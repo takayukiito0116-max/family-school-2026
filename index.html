@@ -5,31 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#041a1e">
+<meta name="theme-color" content="#020000">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <title>ITO Family Dashboard</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap');
 
 :root {
-  --bg: #041a1e;
-  --surface: rgba(6,36,42,0.75);
-  --surface2: rgba(8,45,52,0.5);
-  --glass: rgba(255,255,255,0.025);
-  --glass-border: rgba(120,220,210,0.08);
-  --text: #e0f5f0;
-  --text2: #7cbdb5;
-  --text3: #3d7a72;
-  --accent: #00d4b4;
-  --accent2: #0098d4;
-  --accent3: #40ffc8;
-  --jsb: #00b4e6;
-  --jsb-glow: rgba(0,180,230,0.12);
-  --yochi: #00e6a0;
-  --yochi-glow: rgba(0,230,160,0.12);
-  --danger: #ff5c7a;
-  --warn: #ffc04f;
+  --bg: #020000;
+  --surface: rgba(15,2,2,0.8);
+  --surface2: rgba(25,5,5,0.6);
+  --glass: rgba(255,42,42,0.02);
+  --glass-border: rgba(255,60,60,0.08);
+  --text: #f0e0e0;
+  --text2: #a07070;
+  --text3: #5a3030;
+  --accent: #ff2a2a;
+  --accent2: #c40000;
+  --accent3: #ff5050;
+  --jsb: #ff3b3b;
+  --jsb-glow: rgba(255,59,59,0.12);
+  --yochi: #ff6060;
+  --yochi-glow: rgba(255,96,96,0.10);
+  --danger: #ff2a2a;
+  --warn: #ff8040;
   --radius: 16px;
   --radius-sm: 10px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -52,9 +52,9 @@ body {
 .bg-mesh {
   position:fixed; inset:0; z-index:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 800px 600px at 20% 20%, rgba(0,212,180,0.1), transparent),
-    radial-gradient(ellipse 600px 800px at 80% 80%, rgba(0,120,200,0.08), transparent),
-    radial-gradient(ellipse 500px 500px at 50% 50%, rgba(0,180,150,0.06), transparent);
+    radial-gradient(ellipse 800px 600px at 20% 20%, rgba(255,42,42,0.06), transparent),
+    radial-gradient(ellipse 600px 800px at 80% 80%, rgba(196,0,0,0.04), transparent),
+    radial-gradient(ellipse 500px 500px at 50% 50%, rgba(255,42,42,0.03), transparent);
   animation: meshMove 20s ease-in-out infinite alternate;
 }
 @keyframes meshMove {
@@ -66,8 +66,8 @@ body {
 .bg-grid {
   position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.03;
   background-image:
-    linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+    linear-gradient(rgba(255,42,42,.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,42,42,.15) 1px, transparent 1px);
   background-size:60px 60px;
 }
 
@@ -76,14 +76,73 @@ body {
   position:fixed; border-radius:50%; filter:blur(80px); opacity:0.4; z-index:0; pointer-events:none;
   animation: orbFloat 15s ease-in-out infinite alternate;
 }
-.orb-1 { width:350px; height:350px; background:rgba(0,212,170,0.18); top:5%; left:-8%; animation-delay:0s; }
-.orb-2 { width:300px; height:300px; background:rgba(0,140,210,0.14); bottom:5%; right:-8%; animation-delay:-5s; }
-.orb-3 { width:250px; height:250px; background:rgba(0,230,160,0.1); top:45%; left:45%; animation-delay:-10s; }
+.orb-1 { width:350px; height:350px; background:rgba(255,42,42,0.12); top:5%; left:-8%; animation-delay:0s; }
+.orb-2 { width:300px; height:300px; background:rgba(196,0,0,0.10); bottom:5%; right:-8%; animation-delay:-5s; }
+.orb-3 { width:250px; height:250px; background:rgba(122,0,0,0.08); top:45%; left:45%; animation-delay:-10s; }
 @keyframes orbFloat {
   0% { transform:translate(0,0) scale(1); }
   33% { transform:translate(30px,-40px) scale(1.1); }
   66% { transform:translate(-20px,30px) scale(0.95); }
   100% { transform:translate(10px,-20px) scale(1.05); }
+}
+
+/* === Neon Logo (Stranger Things Style) === */
+.neon-logo { text-align:center; }
+.neon-title {
+  font-family:'Playfair Display',Georgia,'Times New Roman',serif;
+  font-size:52px; font-weight:900; letter-spacing:8px; line-height:1;
+  color:#ff2a2a;
+  text-shadow:
+    0 0 10px rgba(255,42,42,.8),
+    0 0 30px rgba(255,42,42,.5),
+    0 0 60px rgba(255,42,42,.3),
+    0 0 100px rgba(196,0,0,.2);
+  animation:neonFlicker 4s ease-in-out infinite;
+}
+.neon-subtitle {
+  font-family:'Playfair Display',Georgia,'Times New Roman',serif;
+  font-size:28px; font-weight:700; letter-spacing:14px; line-height:1;
+  margin-top:-4px;
+  color:#ff3b3b;
+  text-shadow:
+    0 0 8px rgba(255,59,59,.7),
+    0 0 25px rgba(255,59,59,.4),
+    0 0 50px rgba(196,0,0,.2);
+  animation:neonFlicker 4s ease-in-out infinite .5s;
+}
+.neon-line {
+  height:2px; margin:8px auto;
+  background:linear-gradient(90deg, transparent, #ff2a2a, transparent);
+  box-shadow:0 0 8px rgba(255,42,42,.5), 0 0 20px rgba(255,42,42,.2);
+  width:80%;
+}
+@keyframes neonFlicker {
+  0%,100% { opacity:1; }
+  92% { opacity:1; }
+  93% { opacity:.7; }
+  94% { opacity:1; }
+  96% { opacity:.85; }
+  97% { opacity:1; }
+}
+
+/* Header small logo */
+.neon-logo-sm { display:flex; align-items:center; gap:8px; }
+.neon-title-sm {
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:22px; font-weight:900; letter-spacing:4px; line-height:1;
+  color:#ff2a2a;
+  text-shadow:0 0 8px rgba(255,42,42,.6), 0 0 20px rgba(255,42,42,.3);
+}
+.neon-subtitle-sm {
+  font-family:'Playfair Display',Georgia,serif;
+  font-size:12px; font-weight:700; letter-spacing:6px; line-height:1;
+  color:#ff3b3b; margin-top:-2px;
+  text-shadow:0 0 6px rgba(255,59,59,.5);
+}
+.neon-line-sm {
+  width:1px; height:30px;
+  background:linear-gradient(180deg, transparent, #ff2a2a, transparent);
+  box-shadow:0 0 4px rgba(255,42,42,.4);
 }
 
 /* === Lock Screen === */
@@ -100,7 +159,7 @@ body {
 .lock-bg::before {
   content:''; position:absolute; width:600px; height:600px; border-radius:50%;
   top:50%; left:50%; transform:translate(-50%,-50%);
-  background:radial-gradient(circle, rgba(0,212,180,0.15), rgba(0,140,200,0.05) 50%, transparent 70%);
+  background:radial-gradient(circle, rgba(255,42,42,0.15), rgba(196,0,0,0.05) 50%, transparent 70%);
   animation: lockPulse 3s ease-in-out infinite;
 }
 @keyframes lockPulse {
@@ -120,9 +179,9 @@ body {
 @keyframes lockAppear { from { opacity:0; transform:translateY(30px) scale(.95); } }
 .lock-icon {
   width:64px; height:64px; margin:0 auto 20px;
-  background:linear-gradient(135deg, #00d4b4, #0098d4);
+  background:linear-gradient(135deg, #ff2a2a, #8a0000);
   border-radius:18px; display:flex; align-items:center; justify-content:center;
-  font-size:28px; box-shadow:0 8px 30px rgba(0,212,180,.35);
+  font-size:28px; box-shadow:0 8px 30px rgba(255,42,42,.4), 0 0 60px rgba(255,42,42,.15);
 }
 .lock-box h2 { font-size:22px; font-weight:700; letter-spacing:-.3px; margin-bottom:6px; }
 .lock-box p { font-size:13px; color:var(--text2); margin-bottom:24px; }
@@ -150,12 +209,12 @@ body {
 }
 .lock-btn {
   width:100%; margin-top:16px; padding:14px; border:none; border-radius:14px;
-  background:linear-gradient(135deg, #00d4b4, #0098d4);
+  background:linear-gradient(135deg, #ff2a2a, #c40000);
   color:#fff; font-size:15px; font-weight:600; cursor:pointer;
   transition:transform .2s var(--spring), box-shadow .2s;
   font-family:inherit;
 }
-.lock-btn:hover { transform:translateY(-1px); box-shadow:0 8px 30px rgba(0,212,180,.4); }
+.lock-btn:hover { transform:translateY(-1px); box-shadow:0 8px 30px rgba(255,42,42,.5), 0 0 40px rgba(255,42,42,.2); }
 .lock-btn:active { transform:translateY(0) scale(.98); }
 .lock-error { color:var(--danger); font-size:12px; margin-top:10px; min-height:18px; }
 
@@ -174,7 +233,7 @@ body {
 }
 .header-left h1 {
   font-size:18px; font-weight:700; letter-spacing:-.3px;
-  background:linear-gradient(135deg, #e0fff8 0%, #00d4b4 40%, #0098d4 100%);
+  background:linear-gradient(135deg, #ffcccc 0%, #ff2a2a 40%, #8a0000 100%);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent;
 }
 .header-left .sub { font-size:11px; color:var(--text2); margin-top:2px; }
@@ -182,8 +241,8 @@ body {
 .ai-badge {
   display:flex; align-items:center; gap:5px;
   padding:5px 12px; border-radius:20px; font-size:11px; font-weight:600;
-  background:linear-gradient(135deg, rgba(0,212,180,.12), rgba(0,152,212,.12));
-  border:1px solid rgba(0,212,180,.2); color:var(--accent3);
+  background:linear-gradient(135deg, rgba(255,42,42,.1), rgba(196,0,0,.08));
+  border:1px solid rgba(255,42,42,.2); color:var(--accent3);
 }
 .ai-dot { width:6px; height:6px; border-radius:50%; background:var(--accent3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
@@ -205,7 +264,7 @@ body {
 .sc:hover { transform:translateY(-3px); box-shadow:0 12px 40px rgba(0,0,0,.3); }
 .sc::before {
   content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background:linear-gradient(90deg, #00d4b4, #0098d4, #00d4b4);
+  background:linear-gradient(90deg, #ff2a2a, #c40000, #ff2a2a);
   background-size:200% 100%;
   animation:shimmer 3s ease-in-out infinite;
   opacity:.8;
@@ -214,13 +273,13 @@ body {
 .sc .lb { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; font-weight:600; }
 .sc .vl { font-size:30px; font-weight:800; margin-top:6px; letter-spacing:-.5px; }
 .sc .dt { font-size:12px; color:var(--text3); margin-top:4px; }
-.vl-jsb { background:linear-gradient(135deg,#00b4e6,#60dcff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.vl-yochi { background:linear-gradient(135deg,#00e6a0,#80ffd4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.vl-info { background:linear-gradient(135deg,#00d4b4,#0098d4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-.vl-alert { background:linear-gradient(135deg,#ff5c7a,#ffa0b0); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.vl-jsb { background:linear-gradient(135deg,#ff3b3b,#ff8080); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.vl-yochi { background:linear-gradient(135deg,#ff5050,#ff9090); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.vl-info { background:linear-gradient(135deg,#ff2a2a,#ff6060); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.vl-alert { background:linear-gradient(135deg,#ff2a2a,#ff8080); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
 .prog-bar { height:4px; background:rgba(255,255,255,.06); border-radius:2px; overflow:hidden; margin-top:10px; }
-.prog-fill { height:100%; border-radius:2px; transition:width .5s var(--ease); background:linear-gradient(90deg,#00d4b4,#0098d4); box-shadow:0 0 8px rgba(0,212,180,.4); }
+.prog-fill { height:100%; border-radius:2px; transition:width .5s var(--ease); background:linear-gradient(90deg,#ff2a2a,#c40000); box-shadow:0 0 8px rgba(255,42,42,.5); }
 
 /* === Tabs === */
 .tabs {
@@ -235,8 +294,8 @@ body {
   transition:all .3s var(--ease); font-family:inherit; white-space:nowrap;
 }
 .tab.active {
-  background:linear-gradient(135deg, rgba(0,212,180,.15), rgba(0,152,212,.1));
-  color:#fff; box-shadow:0 2px 12px rgba(0,212,180,.2);
+  background:linear-gradient(135deg, rgba(255,42,42,.15), rgba(196,0,0,.1));
+  color:#fff; box-shadow:0 2px 12px rgba(255,42,42,.2);
 }
 .tab:hover:not(.active) { color:var(--text); background:rgba(255,255,255,.03); }
 .tab-panel { display:none; animation:panelIn .5s var(--ease) both; }
@@ -260,9 +319,9 @@ body {
   display:inline-flex; align-items:center; padding:3px 10px; border-radius:20px;
   font-size:10px; font-weight:700; letter-spacing:.3px; text-transform:uppercase;
 }
-.b-jsb { background:var(--jsb-glow); color:var(--jsb); border:1px solid rgba(79,143,255,.2); }
-.b-yochi { background:var(--yochi-glow); color:var(--yochi); border:1px solid rgba(0,212,170,.2); }
-.b-common { background:rgba(124,92,252,.12); color:var(--accent2); border:1px solid rgba(124,92,252,.2); }
+.b-jsb { background:var(--jsb-glow); color:#ff5050; border:1px solid rgba(255,59,59,.2); }
+.b-yochi { background:var(--yochi-glow); color:#ff7070; border:1px solid rgba(255,96,96,.18); }
+.b-common { background:rgba(255,42,42,.08); color:#ff6060; border:1px solid rgba(255,42,42,.15); }
 
 /* === Task List === */
 .task-list { list-style:none; }
@@ -288,7 +347,7 @@ body {
   transition:all .3s var(--spring);
 }
 .task-cb:checked + .task-cb-visual {
-  background:linear-gradient(135deg, #00d4b4, #0098d4);
+  background:linear-gradient(135deg, #ff2a2a, #c40000);
   border-color:transparent;
   transform:scale(1.1);
 }
@@ -301,14 +360,14 @@ body {
 .task-title { font-weight:600; font-size:14px; transition:opacity .3s; }
 .task-meta { font-size:12px; color:var(--text2); margin-top:3px; display:flex; align-items:center; gap:6px; }
 .task-note {
-  font-size:12px; color:var(--accent3); background:rgba(0,212,180,.06);
+  font-size:12px; color:#ff8080; background:rgba(255,42,42,.05);
   padding:6px 10px; border-radius:8px; margin-top:6px;
-  border-left:2px solid rgba(0,212,180,.25);
+  border-left:2px solid rgba(255,42,42,.25);
 }
 .pri { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:8px; }
-.pri-h { background:#ff5c7a; box-shadow:0 0 10px rgba(255,92,122,.5); }
-.pri-m { background:#ffc04f; box-shadow:0 0 10px rgba(255,192,79,.4); }
-.pri-l { background:#40ffc8; box-shadow:0 0 10px rgba(64,255,200,.4); }
+.pri-h { background:#ff2a2a; box-shadow:0 0 12px rgba(255,42,42,.6); }
+.pri-m { background:#ff8040; box-shadow:0 0 10px rgba(255,128,64,.4); }
+.pri-l { background:#ff6060; box-shadow:0 0 10px rgba(255,96,96,.3); }
 
 .task-actions button {
   border:none; background:rgba(255,255,255,.05); cursor:pointer; font-size:13px;
@@ -326,7 +385,7 @@ body {
   border:1px solid var(--glass-border); background:var(--glass); color:var(--text2);
   cursor:pointer; transition:all .2s var(--ease); font-family:inherit;
 }
-.filter-btn.active { background:rgba(0,212,180,.12); color:var(--accent3); border-color:rgba(0,212,180,.25); }
+.filter-btn.active { background:rgba(255,42,42,.12); color:var(--accent3); border-color:rgba(255,42,42,.25); }
 .filter-btn:hover:not(.active) { background:rgba(255,255,255,.05); color:var(--text); }
 
 /* Add Task Bar */
@@ -351,10 +410,10 @@ body {
   cursor:pointer; transition:all .2s var(--spring); font-family:inherit;
 }
 .btn-primary {
-  background:linear-gradient(135deg, #00d4b4, #0098d4); color:#fff;
-  box-shadow:0 4px 16px rgba(0,212,180,.25);
+  background:linear-gradient(135deg, #ff2a2a, #c40000); color:#fff;
+  box-shadow:0 4px 16px rgba(255,42,42,.3);
 }
-.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(0,212,180,.4); }
+.btn-primary:hover { transform:translateY(-1px); box-shadow:0 6px 24px rgba(255,42,42,.5), 0 0 30px rgba(255,42,42,.15); }
 .btn-primary:active { transform:translateY(0) scale(.97); }
 
 /* === Modal === */
@@ -387,8 +446,8 @@ body {
 .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:24px; }
 .btn-ghost { background:rgba(255,255,255,.05); color:var(--text2); border:1px solid var(--glass-border); }
 .btn-ghost:hover { background:rgba(255,255,255,.08); color:var(--text); }
-.btn-danger { background:rgba(255,92,122,.08); color:#ff5c7a; border:1px solid rgba(255,92,122,.2); }
-.btn-danger:hover { background:rgba(255,92,122,.15); }
+.btn-danger { background:rgba(255,42,42,.08); color:#ff5050; border:1px solid rgba(255,42,42,.2); }
+.btn-danger:hover { background:rgba(255,42,42,.15); }
 
 /* === Timeline === */
 .tg { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
@@ -397,8 +456,8 @@ body {
   font-size:14px; font-weight:700; margin-bottom:16px; padding-bottom:10px;
   border-bottom:1px solid var(--glass-border); display:flex; align-items:center; gap:8px;
 }
-.tc.jsb h3 .tc-dot { background:#00b4e6; box-shadow:0 0 10px rgba(0,180,230,.5); }
-.tc.yochi h3 .tc-dot { background:#00e6a0; box-shadow:0 0 10px rgba(0,230,160,.5); }
+.tc.jsb h3 .tc-dot { background:#ff2a2a; box-shadow:0 0 12px rgba(255,42,42,.6); }
+.tc.yochi h3 .tc-dot { background:#ff5050; box-shadow:0 0 12px rgba(255,80,80,.5); }
 .tc-dot { width:8px; height:8px; border-radius:50%; }
 .mg { margin-bottom:18px; }
 .ml {
@@ -418,12 +477,12 @@ body {
   font-size:9px; padding:2px 8px; border-radius:6px; font-weight:700;
   letter-spacing:.3px; text-transform:uppercase; white-space:nowrap;
 }
-.t-exam { background:rgba(255,192,79,.08); color:#ffc04f; border:1px solid rgba(255,192,79,.15); }
-.t-par { background:rgba(0,180,230,.08); color:#60dcff; border:1px solid rgba(0,180,230,.15); }
-.t-evt { background:rgba(0,212,180,.08); color:#40ffc8; border:1px solid rgba(0,212,180,.12); }
-.t-cer { background:rgba(255,120,160,.06); color:#ffb0c8; border:1px solid rgba(255,120,160,.1); }
-.t-eik { background:rgba(0,230,160,.08); color:#60ffb8; border:1px solid rgba(0,230,160,.12); }
-.hl { background:rgba(255,192,79,.05) !important; border:1px solid rgba(255,192,79,.1) !important; }
+.t-exam { background:rgba(255,128,64,.08); color:#ff8040; border:1px solid rgba(255,128,64,.15); }
+.t-par { background:rgba(255,42,42,.06); color:#ff6060; border:1px solid rgba(255,42,42,.12); }
+.t-evt { background:rgba(196,0,0,.08); color:#ff5050; border:1px solid rgba(196,0,0,.12); }
+.t-cer { background:rgba(255,42,42,.08); color:#ff8080; border:1px solid rgba(255,42,42,.12); }
+.t-eik { background:rgba(255,60,60,.06); color:#ff7070; border:1px solid rgba(255,60,60,.1); }
+.hl { background:rgba(255,42,42,.05) !important; border:1px solid rgba(255,42,42,.1) !important; }
 
 /* School Info */
 .ig { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
@@ -466,7 +525,7 @@ body {
 
 /* Overlap Warning */
 .ow {
-  background:rgba(255,192,79,.05); border:1px solid rgba(255,192,79,.12);
+  background:rgba(255,42,42,.05); border:1px solid rgba(255,42,42,.12);
   border-radius:var(--radius-sm); padding:16px; font-size:13px;
   display:flex; align-items:flex-start; gap:10px;
 }
@@ -494,8 +553,8 @@ body {
 /* Scrollbar */
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:rgba(255,255,255,.1); border-radius:3px; }
-::-webkit-scrollbar-thumb:hover { background:rgba(255,255,255,.2); }
+::-webkit-scrollbar-thumb { background:rgba(255,42,42,.15); border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(255,42,42,.3); }
 </style>
 </head>
 <body>
@@ -510,9 +569,13 @@ body {
 <div id="lockScreen">
   <div class="lock-bg"></div>
   <div class="lock-box">
-    <div class="lock-icon">&#128274;</div>
-    <h2>ITO Family Dashboard</h2>
-    <p>パスワードを入力してください</p>
+    <div class="neon-logo" style="margin-bottom:24px;">
+      <div class="neon-line"></div>
+      <div class="neon-title">ITO</div>
+      <div class="neon-subtitle">FAMILY</div>
+      <div class="neon-line"></div>
+    </div>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:24px;">パスワードを入力してください</p>
     <div class="lock-input-wrap" id="lockWrap">
       <input type="text" id="pwInput" placeholder="パスワード" autocomplete="off">
     </div>
@@ -525,11 +588,16 @@ body {
 <!-- Header -->
 <div class="header">
   <div class="header-left">
-    <h1>ITO Family Dashboard</h1>
-    <div class="sub">令和8年度 | ブラッセル日本人学校 & 日本人幼稚園</div>
+    <div class="neon-logo neon-logo-sm">
+      <div class="neon-line-sm"></div>
+      <div class="neon-title-sm">ITO</div>
+      <div class="neon-subtitle-sm">FAMILY</div>
+      <div class="neon-line-sm"></div>
+    </div>
   </div>
   <div class="header-right">
-    <div class="ai-badge"><div class="ai-dot"></div>AI Powered</div>
+    <div class="sub" style="text-align:right;">令和8年度<br>ブラッセル日本人学校 & 幼稚園</div>
+    <div class="ai-badge"><div class="ai-dot"></div>SYNC</div>
   </div>
 </div>
 
@@ -553,7 +621,7 @@ body {
   <!-- TAB: Tasks -->
   <div class="tab-panel active" id="panel-tasks">
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,var(--accent),var(--accent2));">&#9745;</div>タスク一覧</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#9745;</div>タスク一覧</div>
       <div class="filter-bar">
         <button class="filter-btn active" data-filter="all">すべて</button>
         <button class="filter-btn" data-filter="todo">未完了</button>
@@ -573,18 +641,18 @@ body {
   <!-- TAB: Timeline -->
   <div class="tab-panel" id="panel-timeline">
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#3b82f6,#10b981);">&#128197;</div>学期カレンダー</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#7a0000);">&#128197;</div>学期カレンダー</div>
       <div class="sb">
-        <div class="ss" style="flex:4;background:linear-gradient(90deg,#3b82f6,#60a5fa);">1学期 (4/9-7/17)</div>
-        <div class="ss" style="flex:1.5;background:linear-gradient(90deg,#f59e0b,#fbbf24);">夏休み</div>
-        <div class="ss" style="flex:4.5;background:linear-gradient(90deg,#10b981,#34d399);">2学期 (8/19-12/18)</div>
-        <div class="ss" style="flex:.8;background:linear-gradient(90deg,#8b5cf6,#a78bfa);">冬</div>
-        <div class="ss" style="flex:2.5;background:linear-gradient(90deg,#ef4444,#f87171);">3学期 (1/5-3/5)</div>
+        <div class="ss" style="flex:4;background:linear-gradient(90deg,#c40000,#ff2a2a);">1学期 (4/9-7/17)</div>
+        <div class="ss" style="flex:1.5;background:linear-gradient(90deg,#5a0000,#8a0000);">夏休み</div>
+        <div class="ss" style="flex:4.5;background:linear-gradient(90deg,#ff2a2a,#c40000);">2学期 (8/19-12/18)</div>
+        <div class="ss" style="flex:.8;background:linear-gradient(90deg,#3a0000,#5a0000);">冬</div>
+        <div class="ss" style="flex:2.5;background:linear-gradient(90deg,#c40000,#ff2a2a);">3学期 (1/5-3/5)</div>
       </div>
     </div>
     <div class="sec"><div class="ow"><span style="font-size:18px;">&#9888;</span><div><strong>10/17(土)</strong> — JSB合唱祭（保護者鑑賞）と幼稚園合唱が同日。時間帯の確認が必要。</div></div></div>
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,var(--jsb),var(--yochi));">&#128467;</div>年間行事予定</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#c40000);">&#128467;</div>年間行事予定</div>
       <div class="tg">
         <div class="tc jsb">
           <h3><span class="tc-dot"></span>JSB（颯士・中1）</h3>
@@ -619,7 +687,7 @@ body {
       </div>
     </div>
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ffb84f,#ff4f6e);">&#128218;</div>テスト・英検（中1）</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#5a0000);">&#128218;</div>テスト・英検（中1）</div>
       <div style="overflow-x:auto;">
       <table style="width:100%;font-size:13px;border-collapse:collapse;">
         <thead><tr style="text-align:left;"><th style="padding:10px 12px;color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--glass-border);">日付</th><th style="padding:10px 12px;color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--glass-border);">種別</th><th style="padding:10px 12px;color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--glass-border);">内容</th></tr></thead>
@@ -642,7 +710,7 @@ body {
   <!-- TAB: Info -->
   <div class="tab-panel" id="panel-info">
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,var(--jsb),var(--yochi));">&#127979;</div>学校情報</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#c40000);">&#127979;</div>学校情報</div>
       <div class="ig">
         <div class="ic"><h4><span class="badge b-jsb">JSB</span>ブラッセル日本人学校</h4><table><tr><td>住所</td><td>Avenue des Meuniers 133, 1160 Bruxelles</td></tr><tr><td>TEL</td><td>+32-(0)2-672-1038</td></tr><tr><td>FAX</td><td>+32-(0)2-672-9527</td></tr><tr><td>教務主任</td><td>金指 雄基</td></tr><tr><td>共有フォルダ</td><td><a href="https://drive.google.com/drive/folders/1JOXfw1hWSSYFxdlwFifVxZhbhhTSz1Gu" target="_blank">R08 JSB Student</a></td></tr><tr><td>颯士アカウント</td><td style="font-size:11px;">20.ito.hayato@japanese-school-brussels.be</td></tr></table></div>
         <div class="ic"><h4><span class="badge b-yochi">幼稚園</span>ブラッセル日本人幼稚園</h4><table><tr><td>住所</td><td>Rue Major Petillon 36, 1040 Brussels</td></tr><tr><td>TEL</td><td>02-742-0955</td></tr><tr><td>メール</td><td>nihonjinyouchien@gmail.com</td></tr><tr><td>担当</td><td>増川先生</td></tr><tr><td>駐車場</td><td>周辺有料化（2026/4/8〜）</td></tr></table></div>
@@ -650,15 +718,15 @@ body {
     </div>
     <div class="sec">
       <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#10b981,#3b82f6);">&#128279;</div>接続ステータス</div>
-      <div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Google Calendar</div><div class="cs"><div class="cc"><span class="dot" style="background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.5);"></span>takayuki.ito0116 — 46件</div><div class="cc"><span class="dot" style="background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.5);"></span>ファミリー — 46件</div></div></div>
-      <div><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Gmail MCP</div><div class="cs"><div class="cc"><span class="dot" style="background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.5);"></span>nr.02hyt08@gmail.com</div><div class="cc"><span class="dot" style="background:#f59e0b;box-shadow:0 0 6px rgba(245,158,11,.4);"></span>takayuki.ito0116 (要切替)</div></div></div>
+      <div style="margin-bottom:16px;"><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Google Calendar</div><div class="cs"><div class="cc"><span class="dot" style="background:#ff2a2a;box-shadow:0 0 8px rgba(255,42,42,.5);"></span>takayuki.ito0116 — 46件</div><div class="cc"><span class="dot" style="background:#ff2a2a;box-shadow:0 0 8px rgba(255,42,42,.5);"></span>ファミリー — 46件</div></div></div>
+      <div><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;">Gmail MCP</div><div class="cs"><div class="cc"><span class="dot" style="background:#ff2a2a;box-shadow:0 0 8px rgba(255,42,42,.5);"></span>nr.02hyt08@gmail.com</div><div class="cc"><span class="dot" style="background:#5a0000;box-shadow:0 0 6px rgba(122,0,0,.4);"></span>takayuki.ito0116 (要切替)</div></div></div>
     </div>
   </div>
 
   <!-- TAB: Emails -->
   <div class="tab-panel" id="panel-emails">
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">&#9993;</div>メール (4/10受信分)</div>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#c40000,#ff2a2a);">&#9993;</div>メール (4/10受信分)</div>
       <div class="eg">
         <div class="ec"><div class="es">令和8年度年間行事予定と学費について</div><div class="ef">教務主任 → 颯士経由転送</div><div class="edt">元: 2/2 | 転送: 4/10</div><div><span class="ea">年間行事予定.pdf</span> <span class="ea">学費案内.pdf</span></div></div>
         <div class="ec"><div class="es">体育の授業における服装・持ち物</div><div class="ef">中村亮太 → 颯士経由転送</div><div class="edt">4/9 → 4/10</div><div><span class="ea">体育服装持ち物.pdf</span></div></div>
@@ -690,8 +758,8 @@ body {
   </div>
 </div>
 
-<div class="footer">
-  ITO Family Dashboard 2026 — AI Powered by Claude Code
+<div class="footer" style="font-family:'Playfair Display',Georgia,serif;letter-spacing:2px;">
+  ITO FAMILY DASHBOARD 2026
   <div id="syncStatus" style="margin-top:4px;font-size:10px;color:var(--accent3);opacity:.7;"></div>
 </div>
 </div>
