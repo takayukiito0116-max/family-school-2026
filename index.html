@@ -86,6 +86,87 @@ body {
   100% { transform:translate(10px,-20px) scale(1.05); }
 }
 
+/* === Upside Down Atmosphere Layer === */
+.ud-layer {
+  position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+}
+
+/* Central hellfire backlight */
+.ud-layer::before {
+  content:''; position:absolute;
+  width:120%; height:120%; top:-10%; left:-10%;
+  background:radial-gradient(ellipse 50% 60% at 50% 55%,
+    rgba(255,42,42,0.08) 0%,
+    rgba(196,0,0,0.04) 30%,
+    rgba(80,0,0,0.02) 50%,
+    transparent 70%);
+  animation:hellPulse 8s ease-in-out infinite alternate;
+}
+@keyframes hellPulse {
+  0% { opacity:.6; transform:scale(1); }
+  100% { opacity:1; transform:scale(1.05); }
+}
+
+/* Heavy vignette */
+.ud-layer::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 65% at 50% 50%, transparent 20%, rgba(0,0,0,0.5) 70%, rgba(0,0,0,0.85) 100%);
+}
+
+/* Cracks / fissures */
+.ud-cracks {
+  position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.06;
+}
+.ud-cracks svg { width:100%; height:100%; }
+
+/* Tentacles / vines from top */
+.ud-vines {
+  position:fixed; top:0; left:0; right:0; height:40vh; z-index:0; pointer-events:none; opacity:0.05;
+}
+.ud-vines svg { width:100%; height:100%; }
+
+/* Monster silhouette watermark */
+.ud-monster {
+  position:fixed; z-index:0; pointer-events:none;
+  top:5%; left:50%; transform:translateX(-50%);
+  width:60vw; max-width:500px; height:70vh;
+  opacity:0.025;
+  animation:monsterBreathe 10s ease-in-out infinite alternate;
+}
+.ud-monster svg { width:100%; height:100%; }
+@keyframes monsterBreathe {
+  0% { opacity:0.02; transform:translateX(-50%) scale(1); }
+  100% { opacity:0.035; transform:translateX(-50%) scale(1.03); }
+}
+
+/* Particle embers */
+.ember {
+  position:fixed; z-index:0; pointer-events:none;
+  width:3px; height:3px; border-radius:50%;
+  background:rgba(255,80,20,0.6);
+  box-shadow:0 0 6px rgba(255,60,20,0.4);
+  animation:emberRise linear infinite;
+}
+@keyframes emberRise {
+  0% { transform:translateY(0) translateX(0) scale(1); opacity:.7; }
+  50% { transform:translateY(-40vh) translateX(20px) scale(.6); opacity:.4; }
+  100% { transform:translateY(-80vh) translateX(-10px) scale(.2); opacity:0; }
+}
+
+/* Red lightning flicker in background */
+.ud-lightning {
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  opacity:0;
+  background:radial-gradient(ellipse 30% 40% at 50% 40%, rgba(255,42,42,0.08), transparent);
+  animation:lightning 12s ease-in-out infinite;
+}
+@keyframes lightning {
+  0%,92%,95%,97%,100% { opacity:0; }
+  93% { opacity:1; }
+  94% { opacity:0; }
+  96% { opacity:.6; }
+}
+
 /* === Neon Logo (Stranger Things Style) === */
 .neon-logo { text-align:center; }
 .neon-title {
@@ -616,6 +697,139 @@ body {
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="orb orb-3"></div>
+
+<!-- Upside Down Atmosphere -->
+<div class="ud-layer"></div>
+<div class="ud-lightning"></div>
+
+<!-- Cracks -->
+<div class="ud-cracks">
+<svg viewBox="0 0 1000 1000" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#ff2a2a" fill="none" stroke-width="1.5" stroke-linecap="round">
+    <!-- Central crack system -->
+    <path d="M500,0 L498,80 L510,160 L495,220 L505,300 L490,380 L510,420 L500,500" opacity=".8"/>
+    <path d="M505,300 L540,340 L580,360 L620,350" opacity=".5"/>
+    <path d="M495,220 L460,260 L420,270 L380,290" opacity=".5"/>
+    <path d="M500,500 L495,580 L510,650 L500,720 L505,800 L498,900 L500,1000" opacity=".6"/>
+    <!-- Left crack web -->
+    <path d="M0,300 L80,310 L150,295 L220,320 L300,310 L380,290" opacity=".4"/>
+    <path d="M220,320 L240,380 L230,440 L250,500" opacity=".3"/>
+    <path d="M0,600 L90,580 L170,610 L250,590 L300,620" opacity=".3"/>
+    <!-- Right crack web -->
+    <path d="M1000,350 L920,340 L850,370 L780,350 L700,380 L620,350" opacity=".4"/>
+    <path d="M780,350 L790,420 L770,490 L790,550" opacity=".3"/>
+    <path d="M1000,650 L910,640 L830,670 L760,650" opacity=".3"/>
+    <!-- Diagonal stress cracks -->
+    <path d="M200,0 L230,100 L210,200 L240,280" opacity=".3"/>
+    <path d="M800,0 L780,120 L800,200 L770,300" opacity=".3"/>
+    <path d="M100,800 L160,750 L200,780 L260,720" opacity=".2"/>
+    <path d="M900,850 L840,800 L860,750 L800,700" opacity=".2"/>
+  </g>
+  <!-- Glow along cracks -->
+  <g stroke="#ff2a2a" fill="none" stroke-width="6" stroke-linecap="round" opacity=".15" filter="url(#crackGlow)">
+    <path d="M500,0 L498,80 L510,160 L495,220 L505,300 L490,380 L510,420 L500,500 L495,580 L510,650 L500,720 L505,800 L498,900 L500,1000"/>
+  </g>
+  <defs><filter id="crackGlow"><feGaussianBlur stdDeviation="4"/></filter></defs>
+</svg>
+</div>
+
+<!-- Tentacle vines from top -->
+<div class="ud-vines">
+<svg viewBox="0 0 1000 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+  <g fill="none" stroke="#1a0000" stroke-width="8" stroke-linecap="round">
+    <!-- Left vines -->
+    <path d="M-20,0 C30,50 10,120 40,180 C60,230 30,280 50,350 C55,370 45,390 50,400" stroke-width="12" opacity=".8"/>
+    <path d="M60,0 C80,40 70,90 90,140 C100,170 85,210 100,260" stroke-width="6" opacity=".6"/>
+    <path d="M30,0 C20,60 50,100 30,160 C20,200 40,240 25,300" stroke-width="4" opacity=".4"/>
+    <path d="M120,0 C130,30 115,70 135,110 C140,130 125,160 140,200" stroke-width="5" opacity=".5"/>
+    <!-- Right vines -->
+    <path d="M1020,0 C970,60 990,130 960,190 C940,240 970,290 950,360 C945,380 955,395 950,400" stroke-width="12" opacity=".8"/>
+    <path d="M940,0 C920,50 935,100 910,150 C900,180 920,220 900,270" stroke-width="6" opacity=".6"/>
+    <path d="M970,0 C980,50 960,110 975,160 C985,200 965,250 980,310" stroke-width="4" opacity=".4"/>
+    <path d="M880,0 C870,40 885,80 865,120 C855,150 875,190 860,230" stroke-width="5" opacity=".5"/>
+    <!-- Center dripping vine -->
+    <path d="M480,0 C490,30 475,60 485,100 C490,120 480,140 488,170" stroke-width="3" opacity=".3"/>
+    <path d="M520,0 C515,40 525,70 518,110 C512,130 522,155 515,180" stroke-width="3" opacity=".3"/>
+  </g>
+  <!-- Vine glow -->
+  <g fill="none" stroke="#ff0000" stroke-width="2" opacity=".08" filter="url(#vineGlow)">
+    <path d="M-20,0 C30,50 10,120 40,180 C60,230 30,280 50,350"/>
+    <path d="M1020,0 C970,60 990,130 960,190 C940,240 970,290 950,360"/>
+  </g>
+  <defs><filter id="vineGlow"><feGaussianBlur stdDeviation="6"/></filter></defs>
+</svg>
+</div>
+
+<!-- Monster silhouette -->
+<div class="ud-monster">
+<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="monsterBlur"><feGaussianBlur stdDeviation="3"/></filter>
+    <radialGradient id="monsterFade" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#ff2a2a" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#ff2a2a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g fill="#ff2a2a" filter="url(#monsterBlur)">
+    <!-- Head -->
+    <ellipse cx="200" cy="95" rx="55" ry="65"/>
+    <!-- Crown spikes -->
+    <polygon points="160,40 155,5 170,35"/>
+    <polygon points="185,25 190,0 200,28"/>
+    <polygon points="210,25 215,0 220,28"/>
+    <polygon points="240,40 245,5 230,35"/>
+    <polygon points="145,55 125,20 155,50"/>
+    <polygon points="255,55 275,20 245,50"/>
+    <!-- Face features -->
+    <ellipse cx="180" cy="85" rx="10" ry="6" fill="#000" opacity=".5"/>
+    <ellipse cx="220" cy="85" rx="10" ry="6" fill="#000" opacity=".5"/>
+    <path d="M185,110 Q200,125 215,110" fill="none" stroke="#000" stroke-width="3" opacity=".4"/>
+    <!-- Neck -->
+    <path d="M170,150 L160,160 L155,200 L245,200 L240,160 L230,150 Z"/>
+    <!-- Shoulders & torso -->
+    <path d="M100,200 L80,190 L60,200 L70,210 L100,215 Z"/>
+    <path d="M300,200 L320,190 L340,200 L330,210 L300,215 Z"/>
+    <!-- Shoulder spikes -->
+    <polygon points="80,190 50,160 75,195"/>
+    <polygon points="65,195 30,175 60,200"/>
+    <polygon points="320,190 350,160 325,195"/>
+    <polygon points="335,195 370,175 340,200"/>
+    <!-- Torso -->
+    <path d="M120,200 L100,215 L95,320 L130,400 L200,430 L270,400 L305,320 L300,215 L280,200 Z"/>
+    <!-- Torso texture lines -->
+    <line x1="160" y1="220" x2="155" y2="350" stroke="#000" stroke-width="1" opacity=".15"/>
+    <line x1="200" y1="200" x2="200" y2="400" stroke="#000" stroke-width="1.5" opacity=".2"/>
+    <line x1="240" y1="220" x2="245" y2="350" stroke="#000" stroke-width="1" opacity=".15"/>
+    <!-- Left arm reaching forward -->
+    <path d="M100,215 L65,250 L40,310 L25,370 L15,400 L10,420"/>
+    <path d="M100,215 L60,255 L35,315 L20,375 L10,410 L5,430" fill="#ff2a2a"/>
+    <!-- Left hand/claws -->
+    <polygon points="10,420 -5,440 5,425"/>
+    <polygon points="5,430 -10,455 0,435"/>
+    <polygon points="15,425 5,450 12,430"/>
+    <polygon points="0,435 -15,465 -5,445"/>
+    <!-- Right arm -->
+    <path d="M300,215 L330,260 L345,320 L340,380"/>
+    <path d="M300,215 L335,265 L350,325 L345,385" fill="#ff2a2a"/>
+    <!-- Right claws -->
+    <polygon points="340,380 355,400 342,385"/>
+    <polygon points="345,385 365,410 348,392"/>
+    <!-- Lower body fading -->
+    <ellipse cx="200" cy="450" rx="80" ry="60" opacity=".5"/>
+    <rect x="150" y="450" width="100" height="150" opacity=".2" rx="20"/>
+  </g>
+</svg>
+</div>
+
+<!-- Floating embers -->
+<div class="ember" style="left:15%;bottom:0;animation-duration:6s;animation-delay:0s;"></div>
+<div class="ember" style="left:30%;bottom:0;animation-duration:8s;animation-delay:1s;width:2px;height:2px;"></div>
+<div class="ember" style="left:50%;bottom:0;animation-duration:7s;animation-delay:2s;"></div>
+<div class="ember" style="left:65%;bottom:0;animation-duration:9s;animation-delay:0.5s;width:2px;height:2px;"></div>
+<div class="ember" style="left:80%;bottom:0;animation-duration:6.5s;animation-delay:3s;"></div>
+<div class="ember" style="left:25%;bottom:0;animation-duration:10s;animation-delay:4s;width:2px;height:2px;"></div>
+<div class="ember" style="left:70%;bottom:0;animation-duration:7.5s;animation-delay:1.5s;"></div>
+<div class="ember" style="left:45%;bottom:0;animation-duration:8.5s;animation-delay:2.5s;width:4px;height:4px;background:rgba(255,42,42,.5);"></div>
 
 <!-- Lock Screen -->
 <div id="lockScreen">
