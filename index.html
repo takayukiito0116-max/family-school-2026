@@ -690,10 +690,37 @@ body {
   </div>
 </div>
 
-<div class="footer">ITO Family Dashboard 2026 — AI Powered by Claude Code</div>
+<div class="footer">
+  ITO Family Dashboard 2026 — AI Powered by Claude Code
+  <div id="syncStatus" style="margin-top:4px;font-size:10px;color:var(--accent3);opacity:.7;"></div>
+</div>
 </div>
 
+<!-- Firebase SDK (compat for simple usage) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <script>
+// === Firebase ===
+firebase.initializeApp({
+  apiKey: "AIzaSyBbWL9UPS7cVAk7Aw3MerORhK152eKZ16Y",
+  authDomain: "stranger-things-61885.firebaseapp.com",
+  databaseURL: "https://stranger-things-61885-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "stranger-things-61885",
+  storageBucket: "stranger-things-61885.firebasestorage.app",
+  messagingSenderId: "891477511033",
+  appId: "1:891477511033:web:b8898445bfceaad6c43da8"
+});
+const db = firebase.database();
+const tasksRef = db.ref('dashboard/tasks');
+let firebaseReady = false;
+let skipNextFirebaseUpdate = false;
+
+function showSync(msg) {
+  const el = document.getElementById('syncStatus');
+  if (el) { el.textContent = msg; setTimeout(() => el.textContent = '', 3000); }
+}
+
 // === Password ===
 const PW_HASH='48e7f64ca6fb8200e5b7662d0507ff2c4fd2128a2708dcba807b52df8257ac59';
 const SESSION_KEY='ito-dash-session';
@@ -726,8 +753,19 @@ const defaultTasks=[
   {id:8,title:'10/17合唱祭・幼稚園合唱の時間帯確認',cat:'共通',pri:'mid',done:false,note:'JSBと幼稚園が同日。分担or時間帯の事前確認。'},
 ];
 let tasks=[],editingId=null,currentFilter='all';
-function loadTasks(){const s=localStorage.getItem(STORAGE_KEY);tasks=s?JSON.parse(s):defaultTasks.map(t=>({...t}));saveTasks();}
-function saveTasks(){localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));}
+
+function loadTasks(){
+  const s=localStorage.getItem(STORAGE_KEY);
+  tasks=s?JSON.parse(s):defaultTasks.map(t=>({...t}));
+}
+function saveTasks(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(tasks));
+  // Sync to Firebase
+  if(firebaseReady){
+    skipNextFirebaseUpdate=true;
+    tasksRef.set(tasks).then(()=>showSync('&#x2601; 同期完了')).catch(()=>showSync('&#x26A0; 同期エラー'));
+  }
+}
 function escHtml(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 
 function renderTasks(){
@@ -768,10 +806,34 @@ document.querySelector('.filter-bar').addEventListener('click',e=>{
 document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
 document.getElementById('editModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
+// === Firebase Realtime Sync ===
+tasksRef.on('value', snap => {
+  if(skipNextFirebaseUpdate){ skipNextFirebaseUpdate=false; return; }
+  const data = snap.val();
+  if(data && Array.isArray(data)){
+    tasks = data;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    renderTasks();
+    showSync('&#x2601; 他の端末から更新を受信');
+  }
+  firebaseReady = true;
+});
+
+// Initial load: use local first, then Firebase will override via listener above
+loadTasks();
+renderTasks();
+
+// Push local to Firebase if Firebase is empty (first time only)
+tasksRef.once('value', snap => {
+  if(!snap.val()){
+    tasksRef.set(tasks);
+    showSync('&#x2601; 初回同期完了');
+  }
+  firebaseReady = true;
+});
+
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
-
-loadTasks();renderTasks();
 </script>
 </body>
 </html>
