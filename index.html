@@ -540,14 +540,66 @@ body {
 /* Footer */
 .footer { text-align:center; padding:20px; font-size:11px; color:var(--text3); }
 
+/* === Compact Summary Strip === */
+.summary-strip {
+  display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; align-items:stretch;
+}
+.ss-card {
+  flex:1; min-width:120px;
+  background:var(--surface); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border); border-radius:var(--radius-sm); padding:12px 16px;
+  display:flex; align-items:center; gap:10px;
+  transition:transform .3s var(--spring);
+}
+.ss-card:hover { transform:translateY(-2px); }
+.ss-icon { font-size:18px; }
+.ss-info .ss-label { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; }
+.ss-info .ss-val { font-size:16px; font-weight:700; color:var(--text); }
+.ss-prog { height:3px; background:rgba(255,255,255,.06); border-radius:2px; margin-top:4px; }
+.ss-prog-fill { height:100%; border-radius:2px; background:linear-gradient(90deg,#ff2a2a,#c40000); box-shadow:0 0 6px rgba(255,42,42,.4); transition:width .5s var(--ease); }
+
+/* === Upcoming Events Widget === */
+.upcoming {
+  background:var(--surface); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border); border-radius:var(--radius); padding:16px 20px;
+  margin-bottom:20px;
+}
+.upcoming-title { font-size:12px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+.upcoming-list { display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+.up-item {
+  flex-shrink:0; min-width:160px; padding:10px 14px;
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  transition:all .3s var(--ease);
+}
+.up-item:hover { background:rgba(255,42,42,.04); border-color:rgba(255,42,42,.15); transform:translateY(-2px); }
+.up-item .up-days { font-size:20px; font-weight:800; color:#ff2a2a; text-shadow:0 0 10px rgba(255,42,42,.3); }
+.up-item .up-days span { font-size:11px; font-weight:600; color:var(--text2); }
+.up-item .up-name { font-size:12px; color:var(--text); margin-top:2px; font-weight:500; }
+.up-item .up-date { font-size:10px; color:var(--text3); }
+.up-item .up-badge { display:inline-block; margin-top:4px; }
+
+/* === Memo Section === */
+.memo-area {
+  width:100%; min-height:120px; padding:14px; border:1px solid var(--glass-border);
+  border-radius:var(--radius-sm); background:var(--glass); color:var(--text);
+  font-size:14px; font-family:inherit; outline:none; resize:vertical; line-height:1.7;
+  transition:border-color .2s, box-shadow .2s;
+}
+.memo-area:focus { border-color:rgba(255,42,42,.3); box-shadow:0 0 0 3px rgba(255,42,42,.08); }
+.memo-status { font-size:11px; color:var(--text3); margin-top:6px; min-height:16px; }
+
 /* === Responsive === */
 @media(max-width:600px) {
-  .header { padding:16px 20px; }
-  .header-left h1 { font-size:16px; }
-  .ctr { padding:16px; }
+  .header { padding:12px 16px; }
+  .ctr { padding:12px; }
   .tabs { overflow-x:auto; }
-  .tab { padding:8px 12px; font-size:12px; }
-  .sc .vl { font-size:24px; }
+  .tab { padding:8px 10px; font-size:11px; }
+  .ss-card { min-width:100px; padding:10px 12px; }
+  .ss-info .ss-val { font-size:14px; }
+  .upcoming-list { gap:8px; }
+  .up-item { min-width:140px; }
+  .neon-title-sm { font-size:18px; letter-spacing:3px; }
+  .neon-subtitle-sm { font-size:10px; letter-spacing:4px; }
 }
 
 /* Scrollbar */
@@ -602,17 +654,23 @@ body {
 </div>
 
 <div class="ctr">
-  <!-- Summary Cards -->
-  <div class="sg">
-    <div class="sc"><div class="lb">颯士 — JSB</div><div class="vl vl-jsb">中学1年</div><div class="dt">授業日数 197日 / 3学期制</div></div>
-    <div class="sc"><div class="lb">さつき — 幼稚園</div><div class="vl vl-yochi">年少</div><div class="dt">登園日数 197日</div></div>
-    <div class="sc"><div class="lb">カレンダー登録</div><div class="vl vl-info">92件</div><div class="dt">個人 46 + ファミリー 46</div></div>
-    <div class="sc"><div class="lb">タスク進捗</div><div class="vl vl-alert" id="taskProgress">0/0</div><div class="prog-bar"><div class="prog-fill" id="taskBar" style="width:0%"></div></div></div>
+  <!-- Compact Summary Strip -->
+  <div class="summary-strip">
+    <div class="ss-card"><div class="ss-icon">&#127979;</div><div class="ss-info"><div class="ss-label">颯士</div><div class="ss-val">中1 · JSB</div></div></div>
+    <div class="ss-card"><div class="ss-icon">&#127800;</div><div class="ss-info"><div class="ss-label">さつき</div><div class="ss-val">年少 · 幼稚園</div></div></div>
+    <div class="ss-card"><div class="ss-icon">&#9745;</div><div class="ss-info"><div class="ss-label">タスク</div><div class="ss-val" id="taskProgress">0/0</div><div class="ss-prog"><div class="ss-prog-fill" id="taskBar" style="width:0%"></div></div></div></div>
+  </div>
+
+  <!-- Upcoming Events -->
+  <div class="upcoming">
+    <div class="upcoming-title">&#128308; 直近の予定</div>
+    <div class="upcoming-list" id="upcomingList"></div>
   </div>
 
   <!-- Tabs -->
   <div class="tabs" id="tabBar">
     <button class="tab active" data-tab="tasks">タスク</button>
+    <button class="tab" data-tab="memo">メモ</button>
     <button class="tab" data-tab="timeline">年間予定</button>
     <button class="tab" data-tab="info">学校情報</button>
     <button class="tab" data-tab="emails">メール</button>
@@ -635,6 +693,16 @@ body {
         <select id="newCat"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
         <button class="btn btn-primary" onclick="addTask()">+ 追加</button>
       </div>
+    </div>
+  </div>
+
+  <!-- TAB: Memo -->
+  <div class="tab-panel" id="panel-memo">
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#128221;</div>共有メモ</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">家族で共有できるメモ帳です。変更は自動で同期されます。</p>
+      <textarea class="memo-area" id="memoArea" placeholder="メモを入力..."></textarea>
+      <div class="memo-status" id="memoStatus"></div>
     </div>
   </div>
 
@@ -861,7 +929,11 @@ function openEdit(id){editingId=id;const t=tasks.find(x=>x.id===id);if(!t)return
 function closeModal(){document.getElementById('editModal').classList.remove('active');editingId=null;}
 function saveEdit(){const t=tasks.find(x=>x.id===editingId);if(!t)return;t.title=document.getElementById('editTitle').value.trim()||t.title;t.cat=document.getElementById('editCat').value;t.pri=document.getElementById('editPri').value;t.note=document.getElementById('editNote').value.trim();saveTasks();renderTasks();closeModal();}
 function deleteTask(){if(!confirm('このタスクを削除しますか？'))return;tasks=tasks.filter(t=>t.id!==editingId);saveTasks();renderTasks();closeModal();}
-function updateProgress(){const total=tasks.length,done=tasks.filter(t=>t.done).length;document.getElementById('taskProgress').textContent=`${done}/${total}`;document.getElementById('taskBar').style.width=(total?Math.round(done/total*100):0)+'%';}
+function updateProgress(){
+  const total=tasks.length,done=tasks.filter(t=>t.done).length;
+  document.getElementById('taskProgress').textContent=`${done}/${total}`;
+  document.getElementById('taskBar').style.width=(total?Math.round(done/total*100):0)+'%';
+}
 
 // Filters
 document.querySelector('.filter-bar').addEventListener('click',e=>{
@@ -874,7 +946,102 @@ document.querySelector('.filter-bar').addEventListener('click',e=>{
 document.getElementById('newTitle').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
 document.getElementById('editModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-// === Firebase Realtime Sync ===
+// === Upcoming Events ===
+const EVENTS = [
+  {d:'2026-04-15',n:'保護者会',c:'幼稚園'},
+  {d:'2026-04-17',n:'中1学力テスト',c:'JSB'},
+  {d:'2026-04-22',n:'中学部参観・懇談会',c:'JSB'},
+  {d:'2026-04-29',n:'避難訓練（引取）',c:'JSB'},
+  {d:'2026-05-04',n:'年少お弁当開始',c:'幼稚園'},
+  {d:'2026-05-20',n:'中学部修学旅行',c:'JSB'},
+  {d:'2026-05-28',n:'個人懇談',c:'JSB'},
+  {d:'2026-05-31',n:'英検第1回 1次',c:'JSB'},
+  {d:'2026-06-10',n:'茶・保護者会',c:'幼稚園'},
+  {d:'2026-06-13',n:'父の日参観',c:'幼稚園'},
+  {d:'2026-06-17',n:'第1回定期考査',c:'JSB'},
+  {d:'2026-07-05',n:'英検第1回 2次',c:'JSB'},
+  {d:'2026-07-11',n:'土曜授業参観',c:'JSB'},
+  {d:'2026-07-17',n:'1学期終業式',c:'共通'},
+  {d:'2026-08-19',n:'2学期始業式 (JSB)',c:'JSB'},
+  {d:'2026-08-24',n:'2学期始業式 (幼)',c:'幼稚園'},
+  {d:'2026-08-28',n:'夏祭り',c:'幼稚園'},
+  {d:'2026-09-04',n:'運動会',c:'JSB'},
+  {d:'2026-09-15',n:'遠足',c:'幼稚園'},
+  {d:'2026-09-21',n:'中学部学力テスト',c:'JSB'},
+  {d:'2026-09-30',n:'学校公開',c:'JSB'},
+  {d:'2026-10-04',n:'英検第2回 1次',c:'JSB'},
+  {d:'2026-10-07',n:'音楽会',c:'幼稚園'},
+  {d:'2026-10-15',n:'合唱祭',c:'JSB'},
+  {d:'2026-10-28',n:'ハロウィン仮装',c:'幼稚園'},
+  {d:'2026-11-08',n:'英検第2回 2次',c:'JSB'},
+  {d:'2026-11-18',n:'第2回定期考査',c:'JSB'},
+  {d:'2026-12-04',n:'サン・ニコラ',c:'幼稚園'},
+  {d:'2026-12-16',n:'クリスマス会',c:'幼稚園'},
+  {d:'2026-12-18',n:'2学期終業式',c:'共通'},
+  {d:'2027-01-05',n:'3学期始業式 (幼)',c:'幼稚園'},
+  {d:'2027-01-06',n:'3学期始業式 (JSB)',c:'JSB'},
+  {d:'2027-02-03',n:'豆まき',c:'幼稚園'},
+  {d:'2027-02-04',n:'外国語参観・懇談会(中)',c:'JSB'},
+  {d:'2027-02-17',n:'第3回定期考査',c:'JSB'},
+  {d:'2027-02-24',n:'カーニバル仮装',c:'幼稚園'},
+  {d:'2027-03-01',n:'中学部卒業式',c:'JSB'},
+  {d:'2027-03-03',n:'卒園式',c:'幼稚園'},
+  {d:'2027-03-05',n:'修了式',c:'共通'},
+];
+
+function renderUpcoming(){
+  const now=new Date(); now.setHours(0,0,0,0);
+  const upcoming=EVENTS.map(e=>{
+    const d=new Date(e.d+'T00:00:00');
+    const diff=Math.ceil((d-now)/(1000*60*60*24));
+    return {...e,diff,date:d};
+  }).filter(e=>e.diff>=0).sort((a,b)=>a.diff-b.diff).slice(0,6);
+
+  const el=document.getElementById('upcomingList');
+  if(!el)return;
+  el.innerHTML=upcoming.map(e=>{
+    const bc=e.c==='JSB'?'b-jsb':e.c==='幼稚園'?'b-yochi':'b-common';
+    const dayStr=e.diff===0?'今日':e.diff===1?'明日':`${e.diff}`;
+    const dayUnit=e.diff<=1?'':'<span>日後</span>';
+    const mm=e.date.getMonth()+1, dd=e.date.getDate();
+    return`<div class="up-item">
+      <div class="up-days">${dayStr}${dayUnit}</div>
+      <div class="up-name">${escHtml(e.n)}</div>
+      <div class="up-date">${mm}/${dd}</div>
+      <span class="badge up-badge ${bc}">${escHtml(e.c)}</span>
+    </div>`;
+  }).join('');
+  if(upcoming.length===0) el.innerHTML='<div style="color:var(--text3);font-size:13px;">直近の予定はありません</div>';
+}
+
+// === Memo (Firebase synced) ===
+const memoRef = db.ref('dashboard/memo');
+let memoTimer = null;
+let skipMemoUpdate = false;
+
+const memoArea = document.getElementById('memoArea');
+memoArea.addEventListener('input', () => {
+  clearTimeout(memoTimer);
+  memoTimer = setTimeout(() => {
+    skipMemoUpdate = true;
+    memoRef.set(memoArea.value).then(() => {
+      document.getElementById('memoStatus').textContent = '保存しました';
+      setTimeout(() => document.getElementById('memoStatus').textContent = '', 2000);
+    });
+  }, 800); // debounce 800ms
+});
+
+memoRef.on('value', snap => {
+  if(skipMemoUpdate){ skipMemoUpdate=false; return; }
+  const val = snap.val();
+  if(val !== null && val !== memoArea.value){
+    memoArea.value = val;
+    document.getElementById('memoStatus').textContent = '他の端末から更新を受信';
+    setTimeout(() => document.getElementById('memoStatus').textContent = '', 2000);
+  }
+});
+
+// === Firebase Realtime Sync (Tasks) ===
 tasksRef.on('value', snap => {
   if(skipNextFirebaseUpdate){ skipNextFirebaseUpdate=false; return; }
   const data = snap.val();
@@ -882,16 +1049,17 @@ tasksRef.on('value', snap => {
     tasks = data;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
     renderTasks();
-    showSync('&#x2601; 他の端末から更新を受信');
+    showSync('&#x2601; 同期受信');
   }
   firebaseReady = true;
 });
 
-// Initial load: use local first, then Firebase will override via listener above
+// Initial load
 loadTasks();
 renderTasks();
+renderUpcoming();
 
-// Push local to Firebase if Firebase is empty (first time only)
+// Push local to Firebase if empty (first time)
 tasksRef.once('value', snap => {
   if(!snap.val()){
     tasksRef.set(tasks);
