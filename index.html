@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伊藤家 学校・幼稚園ダッシュボード 2026</title>
+<style>
+  :root {
+    --jsb: #2563eb; --jsb-bg: #eff6ff; --jsb-border: #bfdbfe;
+    --yochi: #059669; --yochi-bg: #ecfdf5; --yochi-border: #a7f3d0;
+    --alert: #dc2626; --alert-bg: #fef2f2;
+    --info: #7c3aed; --info-bg: #f5f3ff;
+    --g50: #f9fafb; --g100: #f3f4f6; --g200: #e5e7eb;
+    --g600: #4b5563; --g700: #374151; --g800: #1f2937;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif; background:var(--g50); color:var(--g800); line-height:1.6; }
+  .header { background:linear-gradient(135deg,#1e3a5f,#2563eb); color:#fff; padding:24px 32px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:22px; }
+  .header .sub { font-size:13px; opacity:.85; }
+  .header .dbadge { background:rgba(255,255,255,.2); padding:6px 16px; border-radius:20px; font-size:13px; }
+  .ctr { max-width:1400px; margin:0 auto; padding:24px; }
+  .sg { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:28px; }
+  .sc { background:#fff; border-radius:12px; padding:20px; border-left:4px solid; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .sc .lb { font-size:12px; color:var(--g600); text-transform:uppercase; letter-spacing:.5px; }
+  .sc .vl { font-size:28px; font-weight:700; margin-top:4px; }
+  .sc .dt { font-size:12px; color:var(--g600); margin-top:2px; }
+  .sec { background:#fff; border-radius:12px; padding:24px; margin-bottom:24px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  .st { font-size:16px; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; }
+  .b-jsb { background:var(--jsb-bg); color:var(--jsb); border:1px solid var(--jsb-border); }
+  .b-yochi { background:var(--yochi-bg); color:var(--yochi); border:1px solid var(--yochi-border); }
+
+  /* Task List */
+  .task-list { list-style:none; }
+  .task-item { display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-bottom:1px solid var(--g100); border-radius:6px; transition:background .15s; }
+  .task-item:hover { background:var(--g50); }
+  .task-item.done .task-title { text-decoration:line-through; color:var(--g600); }
+  .task-item.done .task-meta { opacity:.5; }
+  .task-cb { margin-top:3px; width:18px; height:18px; cursor:pointer; accent-color:var(--jsb); flex-shrink:0; }
+  .task-body { flex:1; min-width:0; }
+  .task-title { font-weight:600; font-size:14px; }
+  .task-meta { font-size:12px; color:var(--g600); margin-top:2px; }
+  .task-note { font-size:12px; color:var(--info); background:var(--info-bg); padding:4px 8px; border-radius:4px; margin-top:4px; display:inline-block; max-width:100%; word-break:break-all; }
+  .task-actions { display:flex; gap:4px; flex-shrink:0; margin-top:2px; }
+  .task-actions button { border:none; background:none; cursor:pointer; font-size:14px; padding:4px; border-radius:4px; color:var(--g600); }
+  .task-actions button:hover { background:var(--g200); }
+  .pri { width:8px; height:8px; border-radius:50%; margin-top:7px; flex-shrink:0; }
+  .pri-h { background:#dc2626; } .pri-m { background:#f59e0b; } .pri-l { background:#10b981; }
+
+  /* Add Task */
+  .add-task-bar { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .add-task-bar input, .add-task-bar select { padding:8px 12px; border:1px solid var(--g200); border-radius:8px; font-size:13px; }
+  .add-task-bar input[type=text] { flex:1; min-width:200px; }
+  .btn { padding:8px 16px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; transition:background .15s; }
+  .btn-primary { background:var(--jsb); color:#fff; }
+  .btn-primary:hover { background:#1d4ed8; }
+  .btn-sm { padding:4px 10px; font-size:12px; }
+  .btn-ghost { background:var(--g100); color:var(--g700); }
+  .btn-ghost:hover { background:var(--g200); }
+  .btn-danger { background:var(--alert-bg); color:var(--alert); }
+  .btn-danger:hover { background:#fecaca; }
+
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; z-index:100; align-items:center; justify-content:center; }
+  .modal-overlay.active { display:flex; }
+  .modal { background:#fff; border-radius:12px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
+  .modal h3 { font-size:16px; margin-bottom:16px; }
+  .modal label { display:block; font-size:13px; font-weight:600; margin-bottom:4px; margin-top:12px; }
+  .modal input, .modal select, .modal textarea { width:100%; padding:8px 12px; border:1px solid var(--g200); border-radius:8px; font-size:13px; font-family:inherit; }
+  .modal textarea { min-height:60px; resize:vertical; }
+  .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:20px; }
+
+  /* Timeline */
+  .tg { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media(max-width:900px){ .tg{grid-template-columns:1fr;} }
+  .tc h3 { font-size:14px; font-weight:700; margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid; }
+  .tc.jsb h3 { border-color:var(--jsb); color:var(--jsb); }
+  .tc.yochi h3 { border-color:var(--yochi); color:var(--yochi); }
+  .mg { margin-bottom:20px; }
+  .ml { font-size:13px; font-weight:700; color:var(--g700); background:var(--g100); padding:4px 12px; border-radius:6px; display:inline-block; margin-bottom:8px; }
+  .er { display:flex; gap:8px; padding:6px 0; font-size:13px; border-bottom:1px solid var(--g100); }
+  .er:last-child { border-bottom:none; }
+  .ed { min-width:50px; color:var(--g600); font-variant-numeric:tabular-nums; }
+  .en { flex:1; }
+  .et { font-size:10px; padding:1px 6px; border-radius:4px; white-space:nowrap; }
+  .t-exam { background:#fef3c7; color:#92400e; } .t-par { background:#dbeafe; color:#1e40af; }
+  .t-evt { background:#ede9fe; color:#5b21b6; } .t-cer { background:#fce7f3; color:#9d174d; }
+  .t-eik { background:#d1fae5; color:#065f46; }
+  .hl { background:#fffbeb; border-radius:4px; padding:4px 6px; margin:-4px -6px; }
+
+  .ig { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media(max-width:700px){ .ig{grid-template-columns:1fr;} }
+  .ic { border:1px solid var(--g200); border-radius:10px; padding:16px; }
+  .ic h4 { font-size:14px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .ic table { width:100%; font-size:13px; border-collapse:collapse; }
+  .ic td { padding:4px 0; } .ic td:first-child { color:var(--g600); width:40%; }
+
+  .eg { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px; }
+  .ec { border:1px solid var(--g200); border-radius:8px; padding:12px; font-size:13px; }
+  .ec .es { font-weight:600; margin-bottom:4px; }
+  .ec .ef { color:var(--g600); font-size:12px; }
+  .ec .edt { color:var(--g600); font-size:11px; }
+  .ec .ea { display:inline-block; background:var(--g100); padding:2px 8px; border-radius:4px; font-size:11px; margin-top:4px; }
+
+  .cs { display:flex; gap:8px; flex-wrap:wrap; }
+  .cc { display:flex; align-items:center; gap:6px; padding:6px 14px; border-radius:20px; font-size:13px; background:var(--g100); }
+  .cc .dot { width:8px; height:8px; border-radius:50%; }
+
+  .sb { display:flex; gap:2px; margin-bottom:16px; border-radius:8px; overflow:hidden; height:32px; }
+  .ss { display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:#fff; }
+
+  .ow { background:#fef3c7; border:1px solid #fbbf24; border-radius:8px; padding:12px; font-size:13px; display:flex; align-items:flex-start; gap:8px; }
+  .footer { text-align:center; padding:16px; font-size:11px; color:var(--g600); }
+
+  /* Tab */
+  .tabs { display:flex; gap:4px; margin-bottom:20px; border-bottom:2px solid var(--g200); }
+  .tab { padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; border:none; background:none; color:var(--g600); border-bottom:2px solid transparent; margin-bottom:-2px; transition:all .15s; }
+  .tab.active { color:var(--jsb); border-bottom-color:var(--jsb); }
+  .tab:hover { color:var(--g800); }
+  .tab-panel { display:none; } .tab-panel.active { display:block; }
+
+  /* Progress */
+  .prog-bar { height:6px; background:var(--g200); border-radius:3px; overflow:hidden; margin-top:8px; }
+  .prog-fill { height:100%; background:var(--jsb); border-radius:3px; transition:width .3s; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>伊藤家 学校・幼稚園ダッシュボード</h1>
+    <div class="sub">令和8年度 (2026-2027) | ブラッセル日本人学校 & 日本人幼稚園</div>
+  </div>
+  <div class="dbadge" id="dateLabel">更新: 2026/04/10</div>
+</div>
+
+<div class="ctr">
+
+  <!-- Summary Cards -->
+  <div class="sg">
+    <div class="sc" style="border-color:var(--jsb);"><div class="lb">颯士 (JSB)</div><div class="vl" style="color:var(--jsb);">中学1年</div><div class="dt">授業日数 197日 / 3学期制</div></div>
+    <div class="sc" style="border-color:var(--yochi);"><div class="lb">さつき (幼稚園)</div><div class="vl" style="color:var(--yochi);">年少</div><div class="dt">登園日数 197日</div></div>
+    <div class="sc" style="border-color:var(--info);"><div class="lb">カレンダー登録</div><div class="vl" style="color:var(--info);">92件</div><div class="dt">個人 46件 + ファミリー 46件</div></div>
+    <div class="sc" style="border-color:var(--alert);"><div class="lb">タスク進捗</div><div class="vl" style="color:var(--alert);" id="taskProgress">0/0</div><div class="prog-bar"><div class="prog-fill" id="taskBar" style="width:0%"></div></div></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('tasks')">タスク管理</button>
+    <button class="tab" onclick="switchTab('timeline')">年間予定</button>
+    <button class="tab" onclick="switchTab('info')">学校情報</button>
+    <button class="tab" onclick="switchTab('emails')">メール</button>
+  </div>
+
+  <!-- TAB: Tasks -->
+  <div class="tab-panel active" id="panel-tasks">
+    <div class="sec">
+      <div class="st">タスク一覧</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-ghost" onclick="filterTasks('all')" id="f-all" style="font-weight:700;">すべて</button>
+        <button class="btn btn-sm btn-ghost" onclick="filterTasks('todo')">未完了</button>
+        <button class="btn btn-sm btn-ghost" onclick="filterTasks('done')">完了済</button>
+        <button class="btn btn-sm btn-ghost" onclick="filterTasks('high')">高優先</button>
+      </div>
+      <ul class="task-list" id="taskList"></ul>
+      <div class="add-task-bar">
+        <input type="text" id="newTitle" placeholder="新しいタスクを追加...">
+        <select id="newPri"><option value="high">高</option><option value="mid" selected>中</option><option value="low">低</option></select>
+        <select id="newCat"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
+        <button class="btn btn-primary" onclick="addTask()">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Timeline -->
+  <div class="tab-panel" id="panel-timeline">
+    <!-- Semester Bar -->
+    <div class="sec">
+      <div class="st">学期カレンダー概要</div>
+      <div class="sb">
+        <div class="ss" style="flex:4;background:#3b82f6;">1学期 (4/9-7/17)</div>
+        <div class="ss" style="flex:1.5;background:#f59e0b;">夏休み</div>
+        <div class="ss" style="flex:4.5;background:#10b981;">2学期 (8/19-12/18)</div>
+        <div class="ss" style="flex:.8;background:#8b5cf6;">冬休</div>
+        <div class="ss" style="flex:2.5;background:#ef4444;">3学期 (1/5-3/5)</div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--g600);">
+        <span><strong>1学期:</strong> JSB 68日 / 幼稚園 ~71日</span>
+        <span><strong>2学期:</strong> JSB 86日 / 幼稚園 ~83日</span>
+        <span><strong>3学期:</strong> JSB 43日 / 幼稚園 ~43日</span>
+      </div>
+    </div>
+
+    <!-- Overlap Warning -->
+    <div class="sec">
+      <div class="ow"><span style="font-size:18px;">&#9888;</span><div><strong>10/17(土)</strong> — JSB合唱祭（保護者鑑賞・午後）と幼稚園合唱が同日。<br><span style="font-size:12px;color:var(--g600);">どちらかに参加する分担、または時間帯の確認が必要です。</span></div></div>
+    </div>
+
+    <!-- Annual Timeline -->
+    <div class="sec">
+      <div class="st">年間行事予定（保護者関連）</div>
+      <div class="tg">
+        <div class="tc jsb">
+          <h3>JSB 日本人学校（颯士・中1）</h3>
+          <div class="mg"><div class="ml">4月</div><div class="er"><span class="ed">4/9</span><span class="en">着任式・始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/10</span><span class="en">入学式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/17</span><span class="en">中1学力テスト / 修学旅行説明会</span><span class="et t-exam">テスト</span></div><div class="er"><span class="ed">4/22</span><span class="en">中学部参観・懇談会</span><span class="et t-par">参観</span></div><div class="er"><span class="ed">4/29</span><span class="en">避難訓練（引取：テロ）</span></div></div>
+          <div class="mg"><div class="ml">5月</div><div class="er"><span class="ed">5/20-22</span><span class="en">中学部修学旅行</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">5/28-29</span><span class="en">個人懇談（午前日課）</span><span class="et t-par">懇談</span></div><div class="er"><span class="ed">5/31</span><span class="en">英検第1回 1次</span><span class="et t-eik">英検</span></div></div>
+          <div class="mg"><div class="ml">6月</div><div class="er"><span class="ed">6/1-2</span><span class="en">個人懇談（午前日課）</span><span class="et t-par">懇談</span></div><div class="er"><span class="ed">6/17-18</span><span class="en">第1回定期考査</span><span class="et t-exam">テスト</span></div></div>
+          <div class="mg"><div class="ml">7月</div><div class="er"><span class="ed">7/5</span><span class="en">英検第1回 2次</span><span class="et t-eik">英検</span></div><div class="er"><span class="ed">7/11</span><span class="en">土曜授業参観</span><span class="et t-par">参観</span></div><div class="er"><span class="ed">7/17</span><span class="en">1学期終業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">8月</div><div class="er"><span class="ed">8/19</span><span class="en">2学期始業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">9月</div><div class="er"><span class="ed">9/4</span><span class="en">運動会（予備日 9/9）</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">9/21</span><span class="en">中学部学力テスト</span><span class="et t-exam">テスト</span></div><div class="er"><span class="ed">9/30</span><span class="en">学校公開</span><span class="et t-par">参観</span></div></div>
+          <div class="mg"><div class="ml">10月</div><div class="er"><span class="ed">10/4</span><span class="en">英検第2回 1次</span><span class="et t-eik">英検</span></div><div class="er hl"><span class="ed">10/15-17</span><span class="en">合唱祭（17日保護者鑑賞）</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">11月</div><div class="er"><span class="ed">11/8</span><span class="en">英検第2回 2次</span><span class="et t-eik">英検</span></div><div class="er"><span class="ed">11/18-19</span><span class="en">第2回定期考査（1,2年）</span><span class="et t-exam">テスト</span></div></div>
+          <div class="mg"><div class="ml">12月</div><div class="er"><span class="ed">12/1,3,4</span><span class="en">個人懇談（午前日課）</span><span class="et t-par">懇談</span></div><div class="er"><span class="ed">12/18</span><span class="en">2学期終業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">1月</div><div class="er"><span class="ed">1/6</span><span class="en">3学期始業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">2月</div><div class="er"><span class="ed">2/4</span><span class="en">外国語参観・懇談会（中学部）</span><span class="et t-par">参観</span></div><div class="er"><span class="ed">2/15</span><span class="en">中1・2学力テスト</span><span class="et t-exam">テスト</span></div><div class="er"><span class="ed">2/17-18</span><span class="en">第3回定期考査</span><span class="et t-exam">テスト</span></div><div class="er"><span class="ed">2/25</span><span class="en">感謝の会</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">3月</div><div class="er"><span class="ed">3/1</span><span class="en">中学部卒業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">3/5</span><span class="en">修了式・離任式</span><span class="et t-cer">式典</span></div></div>
+        </div>
+        <div class="tc yochi">
+          <h3>日本人幼稚園（さつき・年少）</h3>
+          <div class="mg"><div class="ml">4月</div><div class="er"><span class="ed">4/8</span><span class="en">始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/9</span><span class="en">入園式 10:00〜</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/13</span><span class="en">預かり・お弁当開始</span></div><div class="er"><span class="ed">4/15</span><span class="en">保護者会</span><span class="et t-par">保護者</span></div></div>
+          <div class="mg"><div class="ml">5月</div><div class="er"><span class="ed">5/4</span><span class="en">年少お弁当開始</span></div><div class="er"><span class="ed">5/6</span><span class="en">子どもの日・ポップコーン</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">6月</div><div class="er"><span class="ed">6/10</span><span class="en">茶・保護者会</span><span class="et t-par">保護者</span></div><div class="er"><span class="ed">6/13</span><span class="en">父の日参観</span><span class="et t-par">参観</span></div></div>
+          <div class="mg"><div class="ml">7月</div><div class="er"><span class="ed">7/17</span><span class="en">1学期終業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">8月</div><div class="er"><span class="ed">8/24</span><span class="en">2学期始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">8/28</span><span class="en">夏祭り</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">9月</div><div class="er"><span class="ed">9/15</span><span class="en">遠足</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">9/21-10/2</span><span class="en">個人面談</span><span class="et t-par">面談</span></div></div>
+          <div class="mg"><div class="ml">10月</div><div class="er"><span class="ed">10/7</span><span class="en">音楽会</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">10/14</span><span class="en">茶・保護者会</span><span class="et t-par">保護者</span></div><div class="er hl"><span class="ed">10/17</span><span class="en">合唱 &#9888; JSBと同日</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">10/28</span><span class="en">ハロウィン仮装</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">11月</div><div class="er"><span class="ed">11/21?</span><span class="en">スポーツデー（未確定）</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">12月</div><div class="er"><span class="ed">12/4</span><span class="en">サン・ニコラ</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">12/16</span><span class="en">クリスマス会</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">12/18</span><span class="en">終業式</span><span class="et t-cer">式典</span></div></div>
+          <div class="mg"><div class="ml">1月</div><div class="er"><span class="ed">1/5</span><span class="en">3学期始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">1/13</span><span class="en">餅丸め</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">2月</div><div class="er"><span class="ed">2/3</span><span class="en">豆まき</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">2/10</span><span class="en">茶・保護者会</span><span class="et t-par">保護者</span></div><div class="er"><span class="ed">2/24</span><span class="en">カーニバル仮装</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">2/26</span><span class="en">お別れランチ</span><span class="et t-evt">行事</span></div></div>
+          <div class="mg"><div class="ml">3月</div><div class="er"><span class="ed">3/3</span><span class="en">卒園式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">3/4</span><span class="en">修了式</span><span class="et t-cer">式典</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Schedule -->
+    <div class="sec">
+      <div class="st">JSB テスト・英検スケジュール（中1）</div>
+      <table style="width:100%;font-size:13px;border-collapse:collapse;">
+        <thead><tr style="background:var(--g100);text-align:left;"><th style="padding:8px 12px;">日付</th><th style="padding:8px 12px;">種別</th><th style="padding:8px 12px;">内容</th></tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">4/17</td><td style="padding:8px 12px;"><span class="et t-exam">学力</span></td><td style="padding:8px 12px;">中1学力テスト</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">5/31</td><td style="padding:8px 12px;"><span class="et t-eik">英検</span></td><td style="padding:8px 12px;">英検第1回 1次</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">6/17-18</td><td style="padding:8px 12px;"><span class="et t-exam">定期</span></td><td style="padding:8px 12px;">第1回定期考査</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">7/5</td><td style="padding:8px 12px;"><span class="et t-eik">英検</span></td><td style="padding:8px 12px;">英検第1回 2次</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">9/21</td><td style="padding:8px 12px;"><span class="et t-exam">学力</span></td><td style="padding:8px 12px;">中学部学力テスト</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">10/4</td><td style="padding:8px 12px;"><span class="et t-eik">英検</span></td><td style="padding:8px 12px;">英検第2回 1次</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">11/8</td><td style="padding:8px 12px;"><span class="et t-eik">英検</span></td><td style="padding:8px 12px;">英検第2回 2次</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">11/18-19</td><td style="padding:8px 12px;"><span class="et t-exam">定期</span></td><td style="padding:8px 12px;">第2回定期考査（1,2年）</td></tr>
+          <tr style="border-bottom:1px solid var(--g200);"><td style="padding:8px 12px;">2/15</td><td style="padding:8px 12px;"><span class="et t-exam">学力</span></td><td style="padding:8px 12px;">中1・2学力テスト</td></tr>
+          <tr><td style="padding:8px 12px;">2/17-18</td><td style="padding:8px 12px;"><span class="et t-exam">定期</span></td><td style="padding:8px 12px;">第3回定期考査</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Belgian Holidays -->
+    <div class="sec">
+      <div class="st">ベルギー祝日 (休校日)</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;font-size:13px;">
+        <div class="er"><span class="ed">4/6</span>イースターマンデー</div><div class="er"><span class="ed">5/1</span>メーデー</div>
+        <div class="er"><span class="ed">5/14</span>基督昇天祭 (+5/15休)</div><div class="er"><span class="ed">5/25</span>聖霊降臨祭 (+5/26休)</div>
+        <div class="er"><span class="ed">7/21</span>建国記念日</div><div class="er"><span class="ed">8/15</span>聖母被昇天祭 (+8/17振替)</div>
+        <div class="er"><span class="ed">11/1</span>万聖節 (+11/2休)</div><div class="er"><span class="ed">11/11</span>休戦記念日</div>
+        <div class="er"><span class="ed">12/25</span>クリスマス</div><div class="er"><span class="ed">3/29</span>イースターマンデー (2027)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Info -->
+  <div class="tab-panel" id="panel-info">
+    <div class="sec">
+      <div class="st">学校情報</div>
+      <div class="ig">
+        <div class="ic">
+          <h4><span class="badge b-jsb">JSB</span> ブラッセル日本人学校</h4>
+          <table><tr><td>住所</td><td>Avenue des Meuniers 133, 1160 Bruxelles</td></tr><tr><td>TEL</td><td>+32-(0)2-672-1038</td></tr><tr><td>FAX</td><td>+32-(0)2-672-9527</td></tr><tr><td>教務主任</td><td>金指 雄基 (kyomu@japanese-school-brussels.be)</td></tr><tr><td>共有フォルダ</td><td><a href="https://drive.google.com/drive/folders/1JOXfw1hWSSYFxdlwFifVxZhbhhTSz1Gu" target="_blank">R08 JSB Student</a></td></tr><tr><td>颯士アカウント</td><td>20.ito.hayato@japanese-school-brussels.be</td></tr></table>
+        </div>
+        <div class="ic">
+          <h4><span class="badge b-yochi">幼稚園</span> ブラッセル日本人幼稚園</h4>
+          <table><tr><td>住所</td><td>Rue Major Petillon 36, 1040 Brussels</td></tr><tr><td>TEL</td><td>02-742-0955</td></tr><tr><td>メール</td><td>nihonjinyouchien@gmail.com</td></tr><tr><td>担当</td><td>増川先生</td></tr><tr><td>駐車場</td><td>周辺有料化（2026/4/8〜）</td></tr></table>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="st">接続ステータス</div>
+      <div style="margin-bottom:12px;"><strong style="font-size:13px;">Google Calendar:</strong><div class="cs" style="margin-top:8px;"><div class="cc"><span class="dot" style="background:#10b981;"></span> takayuki.ito0116 (個人) — 46件</div><div class="cc"><span class="dot" style="background:#10b981;"></span> ファミリー (nr.02hyt08) — 46件</div></div></div>
+      <div><strong style="font-size:13px;">Gmail MCP:</strong><div class="cs" style="margin-top:8px;"><div class="cc"><span class="dot" style="background:#10b981;"></span> 現在: nr.02hyt08@gmail.com</div><div class="cc"><span class="dot" style="background:#f59e0b;"></span> 切替要: takayuki.ito0116@gmail.com</div></div><p style="font-size:12px;color:var(--g600);margin-top:8px;">Gmail MCPは同時に1アカウントのみ。切替はclaude.ai → Settings → Integrations。</p></div>
+    </div>
+  </div>
+
+  <!-- TAB: Emails -->
+  <div class="tab-panel" id="panel-emails">
+    <div class="sec">
+      <div class="st">最新メールサマリー (4/10受信分)</div>
+      <div class="eg">
+        <div class="ec"><div class="es">令和8年度年間行事予定と学費について</div><div class="ef">教務主任 → 颯士経由転送</div><div class="edt">元: 2/2 | 転送: 4/10</div><div><span class="ea">年間行事予定.pdf</span> <span class="ea">学費案内.pdf</span></div></div>
+        <div class="ec"><div class="es">体育の授業における服装・持ち物</div><div class="ef">中村亮太 → 颯士経由転送</div><div class="edt">4/9 → 4/10</div><div><span class="ea">体育服装持ち物.pdf</span></div></div>
+        <div class="ec"><div class="es">R8年度 公開用フォルダのお知らせ</div><div class="ef">情報部 → 颯士経由転送</div><div class="edt">4/10</div><div><span class="ea">Google Driveリンク</span></div></div>
+        <div class="ec"><div class="es">外国語会話授業・インフォメーションデー</div><div class="ef">教務主任 → 颯士経由転送</div><div class="edt">4/10</div><div><span class="ea">インフォメーションデー.pdf</span> <span class="ea">外国語教科書.pdf</span></div></div>
+        <div class="ec"><div class="es">保健だよりの配付について</div><div class="ef">矢野千恵子 → 颯士経由転送</div><div class="edt">4/10</div><div><span class="ea">保健だより第1号.pdf</span></div></div>
+        <div class="ec"><div class="es">授業参観・懇談会(お知らせ)</div><div class="ef">教務主任 → 颯士経由転送</div><div class="edt">4/10</div><div><span class="ea">授業参観・懇談会.pdf</span></div></div>
+        <div class="ec"><div class="es">メールアカウント利用規則の送付</div><div class="ef">情報部 → 颯士経由転送</div><div class="edt">4/10</div><div><span class="ea">利用規則.pdf</span></div></div>
+        <div class="ec"><div class="es">入園確認書および関連書類一式【さつき/年少】</div><div class="ef">ブラッセル日本人幼稚園</div><div class="edt">3/30</div><div><span class="ea">入園確認書.pdf</span> <span class="ea">家庭環境調査票</span> <span class="ea">年間予定表.pdf</span></div></div>
+        <div class="ec"><div class="es">幼稚園周辺駐車スペース有料化</div><div class="ef">ブラッセル日本人幼稚園</div><div class="edt">4/8</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <h3 id="modalTitle">タスクを編集</h3>
+    <label>タイトル</label>
+    <input type="text" id="editTitle">
+    <label>カテゴリ</label>
+    <select id="editCat"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
+    <label>優先度</label>
+    <select id="editPri"><option value="high">高</option><option value="mid">中</option><option value="low">低</option></select>
+    <label>メモ</label>
+    <textarea id="editNote" placeholder="メモを追加..."></textarea>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="deleteBtn" onclick="deleteTask()">削除</button>
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">伊藤家 学校・幼稚園ダッシュボード 2026 | Generated by Claude Code</div>
+
+<script>
+const STORAGE_KEY = 'ito-family-school-2026-tasks';
+
+const defaultTasks = [
+  { id:1, title:'家庭環境調査票の提出', cat:'幼稚園', pri:'high', done:false, note:'Excel or PDFで提出。入園確認書メール(3/30)添付。' },
+  { id:2, title:'授業参観・懇談会の日程確認', cat:'JSB', pri:'high', done:false, note:'添付PDF要確認。4/10メール。' },
+  { id:3, title:'体育の服装・持ち物を準備', cat:'JSB', pri:'mid', done:false, note:'添付PDF参照。4/9メール。' },
+  { id:4, title:'外国語教科書・インフォメーションデー確認', cat:'JSB', pri:'mid', done:false, note:'添付PDF参照。4/10メール。' },
+  { id:5, title:'メールアカウント利用規則の確認', cat:'JSB', pri:'low', done:false, note:'小2〜中3保護者向け。4/10メール。' },
+  { id:6, title:'幼稚園周辺駐車場の有料化を把握', cat:'幼稚園', pri:'low', done:false, note:'車送迎の場合注意。4/8メール。' },
+  { id:7, title:'JSB公開用Googleドライブフォルダを確認', cat:'JSB', pri:'mid', done:false, note:'R08 JSB Studentフォルダ。4/10メール。' },
+  { id:8, title:'10/17合唱祭・幼稚園合唱の時間帯確認', cat:'共通', pri:'mid', done:false, note:'JSBと幼稚園が同日。分担or時間帯の事前確認。' },
+];
+
+let tasks = [];
+let editingId = null;
+let currentFilter = 'all';
+
+function loadTasks() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    tasks = JSON.parse(saved);
+  } else {
+    tasks = defaultTasks.map(t => ({...t}));
+    saveTasks();
+  }
+}
+
+function saveTasks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  let filtered = tasks;
+  if (currentFilter === 'todo') filtered = tasks.filter(t => !t.done);
+  if (currentFilter === 'done') filtered = tasks.filter(t => t.done);
+  if (currentFilter === 'high') filtered = tasks.filter(t => t.pri === 'high' && !t.done);
+
+  const priOrder = { high:0, mid:1, low:2 };
+  filtered.sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return priOrder[a.pri] - priOrder[b.pri];
+  });
+
+  list.innerHTML = filtered.map(t => {
+    const priClass = t.pri === 'high' ? 'pri-h' : t.pri === 'mid' ? 'pri-m' : 'pri-l';
+    const badgeClass = t.cat === 'JSB' ? 'b-jsb' : t.cat === '幼稚園' ? 'b-yochi' : 'b-jsb';
+    const doneClass = t.done ? 'done' : '';
+    const noteHtml = t.note ? `<div class="task-note">${escHtml(t.note)}</div>` : '';
+    return `<li class="task-item ${doneClass}">
+      <div class="pri ${priClass}"></div>
+      <input type="checkbox" class="task-cb" ${t.done?'checked':''} onchange="toggleTask(${t.id})">
+      <div class="task-body">
+        <div class="task-title">${escHtml(t.title)}</div>
+        <div class="task-meta"><span class="badge ${badgeClass}">${escHtml(t.cat)}</span></div>
+        ${noteHtml}
+      </div>
+      <div class="task-actions">
+        <button onclick="openEdit(${t.id})" title="編集">&#9998;</button>
+      </div>
+    </li>`;
+  }).join('');
+
+  updateProgress();
+}
+
+function escHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function toggleTask(id) {
+  const t = tasks.find(x => x.id === id);
+  if (t) { t.done = !t.done; saveTasks(); renderTasks(); }
+}
+
+function addTask() {
+  const title = document.getElementById('newTitle').value.trim();
+  if (!title) return;
+  const pri = document.getElementById('newPri').value;
+  const cat = document.getElementById('newCat').value;
+  const maxId = tasks.reduce((m,t) => Math.max(m,t.id), 0);
+  tasks.push({ id: maxId+1, title, cat, pri, done:false, note:'' });
+  saveTasks();
+  renderTasks();
+  document.getElementById('newTitle').value = '';
+}
+
+function openEdit(id) {
+  editingId = id;
+  const t = tasks.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById('editTitle').value = t.title;
+  document.getElementById('editCat').value = t.cat;
+  document.getElementById('editPri').value = t.pri;
+  document.getElementById('editNote').value = t.note || '';
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('active');
+  editingId = null;
+}
+
+function saveEdit() {
+  const t = tasks.find(x => x.id === editingId);
+  if (!t) return;
+  t.title = document.getElementById('editTitle').value.trim() || t.title;
+  t.cat = document.getElementById('editCat').value;
+  t.pri = document.getElementById('editPri').value;
+  t.note = document.getElementById('editNote').value.trim();
+  saveTasks();
+  renderTasks();
+  closeModal();
+}
+
+function deleteTask() {
+  if (!confirm('このタスクを削除しますか？')) return;
+  tasks = tasks.filter(t => t.id !== editingId);
+  saveTasks();
+  renderTasks();
+  closeModal();
+}
+
+function filterTasks(f) {
+  currentFilter = f;
+  document.querySelectorAll('.tabs + .tab-panel .btn-sm, .sec .btn-sm').forEach(b => b.style.fontWeight = 'normal');
+  const btn = document.getElementById('f-' + f);
+  if (btn) btn.style.fontWeight = '700';
+  renderTasks();
+}
+
+function updateProgress() {
+  const total = tasks.length;
+  const done = tasks.filter(t => t.done).length;
+  document.getElementById('taskProgress').textContent = `${done}/${total}`;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('taskBar').style.width = pct + '%';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// Enter key for new task
+document.getElementById('newTitle').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+// Close modal on overlay click
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Init
+loadTasks();
+renderTasks();
+</script>
+</body>
+</html>
