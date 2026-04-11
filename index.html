@@ -1513,14 +1513,45 @@ tasksRef.once('value', snap => {
 const API_URL = 'https://ito-family-api.jsb-yochien.workers.dev';
 let aiProcessing = false;
 
-function addChatMsg(text, type) {
+function addChatMsg(text, type, allowHtml=false) {
   const el = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = `chat-msg ${type}`;
-  div.innerHTML = text;
+  if(allowHtml) div.innerHTML = text;
+  else div.textContent = text;
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
   return div;
+}
+// Safe version that allows action buttons (pre-escaped reply + safe HTML buttons)
+function addAiMsg(reply, actions) {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ai';
+  const replySpan = document.createElement('span');
+  replySpan.textContent = reply;
+  div.appendChild(replySpan);
+  if(actions && actions.length){
+    const btns = document.createElement('div');
+    btns.className = 'ai-actions';
+    actions.forEach((a,i)=>{
+      const b = document.createElement('button');
+      b.className = 'ai-action-btn';
+      b.dataset.idx = i;
+      b.textContent = a.type==='add'?'+ '+a.title:a.type==='complete'?'✓ '+a.title:'× '+a.title;
+      b.onclick = ()=>applyOneAction(i);
+      btns.appendChild(b);
+    });
+    const allBtn = document.createElement('button');
+    allBtn.className = 'ai-action-btn';
+    allBtn.style.background = 'rgba(255,42,42,.2)';
+    allBtn.textContent = 'すべて実行';
+    allBtn.onclick = applyAllActions;
+    btns.appendChild(allBtn);
+    div.appendChild(btns);
+  }
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
 }
 
 function showTyping() {
@@ -1603,7 +1634,7 @@ async function sendChat() {
       addChatMsg('エラー: ' + data.error, 'system');
     } else {
       pendingActions = data.actions || [];
-      addChatMsg(escHtml(data.reply) + actionButtons(data.actions), 'ai');
+      addAiMsg(data.reply, data.actions);
     }
   } catch (err) {
     hideTyping();
@@ -1634,6 +1665,8 @@ function toggleMic() {
     return;
   }
 
+  const chatInput = document.getElementById('chatInput');
+
   if (isRecording) {
     recognition.stop();
     return;
@@ -1642,26 +1675,54 @@ function toggleMic() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   recognition = new SR();
   recognition.lang = 'ja-JP';
-  recognition.continuous = false;
-  recognition.interimResults = false;
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  const prevPlaceholder = chatInput.placeholder;
+  let finalTranscript = '';
 
   recognition.onstart = () => {
     isRecording = true;
+    finalTranscript = '';
+    chatInput.value = '';
+    chatInput.placeholder = '🎤 聞いています...';
+    chatInput.style.borderColor = 'rgba(255,42,42,.4)';
+    chatInput.style.boxShadow = '0 0 0 3px rgba(255,42,42,.12)';
     document.getElementById('micBtn').classList.add('recording');
   };
   recognition.onend = () => {
     isRecording = false;
+    chatInput.placeholder = prevPlaceholder;
+    chatInput.style.borderColor = '';
+    chatInput.style.boxShadow = '';
     document.getElementById('micBtn').classList.remove('recording');
+    if (finalTranscript) {
+      chatInput.value = finalTranscript;
+      chatInput.dispatchEvent(new Event('input'));
+    }
   };
   recognition.onresult = (e) => {
-    const text = e.results[0][0].transcript;
-    document.getElementById('chatInput').value = text;
-    document.getElementById('chatInput').dispatchEvent(new Event('input'));
+    let interim = '';
+    finalTranscript = '';
+    for (let i = 0; i < e.results.length; i++) {
+      if (e.results[i].isFinal) {
+        finalTranscript += e.results[i][0].transcript;
+      } else {
+        interim += e.results[i][0].transcript;
+      }
+    }
+    // Show real-time transcription
+    chatInput.value = finalTranscript + interim;
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
   };
   recognition.onerror = (e) => {
     isRecording = false;
+    chatInput.placeholder = prevPlaceholder;
+    chatInput.style.borderColor = '';
+    chatInput.style.boxShadow = '';
     document.getElementById('micBtn').classList.remove('recording');
-    if (e.error !== 'no-speech') addChatMsg('音声認識エラー: ' + e.error, 'system');
+    if (e.error !== 'no-speech' && e.error !== 'aborted') addChatMsg('音声認識エラー: ' + e.error, 'system');
   };
 
   recognition.start();
@@ -1672,25 +1733,50 @@ async function handlePhoto(input) {
   const file = input.files[0];
   if (!file) return;
 
-  // Show preview
-  addChatMsg('&#128247; 写真を分析中...', 'user');
+  // File size check (max 10MB)
+  if (file.size > 10 * 1024 * 1024) {
+    addChatMsg('ファイルが大きすぎます（10MB以下にしてください）', 'system');
+    input.value = '';
+    return;
+  }
+
+  addChatMsg('写真を分析中...', 'user');
   aiProcessing = true;
   document.getElementById('sendBtn').disabled = true;
   showTyping();
 
   try {
+    // Resize image to reduce payload (max 1200px)
     const base64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
       reader.onerror = reject;
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const maxDim = 1200;
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+        };
+        img.onerror = reject;
+        img.src = reader.result;
+      };
       reader.readAsDataURL(file);
     });
 
     const res = await fetch(API_URL + '/analyze-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64, mimeType: file.type }),
+      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
     });
+
+    if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
     const data = await res.json();
     hideTyping();
 
@@ -1698,11 +1784,11 @@ async function handlePhoto(input) {
       addChatMsg('エラー: ' + data.error, 'system');
     } else {
       pendingActions = data.actions || [];
-      addChatMsg(escHtml(data.reply) + actionButtons(data.actions), 'ai');
+      addAiMsg(data.reply, data.actions);
     }
   } catch (err) {
     hideTyping();
-    addChatMsg('接続エラー: ' + err.message, 'system');
+    addChatMsg('写真分析エラー: ' + err.message, 'system');
   }
 
   aiProcessing = false;
