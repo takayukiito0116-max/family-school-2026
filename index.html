@@ -286,14 +286,15 @@ body {
 /* === Lock Screen === */
 #lockScreen {
   position:fixed; inset:0; z-index:9999;
-  background:var(--bg);
+  background:var(--bg) url('eddie.jpg') center 20% / cover no-repeat;
+  background-blend-mode:overlay;
   display:flex; align-items:center; justify-content:center; flex-direction:column;
   transition:opacity .6s var(--ease), transform .6s var(--ease);
 }
 #lockScreen.hidden {
   opacity:0; transform:scale(1.05); pointer-events:none;
 }
-.lock-bg { position:absolute; inset:0; }
+.lock-bg { position:absolute; inset:0; background:rgba(0,0,0,.65); }
 .lock-bg::before {
   content:''; position:absolute; width:600px; height:600px; border-radius:50%;
   top:50%; left:50%; transform:translate(-50%,-50%);
@@ -437,8 +438,10 @@ body {
   padding:20px 0; overflow-y:auto;
   box-shadow:-10px 0 40px rgba(255,0,0,.1), -20px 0 80px rgba(0,0,0,.5);
   background-image:
-    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(255,42,42,.04), transparent),
-    linear-gradient(180deg, rgba(255,42,42,.02) 0%, transparent 30%);
+    linear-gradient(180deg, rgba(8,2,2,.95) 0%, rgba(8,2,2,.7) 60%, rgba(8,2,2,.85) 100%),
+    url('eddie2.jpg');
+  background-size:cover, cover;
+  background-position:center, center 20%;
 }
 .menu-drawer.open { right:0; }
 .menu-overlay {
@@ -1087,6 +1090,8 @@ body {
 <div class="ud-photo-bottom"></div>
 <div class="ud-photo-left"></div>
 <div class="ud-photo-right"></div>
+<!-- Eddie guitar watermark -->
+<div style="position:fixed;z-index:0;pointer-events:none;bottom:-5%;right:-10%;width:50vw;height:70vh;background:url('eddie.jpg') center/contain no-repeat;opacity:0.04;filter:saturate(2) contrast(1.3);mix-blend-mode:screen;"></div>
 
 <!-- Floating embers -->
 <div class="ember" style="left:15%;bottom:0;animation-duration:6s;animation-delay:0s;"></div>
@@ -1117,14 +1122,9 @@ body {
     <circle cx="100" cy="100" r="3" fill="rgba(255,42,42,.15)"/>
   </svg>
   <div class="lock-box">
-    <div class="neon-logo" style="margin-bottom:20px;">
-      <div class="neon-line"></div>
-      <div class="neon-title" style="font-size:42px;">STRANGER</div>
-      <div class="neon-subtitle" style="font-size:20px;letter-spacing:10px;">THINGS</div>
-      <div class="neon-line" style="margin:6px auto;"></div>
-      <div style="font-family:'Playfair Display',serif;font-size:14px;color:#ff5050;letter-spacing:6px;text-shadow:0 0 8px rgba(255,42,42,.4);margin-top:4px;">ITO FAMILY</div>
-    </div>
-    <p style="color:var(--text3);font-size:12px;margin-bottom:20px;">The Upside Down awaits...</p>
+    <img src="st-logo.png" alt="Stranger Things" style="width:85%;max-width:280px;margin:0 auto 12px;display:block;filter:drop-shadow(0 0 20px rgba(255,42,42,.4));">
+    <div style="font-family:'Playfair Display',serif;font-size:16px;color:#ff5050;letter-spacing:8px;text-shadow:0 0 12px rgba(255,42,42,.5);text-align:center;margin-bottom:16px;">ITO FAMILY EDITION</div>
+    <p style="color:var(--text3);font-size:11px;margin-bottom:20px;font-style:italic;">"It's not my fault you don't like cool things."  — Eddie Munson</p>
     <div class="lock-input-wrap" id="lockWrap">
       <input type="text" id="pwInput" placeholder="パスワード" autocomplete="off">
     </div>
@@ -1137,12 +1137,7 @@ body {
 <!-- Header -->
 <div class="header">
   <div class="header-left">
-    <div class="neon-logo neon-logo-sm">
-      <div class="neon-line-sm"></div>
-      <div class="neon-title-sm">STRANGER</div>
-      <div class="neon-subtitle-sm">ITO FAMILY</div>
-      <div class="neon-line-sm"></div>
-    </div>
+    <img src="st-logo2.png" alt="ST" style="height:32px;filter:drop-shadow(0 0 6px rgba(255,42,42,.4));margin-right:8px;">
   </div>
   <div class="header-right">
     <div class="ai-badge"><div class="ai-dot"></div>SYNC</div>
@@ -1158,12 +1153,15 @@ body {
     <div class="ss-card" id="strikeStrip"><div class="ss-icon" id="strikeIcon">&#9989;</div><div class="ss-info"><div class="ss-label">ストライキ・治安</div><div class="ss-val" id="strikeStatus" style="font-size:13px;">確認中</div></div></div>
   </div>
 
+  <!-- Eddie Quote -->
+  <div style="text-align:center;padding:8px 16px;font-style:italic;font-size:11px;color:var(--text3);margin-bottom:12px;" id="eddieQuote"></div>
+
   <!-- Top AI Chat Box (Apple-style) -->
   <div class="top-ai-box" id="topAiBox">
     <div class="top-ai-glow"></div>
     <div class="top-ai-inner">
       <div class="top-ai-header">
-        <div class="top-ai-avatar"><img src="icon-192.png" alt="" style="width:100%;height:100%;border-radius:50%;"></div>
+        <div class="top-ai-avatar"><img src="eleven.jpg" alt="Eleven" style="width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 30%;"></div>
         <div class="top-ai-label">
           <span class="top-ai-name">Eleven</span>
           <span class="top-ai-status"><span class="ai-dot"></span> Ready</span>
@@ -1420,7 +1418,8 @@ body {
 </div>
 
 <div class="footer" style="font-family:'Playfair Display',Georgia,serif;letter-spacing:2px;">
-  STRANGER THINGS — ITO FAMILY EDITION
+  <img src="st-logo2.png" alt="" style="height:20px;opacity:.4;margin-bottom:4px;display:block;margin:0 auto 4px;filter:drop-shadow(0 0 4px rgba(255,42,42,.3));">
+  ITO FAMILY EDITION
   <div id="syncStatus" style="margin-top:4px;font-size:10px;color:var(--accent3);opacity:.7;"></div>
 </div>
 </div>
@@ -2310,6 +2309,24 @@ morningAlertRef.on('value', snap => {
   lastAlertDate = data.date;
   localStorage.setItem('ito-last-alert-date', data.date);
 });
+
+// === Eddie Munson Quotes ===
+const EDDIE_QUOTES = [
+  '"This is music!" — Eddie Munson',
+  '"I didn\'t run away this time, right?" — Eddie Munson',
+  '"There is no shame in running." — Eddie Munson',
+  '"I\'m not going to run. Not this time." — Eddie Munson',
+  '"The most metal ever!" — Eddie Munson',
+  '"Chrissy, wake up! I don\'t like this." — Eddie Munson',
+  '"Me? I\'m just the freak." — Eddie Munson',
+  '"Never change, Dustin Henderson." — Eddie Munson',
+  '"Friends don\'t lie." — Eleven',
+  '"Mornings are for coffee and contemplation." — Hopper',
+  '"She\'s our friend and she\'s crazy!" — Dustin',
+  '"I dump your ass." — Eleven',
+];
+const qEl = document.getElementById('eddieQuote');
+if(qEl) qEl.textContent = EDDIE_QUOTES[Math.floor(Math.random() * EDDIE_QUOTES.length)];
 
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}

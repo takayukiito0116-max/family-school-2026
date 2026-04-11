@@ -1,5 +1,5 @@
-const CACHE_NAME = 'ito-family-dash-v25';
-const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg.webp'];
+const CACHE_NAME = 'ito-family-dash-v26';
+const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg.webp', './eddie.jpg', './eddie2.jpg', './eleven.jpg', './eleven2.jpg', './st-logo.png', './st-logo2.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
