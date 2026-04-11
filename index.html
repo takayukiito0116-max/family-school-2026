@@ -1517,6 +1517,7 @@ tasksRef.once('value', snap => {
 // === AI Chat ===
 const API_URL = 'https://ito-family-api.jsb-yochien.workers.dev';
 let aiProcessing = false;
+let chatHistory = []; // {role:'user'|'assistant', content:string}
 
 function scrollChat() {
   const el = document.getElementById('chatMessages');
@@ -1616,6 +1617,9 @@ async function sendChat() {
   if (!msg || aiProcessing) return;
 
   addChatMsg(msg, 'user');
+  chatHistory.push({role:'user', content:msg});
+  // Keep last 20 messages to avoid token overflow
+  if(chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
   input.value = '';
   input.style.height = 'auto';
   aiProcessing = true;
@@ -1626,7 +1630,7 @@ async function sendChat() {
     const res = await fetch(API_URL + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, currentTasks: tasks }),
+      body: JSON.stringify({ message: msg, currentTasks: tasks, history: chatHistory.slice(0,-1) }),
     });
     const data = await res.json();
     hideTyping();
@@ -1636,6 +1640,7 @@ async function sendChat() {
     } else {
       pendingActions = data.actions || [];
       addAiMsg(data.reply, data.actions);
+      chatHistory.push({role:'assistant', content:data.reply});
     }
   } catch (err) {
     hideTyping();
