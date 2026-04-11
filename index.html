@@ -1641,7 +1641,8 @@ async function sendChat() {
 
 // Enter to send (Shift+Enter for newline)
 document.getElementById('chatInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+  // isComposing: IME変換中はEnterで送信しない（日本語入力対応）
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendChat(); }
 });
 // Auto-resize textarea
 document.getElementById('chatInput').addEventListener('input', function() {
