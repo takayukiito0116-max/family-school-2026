@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ito-family-dash-v14';
+const CACHE_NAME = 'ito-family-dash-v15';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg.webp'];
 
 self.addEventListener('install', e => {
@@ -14,7 +14,27 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
+  // Skip non-GET and external API requests
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.origin !== self.location.origin) return;
+
   e.respondWith(
-    fetch(e.request).catch(() => caches.match(e.request))
+    fetch(e.request)
+      .then(res => {
+        // Cache successful responses
+        if (res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request).then(r => r || new Response('Offline', { status: 503 })))
   );
+});
+
+// Handle push notification display
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(clients.openWindow('/'));
 });

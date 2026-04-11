@@ -1510,12 +1510,11 @@ tasksRef.once('value', snap => {
 const API_URL = 'https://ito-family-api.jsb-yochien.workers.dev';
 let aiProcessing = false;
 
-function addChatMsg(text, type, allowHtml=false) {
+function addChatMsg(text, type) {
   const el = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = `chat-msg ${type}`;
-  if(allowHtml) div.innerHTML = text;
-  else div.textContent = text;
+  div.textContent = text;
   el.appendChild(div);
   el.scrollTop = el.scrollHeight;
   return div;
@@ -1581,14 +1580,6 @@ function applyActions(actions) {
   });
   saveTasks();
   renderTasks();
-}
-
-function actionButtons(actions) {
-  if (!actions || !actions.length) return '';
-  return '<div class="ai-actions">' + actions.map((a, i) => {
-    const label = a.type === 'add' ? `+ ${a.title}` : a.type === 'complete' ? `✓ ${a.title}` : `× ${a.title}`;
-    return `<button class="ai-action-btn" onclick="applyOneAction(${i})" data-idx="${i}">${label}</button>`;
-  }).join('') + '<button class="ai-action-btn" onclick="applyAllActions()" style="background:rgba(255,42,42,.2);">すべて実行</button></div>';
 }
 
 let pendingActions = [];
@@ -1770,7 +1761,10 @@ async function loadWeather(){
     // Umbrella alert
     if((c.precipitation_probability||0)>40||[51,53,55,61,63,65,80,81,82,95,96,99].includes(c.weather_code)){
       document.getElementById('wAlert').style.display='';
-      document.getElementById('wAlert').innerHTML='<div class="weather-alert"><span class="wa-icon">☂️</span>今日は傘が必要です！降水確率 '+(c.precipitation_probability||0)+'%</div>';
+      const ua=document.getElementById('wAlert');ua.style.display='';
+      const uad=document.createElement('div');uad.className='weather-alert';
+      uad.textContent='☂️ 今日は傘が必要です！降水確率 '+(c.precipitation_probability||0)+'%';
+      ua.appendChild(uad);
     }
   }catch(e){console.error('Weather error:',e);}
 }
@@ -1818,7 +1812,10 @@ async function checkStrikes(){
       // Also show alert in weather widget
       const alertEl=document.getElementById('wAlert');
       alertEl.style.display='';
-      alertEl.innerHTML+='<div class="weather-alert"><span class="wa-icon">🚨</span>'+strike.text+'</div>';
+      const wd=document.createElement('div');wd.className='weather-alert';
+      wd.innerHTML='<span class="wa-icon">🚨</span>';
+      const wt=document.createElement('span');wt.textContent=strike.text;wd.appendChild(wt);
+      alertEl.style.display='';alertEl.appendChild(wd);
     } else {
       // Check for weather warnings (storms, etc)
       const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=weather_code,wind_speed_10m&timezone=Europe/Brussels');
@@ -1989,7 +1986,10 @@ morningAlertRef.on('value', snap => {
   const banner = document.createElement('div');
   banner.className = 'weather-alert';
   banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:200;max-width:90%;animation:msgIn .5s var(--spring) both;cursor:pointer;';
-  banner.innerHTML = '<span class="wa-icon">🌅</span><div style="flex:1;font-size:12px;white-space:pre-line;">' + escHtml(alert.body.slice(0, 300)) + '</div><span onclick="this.parentElement.remove()" style="cursor:pointer;padding:4px;">✕</span>';
+  const bIcon=document.createElement('span');bIcon.className='wa-icon';bIcon.textContent='🌅';
+  const bText=document.createElement('div');bText.style.cssText='flex:1;font-size:12px;white-space:pre-line;';bText.textContent=alert.body.slice(0,300);
+  const bClose=document.createElement('span');bClose.style.cssText='cursor:pointer;padding:4px;';bClose.textContent='✕';bClose.onclick=()=>banner.remove();
+  banner.appendChild(bIcon);banner.appendChild(bText);banner.appendChild(bClose);
   document.body.appendChild(banner);
   setTimeout(() => { if (banner.parentElement) banner.remove(); }, 30000);
 
