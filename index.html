@@ -732,6 +732,99 @@ body {
   .neon-subtitle-sm { font-size:10px; letter-spacing:4px; }
 }
 
+/* === Weather Widget === */
+.weather-widget {
+  display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+}
+.weather-main {
+  display:flex; align-items:center; gap:12px;
+}
+.weather-temp { font-size:36px; font-weight:800; color:var(--text); }
+.weather-icon { font-size:40px; }
+.weather-desc { font-size:13px; color:var(--text2); }
+.weather-details {
+  display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--text2);
+}
+.weather-detail { display:flex; align-items:center; gap:4px; }
+.weather-forecast {
+  display:flex; gap:8px; margin-top:12px; overflow-x:auto; padding-bottom:4px;
+}
+.forecast-item {
+  flex-shrink:0; text-align:center; padding:8px 12px; min-width:70px;
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  font-size:11px; color:var(--text2);
+}
+.forecast-item .fc-temp { font-size:14px; font-weight:700; color:var(--text); margin:4px 0; }
+.forecast-item .fc-icon { font-size:20px; }
+.weather-alert {
+  margin-top:12px; padding:10px 14px; border-radius:var(--radius-sm);
+  background:rgba(255,42,42,.08); border:1px solid rgba(255,42,42,.15);
+  font-size:12px; color:#ff8080; display:flex; align-items:center; gap:8px;
+}
+.weather-alert .wa-icon { font-size:16px; }
+
+/* === Week View === */
+.week-grid {
+  display:grid; grid-template-columns:repeat(7,1fr); gap:6px;
+}
+@media(max-width:700px){ .week-grid{grid-template-columns:repeat(7,1fr); gap:3px;} }
+.week-day {
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  padding:8px 6px; min-height:80px; font-size:11px; transition:all .2s var(--ease);
+}
+.week-day:hover { border-color:rgba(255,42,42,.2); }
+.week-day.today { border-color:rgba(255,42,42,.4); background:rgba(255,42,42,.05); }
+.week-day .wd-label { font-weight:700; color:var(--text2); text-align:center; margin-bottom:4px; text-transform:uppercase; font-size:10px; letter-spacing:.5px; }
+.week-day .wd-date { text-align:center; font-size:14px; font-weight:700; color:var(--text); margin-bottom:6px; }
+.week-day.today .wd-date { color:#ff2a2a; text-shadow:0 0 8px rgba(255,42,42,.4); }
+.week-day .wd-events { display:flex; flex-direction:column; gap:3px; }
+.wd-event {
+  padding:2px 5px; border-radius:4px; font-size:9px; font-weight:600;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.wd-event.wd-jsb { background:rgba(255,59,59,.12); color:#ff5050; }
+.wd-event.wd-yochi { background:rgba(255,96,96,.10); color:#ff7070; }
+.wd-event.wd-common { background:rgba(255,42,42,.08); color:#ff6060; }
+
+/* === Checklist === */
+.checklist-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+@media(max-width:600px){ .checklist-grid{grid-template-columns:1fr;} }
+.cl-card {
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm); padding:14px;
+}
+.cl-card h4 { font-size:13px; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.cl-items { list-style:none; }
+.cl-item {
+  display:flex; align-items:center; gap:8px; padding:5px 0; font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,.03);
+}
+.cl-item:last-child { border-bottom:none; }
+.cl-item input[type=checkbox] { accent-color:#ff2a2a; width:16px; height:16px; cursor:pointer; }
+.cl-item.checked label { text-decoration:line-through; color:var(--text3); }
+.cl-item label { cursor:pointer; }
+.cl-add { margin-top:8px; display:flex; gap:6px; }
+.cl-add input { flex:1; padding:6px 10px; border:1px solid var(--glass-border); border-radius:6px; background:var(--glass); color:var(--text); font-size:12px; font-family:inherit; outline:none; }
+.cl-add button { padding:6px 12px; border:none; border-radius:6px; background:rgba(255,42,42,.15); color:#ff5050; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+
+/* === Emergency Contacts === */
+.em-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; }
+.em-card {
+  display:flex; align-items:center; gap:12px; padding:12px 16px;
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  transition:all .2s var(--ease); cursor:pointer; text-decoration:none; color:var(--text);
+}
+.em-card:hover { background:rgba(255,42,42,.06); border-color:rgba(255,42,42,.15); transform:translateY(-2px); }
+.em-icon { font-size:24px; flex-shrink:0; }
+.em-info .em-name { font-size:13px; font-weight:600; }
+.em-info .em-num { font-size:12px; color:var(--text2); }
+.em-info .em-note { font-size:10px; color:var(--text3); }
+.em-call {
+  margin-left:auto; padding:6px 12px; border-radius:8px; font-size:11px; font-weight:600;
+  background:linear-gradient(135deg,#ff2a2a,#c40000); color:#fff; text-decoration:none;
+  transition:all .2s var(--spring); flex-shrink:0;
+}
+.em-call:hover { transform:scale(1.05); box-shadow:0 4px 12px rgba(255,42,42,.3); }
+
 /* === AI Chat === */
 .chat-container { display:flex; flex-direction:column; height:60vh; min-height:350px; }
 .chat-messages { flex:1; overflow-y:auto; padding:8px 0; display:flex; flex-direction:column; gap:8px; }
@@ -920,9 +1013,28 @@ body {
 <div class="ctr">
   <!-- Compact Summary Strip -->
   <div class="summary-strip">
-    <div class="ss-card"><div class="ss-icon">&#127979;</div><div class="ss-info"><div class="ss-label">颯士</div><div class="ss-val">中1 · JSB</div></div></div>
-    <div class="ss-card"><div class="ss-icon">&#127800;</div><div class="ss-info"><div class="ss-label">さつき</div><div class="ss-val">年少 · 幼稚園</div></div></div>
+    <div class="ss-card" id="weatherStrip"><div class="ss-icon" id="wIcon">&#9728;</div><div class="ss-info"><div class="ss-label">ブリュッセル</div><div class="ss-val" id="wTemp">--°</div></div></div>
+    <div class="ss-card"><div class="ss-icon">&#127979;</div><div class="ss-info"><div class="ss-label">颯士</div><div class="ss-val">中1</div></div></div>
+    <div class="ss-card"><div class="ss-icon">&#127800;</div><div class="ss-info"><div class="ss-label">さつき</div><div class="ss-val">年少</div></div></div>
     <div class="ss-card"><div class="ss-icon">&#9745;</div><div class="ss-info"><div class="ss-label">タスク</div><div class="ss-val" id="taskProgress">0/0</div><div class="ss-prog"><div class="ss-prog-fill" id="taskBar" style="width:0%"></div></div></div></div>
+  </div>
+
+  <!-- Weather + Alert Widget -->
+  <div class="upcoming" id="weatherWidget" style="display:none;">
+    <div class="upcoming-title">&#127326; 天気・安全情報</div>
+    <div class="weather-widget">
+      <div class="weather-main">
+        <div class="weather-icon" id="wIconBig">&#9728;</div>
+        <div><div class="weather-temp" id="wTempBig">--°</div><div class="weather-desc" id="wDesc">読み込み中...</div></div>
+      </div>
+      <div class="weather-details">
+        <div class="weather-detail">&#128167; <span id="wRain">--%</span></div>
+        <div class="weather-detail">&#127744; <span id="wWind">-- km/h</span></div>
+        <div class="weather-detail">&#128065; <span id="wHumid">--%</span></div>
+      </div>
+    </div>
+    <div class="weather-forecast" id="wForecast"></div>
+    <div id="wAlert" style="display:none;"></div>
   </div>
 
   <!-- Upcoming Events -->
@@ -935,10 +1047,11 @@ body {
   <div class="tabs" id="tabBar">
     <button class="tab active" data-tab="tasks">タスク</button>
     <button class="tab" data-tab="ai">AI</button>
+    <button class="tab" data-tab="week">週間</button>
+    <button class="tab" data-tab="checklist">持ち物</button>
     <button class="tab" data-tab="memo">メモ</button>
-    <button class="tab" data-tab="timeline">予定</button>
+    <button class="tab" data-tab="timeline">年間</button>
     <button class="tab" data-tab="info">情報</button>
-    <button class="tab" data-tab="emails">メール</button>
   </div>
 
   <!-- TAB: Tasks -->
@@ -977,6 +1090,50 @@ body {
           <button class="chat-btn chat-mic" id="micBtn" onclick="toggleMic()" title="音声入力">&#127908;</button>
           <button class="chat-btn chat-send" id="sendBtn" onclick="sendChat()" title="送信">&#10148;</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: Week View -->
+  <div class="tab-panel" id="panel-week">
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#128197;</div>週間ビュー <span id="weekLabel" style="font-size:12px;color:var(--text2);font-weight:400;margin-left:8px;"></span></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button class="filter-btn" onclick="shiftWeek(-1)">&#9664; 前週</button>
+        <button class="filter-btn" onclick="shiftWeek(0)">今週</button>
+        <button class="filter-btn" onclick="shiftWeek(1)">翌週 &#9654;</button>
+      </div>
+      <div class="week-grid" id="weekGrid"></div>
+    </div>
+  </div>
+
+  <!-- TAB: Checklist -->
+  <div class="tab-panel" id="panel-checklist">
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#127890;</div>持ち物チェックリスト</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">毎日リセットされます。カスタム項目も追加可能。</p>
+      <div class="checklist-grid">
+        <div class="cl-card">
+          <h4>&#127979; 颯士（JSB）</h4>
+          <ul class="cl-items" id="clJsb"></ul>
+          <div class="cl-add"><input type="text" id="clJsbInput" placeholder="項目を追加..."><button onclick="addClItem('jsb')">+</button></div>
+        </div>
+        <div class="cl-card">
+          <h4>&#127800; さつき（幼稚園）</h4>
+          <ul class="cl-items" id="clYochi"></ul>
+          <div class="cl-add"><input type="text" id="clYochiInput" placeholder="項目を追加..."><button onclick="addClItem('yochi')">+</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#5a0000);">&#128222;</div>緊急連絡先</div>
+      <div class="em-grid">
+        <a class="em-card" href="tel:+3226721038"><div class="em-icon">&#127979;</div><div class="em-info"><div class="em-name">ブラッセル日本人学校</div><div class="em-num">+32 2 672 1038</div></div><span class="em-call">発信</span></a>
+        <a class="em-card" href="tel:+3227420955"><div class="em-icon">&#127800;</div><div class="em-info"><div class="em-name">日本人幼稚園</div><div class="em-num">+32 2 742 0955</div></div><span class="em-call">発信</span></a>
+        <a class="em-card" href="tel:+3225000580"><div class="em-icon">&#127471;&#127477;</div><div class="em-info"><div class="em-name">在ベルギー日本大使館</div><div class="em-num">+32 2 500 0580</div><div class="em-note">領事部</div></div><span class="em-call">発信</span></a>
+        <a class="em-card" href="tel:112"><div class="em-icon">&#128680;</div><div class="em-info"><div class="em-name">緊急通報</div><div class="em-num">112</div><div class="em-note">警察・救急・消防（EU共通）</div></div><span class="em-call">発信</span></a>
+        <a class="em-card" href="tel:100"><div class="em-icon">&#128657;</div><div class="em-info"><div class="em-name">救急車</div><div class="em-num">100</div><div class="em-note">ベルギー国内</div></div><span class="em-call">発信</span></a>
+        <a class="em-card" href="tel:101"><div class="em-icon">&#128110;</div><div class="em-info"><div class="em-name">警察</div><div class="em-num">101</div><div class="em-note">ベルギー国内</div></div><span class="em-call">発信</span></a>
       </div>
     </div>
   </div>
@@ -1553,6 +1710,135 @@ async function handlePhoto(input) {
   document.getElementById('sendBtn').disabled = false;
   input.value = '';
 }
+
+// === Weather (Open-Meteo API — free, no key needed) ===
+const WEATHER_ICONS = {0:'☀️',1:'🌤',2:'⛅',3:'☁️',45:'🌫',48:'🌫',51:'🌦',53:'🌧',55:'🌧',61:'🌧',63:'🌧',65:'🌧️',71:'🌨',73:'🌨',75:'❄️',80:'🌦',81:'🌧',82:'⛈',95:'⛈',96:'⛈',99:'⛈'};
+async function loadWeather(){
+  try{
+    const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe/Brussels&forecast_days=5');
+    const d=await r.json();
+    const c=d.current;
+    const icon=WEATHER_ICONS[c.weather_code]||'🌡';
+    document.getElementById('wIcon').textContent=icon;
+    document.getElementById('wTemp').textContent=Math.round(c.temperature_2m)+'°';
+    document.getElementById('wIconBig').textContent=icon;
+    document.getElementById('wTempBig').textContent=Math.round(c.temperature_2m)+'°C';
+    const descs={0:'快晴',1:'晴れ',2:'曇りがち',3:'曇り',45:'霧',48:'霧',51:'小雨',53:'雨',55:'強い雨',61:'小雨',63:'雨',65:'大雨',71:'小雪',73:'雪',75:'大雪',80:'にわか雨',81:'雨',82:'豪雨',95:'雷雨',96:'雷雨+雹',99:'雷雨+雹'};
+    document.getElementById('wDesc').textContent=descs[c.weather_code]||'--';
+    document.getElementById('wRain').textContent=(c.precipitation_probability||0)+'%';
+    document.getElementById('wWind').textContent=Math.round(c.wind_speed_10m)+' km/h';
+    document.getElementById('wHumid').textContent=c.relative_humidity_2m+'%';
+    // Forecast
+    const fc=document.getElementById('wForecast');
+    const days=['日','月','火','水','木','金','土'];
+    fc.innerHTML=d.daily.time.map((t,i)=>{
+      const dt=new Date(t+'T00:00:00');
+      const day=days[dt.getDay()];
+      const ic=WEATHER_ICONS[d.daily.weather_code[i]]||'🌡';
+      return`<div class="forecast-item"><div>${i===0?'今日':day}</div><div class="fc-icon">${ic}</div><div class="fc-temp">${Math.round(d.daily.temperature_2m_max[i])}°/${Math.round(d.daily.temperature_2m_min[i])}°</div><div>☔${d.daily.precipitation_probability_max[i]}%</div></div>`;
+    }).join('');
+    document.getElementById('weatherWidget').style.display='';
+    // Umbrella alert
+    if((c.precipitation_probability||0)>40||[51,53,55,61,63,65,80,81,82,95,96,99].includes(c.weather_code)){
+      document.getElementById('wAlert').style.display='';
+      document.getElementById('wAlert').innerHTML='<div class="weather-alert"><span class="wa-icon">☂️</span>今日は傘が必要です！降水確率 '+(c.precipitation_probability||0)+'%</div>';
+    }
+  }catch(e){console.error('Weather error:',e);}
+}
+loadWeather();
+
+// === Week View ===
+let weekOffset=0;
+function shiftWeek(dir){if(dir===0)weekOffset=0;else weekOffset+=dir;renderWeek();}
+function renderWeek(){
+  const now=new Date();
+  const start=new Date(now);
+  start.setDate(start.getDate()-start.getDay()+1+weekOffset*7); // Monday
+  const days=['月','火','水','木','金','土','日'];
+  const grid=document.getElementById('weekGrid');
+  const label=document.getElementById('weekLabel');
+  const end=new Date(start);end.setDate(end.getDate()+6);
+  label.textContent=`${start.getMonth()+1}/${start.getDate()} 〜 ${end.getMonth()+1}/${end.getDate()}`;
+
+  let html='';
+  for(let i=0;i<7;i++){
+    const d=new Date(start);d.setDate(d.getDate()+i);
+    const ds=d.toISOString().slice(0,10);
+    const isToday=ds===now.toISOString().slice(0,10);
+    const dayEvents=EVENTS.filter(e=>e.d===ds);
+    html+=`<div class="week-day ${isToday?'today':''}">
+      <div class="wd-label">${days[i]}</div>
+      <div class="wd-date">${d.getDate()}</div>
+      <div class="wd-events">${dayEvents.map(e=>{
+        const cls=e.c==='JSB'?'wd-jsb':e.c==='幼稚園'?'wd-yochi':'wd-common';
+        return`<div class="wd-event ${cls}" title="${e.n}">${e.n}</div>`;
+      }).join('')}</div>
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+renderWeek();
+
+// === Checklist (localStorage, daily reset) ===
+const CL_KEY='ito-checklist-v1';
+const CL_DATE_KEY='ito-checklist-date';
+const defaultChecklist={
+  jsb:[
+    {text:'教科書・ノート',checked:false},
+    {text:'筆箱',checked:false},
+    {text:'お弁当・水筒',checked:false},
+    {text:'体操服（体育がある日）',checked:false},
+    {text:'上履き',checked:false},
+    {text:'連絡帳',checked:false},
+  ],
+  yochi:[
+    {text:'お弁当・水筒',checked:false},
+    {text:'着替え一式',checked:false},
+    {text:'帽子',checked:false},
+    {text:'ハンカチ・ティッシュ',checked:false},
+    {text:'連絡帳',checked:false},
+    {text:'スリッパ（室内履き）',checked:false},
+  ]
+};
+
+function loadChecklist(){
+  const today=new Date().toISOString().slice(0,10);
+  const savedDate=localStorage.getItem(CL_DATE_KEY);
+  if(savedDate!==today){
+    // Daily reset: uncheck all but keep custom items
+    const saved=JSON.parse(localStorage.getItem(CL_KEY)||'null');
+    if(saved){
+      ['jsb','yochi'].forEach(k=>{saved[k].forEach(item=>item.checked=false);});
+      localStorage.setItem(CL_KEY,JSON.stringify(saved));
+    }
+    localStorage.setItem(CL_DATE_KEY,today);
+  }
+  const s=localStorage.getItem(CL_KEY);
+  return s?JSON.parse(s):{jsb:[...defaultChecklist.jsb],yochi:[...defaultChecklist.yochi]};
+}
+function saveChecklist(cl){localStorage.setItem(CL_KEY,JSON.stringify(cl));}
+function renderChecklist(){
+  const cl=loadChecklist();
+  ['jsb','yochi'].forEach(k=>{
+    const el=document.getElementById(k==='jsb'?'clJsb':'clYochi');
+    el.innerHTML=cl[k].map((item,i)=>`<li class="cl-item ${item.checked?'checked':''}">
+      <input type="checkbox" ${item.checked?'checked':''} onchange="toggleCl('${k}',${i})">
+      <label onclick="toggleCl('${k}',${i})">${escHtml(item.text)}</label>
+    </li>`).join('');
+  });
+}
+function toggleCl(k,i){const cl=loadChecklist();cl[k][i].checked=!cl[k][i].checked;saveChecklist(cl);renderChecklist();}
+function addClItem(k){
+  const inputId=k==='jsb'?'clJsbInput':'clYochiInput';
+  const text=document.getElementById(inputId).value.trim();
+  if(!text)return;
+  const cl=loadChecklist();
+  cl[k].push({text,checked:false});
+  saveChecklist(cl);
+  renderChecklist();
+  document.getElementById(inputId).value='';
+}
+renderChecklist();
 
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
