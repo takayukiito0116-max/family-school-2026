@@ -872,10 +872,6 @@ body {
 .chat-send { background:linear-gradient(135deg,#ff2a2a,#c40000); color:#fff; }
 .chat-send:hover { transform:scale(1.05); box-shadow:0 4px 12px rgba(255,42,42,.3); }
 .chat-send:disabled { opacity:.4; cursor:default; transform:none; box-shadow:none; }
-.chat-mic { background:var(--glass); border:1px solid var(--glass-border); color:var(--text2); }
-.chat-mic:hover { background:rgba(255,42,42,.08); color:#ff5050; }
-.chat-mic.recording { background:rgba(255,42,42,.15); color:#ff2a2a; animation:micPulse 1s ease-in-out infinite; border-color:rgba(255,42,42,.3); }
-@keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,42,42,.3);} 50%{box-shadow:0 0 0 8px rgba(255,42,42,0);} }
 .chat-photo { background:var(--glass); border:1px solid var(--glass-border); color:var(--text2); }
 .chat-photo:hover { background:rgba(255,42,42,.08); color:#ff5050; }
 .chat-photo-input { display:none; }
@@ -1083,10 +1079,11 @@ body {
           <div class="chat-msg system">AIアシスタントに話しかけてください</div>
         </div>
         <div class="chat-input-bar">
-          <button class="chat-btn chat-photo" onclick="document.getElementById('photoInput').click()" title="写真">&#128247;</button>
-          <input type="file" id="photoInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
           <textarea class="chat-input" id="chatInput" placeholder="メッセージを入力... 例:「体操服を買う」" rows="1"></textarea>
-          <button class="chat-btn chat-mic" id="micBtn" onclick="toggleMic()" title="音声入力">&#127908;</button>
+          <input type="file" id="fileInput" class="chat-photo-input" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" onchange="handleFile(this)">
+          <input type="file" id="cameraInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handleFile(this)">
+          <button class="chat-btn chat-photo" onclick="document.getElementById('cameraInput').click()" title="カメラ">&#128247;</button>
+          <button class="chat-btn chat-photo" onclick="document.getElementById('fileInput').click()" title="ファイル追加">&#10133;</button>
           <button class="chat-btn chat-send" id="sendBtn" onclick="sendChat()" title="送信">&#10148;</button>
         </div>
       </div>
@@ -1655,140 +1652,87 @@ document.getElementById('chatInput').addEventListener('input', function() {
   this.style.height = Math.min(this.scrollHeight, 100) + 'px';
 });
 
-// === Voice Input (Web Speech API) ===
-let recognition = null;
-let isRecording = false;
-
-function toggleMic() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    addChatMsg('このブラウザは音声入力に対応していません', 'system');
-    return;
-  }
-
-  const chatInput = document.getElementById('chatInput');
-
-  if (isRecording) {
-    recognition.stop();
-    return;
-  }
-
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = 'ja-JP';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-
-  const prevPlaceholder = chatInput.placeholder;
-  let finalTranscript = '';
-
-  recognition.onstart = () => {
-    isRecording = true;
-    finalTranscript = '';
-    chatInput.value = '';
-    chatInput.placeholder = '🎤 聞いています...';
-    chatInput.style.borderColor = 'rgba(255,42,42,.4)';
-    chatInput.style.boxShadow = '0 0 0 3px rgba(255,42,42,.12)';
-    document.getElementById('micBtn').classList.add('recording');
-  };
-  recognition.onend = () => {
-    isRecording = false;
-    chatInput.placeholder = prevPlaceholder;
-    chatInput.style.borderColor = '';
-    chatInput.style.boxShadow = '';
-    document.getElementById('micBtn').classList.remove('recording');
-    if (finalTranscript) {
-      chatInput.value = finalTranscript;
-      chatInput.dispatchEvent(new Event('input'));
-    }
-  };
-  recognition.onresult = (e) => {
-    let interim = '';
-    finalTranscript = '';
-    for (let i = 0; i < e.results.length; i++) {
-      if (e.results[i].isFinal) {
-        finalTranscript += e.results[i][0].transcript;
-      } else {
-        interim += e.results[i][0].transcript;
-      }
-    }
-    // Show real-time transcription
-    chatInput.value = finalTranscript + interim;
-    chatInput.style.height = 'auto';
-    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
-  };
-  recognition.onerror = (e) => {
-    isRecording = false;
-    chatInput.placeholder = prevPlaceholder;
-    chatInput.style.borderColor = '';
-    chatInput.style.boxShadow = '';
-    document.getElementById('micBtn').classList.remove('recording');
-    if (e.error !== 'no-speech' && e.error !== 'aborted') addChatMsg('音声認識エラー: ' + e.error, 'system');
-  };
-
-  recognition.start();
-}
-
-// === Photo Analysis ===
-async function handlePhoto(input) {
+// === File / Photo Analysis ===
+async function handleFile(input) {
   const file = input.files[0];
   if (!file) return;
 
-  // File size check (max 10MB)
   if (file.size > 10 * 1024 * 1024) {
     addChatMsg('ファイルが大きすぎます（10MB以下にしてください）', 'system');
     input.value = '';
     return;
   }
 
-  addChatMsg('写真を分析中...', 'user');
+  const isImage = file.type.startsWith('image/');
+  const fileName = file.name;
+  addChatMsg((isImage ? '📷 ' : '📎 ') + fileName + ' を分析中...', 'user');
   aiProcessing = true;
   document.getElementById('sendBtn').disabled = true;
   showTyping();
 
   try {
-    // Resize image to reduce payload (max 1200px)
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = reject;
-      reader.onload = () => {
-        const img = new Image();
-        img.onload = () => {
-          const maxDim = 1200;
-          let w = img.width, h = img.height;
-          if (w > maxDim || h > maxDim) {
-            if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-            else { w = Math.round(w * maxDim / h); h = maxDim; }
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+    if (isImage) {
+      // Resize image
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1200;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+          };
+          img.onerror = reject;
+          img.src = reader.result;
         };
-        img.onerror = reject;
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
+        reader.readAsDataURL(file);
+      });
 
-    const res = await fetch(API_URL + '/analyze-image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
-    });
+      const res = await fetch(API_URL + '/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
+      });
+      if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
+      const data = await res.json();
+      hideTyping();
+      if (data.error) { addChatMsg('エラー: ' + data.error, 'system'); }
+      else { pendingActions = data.actions || []; addAiMsg(data.reply, data.actions); }
 
-    if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
-    const data = await res.json();
-    hideTyping();
-
-    if (data.error) {
-      addChatMsg('エラー: ' + data.error, 'system');
     } else {
-      pendingActions = data.actions || [];
-      addAiMsg(data.reply, data.actions);
+      // Non-image file: read as text and send to chat endpoint
+      const text = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => resolve(reader.result);
+        reader.readAsText(file);
+      });
+
+      const truncated = text.slice(0, 3000);
+      const prompt = 'ファイル「' + fileName + '」の内容:\n\n' + truncated + '\n\nこの内容から必要なタスクを抽出してください。';
+
+      const res = await fetch(API_URL + '/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, currentTasks: tasks }),
+      });
+      if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
+      const data = await res.json();
+      hideTyping();
+      if (data.error) { addChatMsg('エラー: ' + data.error, 'system'); }
+      else { pendingActions = data.actions || []; addAiMsg(data.reply, data.actions); }
     }
   } catch (err) {
     hideTyping();
-    addChatMsg('写真分析エラー: ' + err.message, 'system');
+    addChatMsg('ファイル分析エラー: ' + err.message, 'system');
   }
 
   aiProcessing = false;
