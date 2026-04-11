@@ -125,18 +125,24 @@ body {
 }
 .ud-vines svg { width:100%; height:100%; }
 
-/* Monster silhouette watermark */
-.ud-monster {
+/* Photo watermark background */
+.ud-photo {
   position:fixed; z-index:0; pointer-events:none;
-  top:5%; left:50%; transform:translateX(-50%);
-  width:60vw; max-width:500px; height:70vh;
-  opacity:0.025;
-  animation:monsterBreathe 10s ease-in-out infinite alternate;
+  inset:0;
+  background:url('bg.webp') center 20% / cover no-repeat;
+  opacity:0.06;
+  filter:saturate(1.5) contrast(1.2);
+  animation:photoBreathe 12s ease-in-out infinite alternate;
 }
-.ud-monster svg { width:100%; height:100%; }
-@keyframes monsterBreathe {
-  0% { opacity:0.02; transform:translateX(-50%) scale(1); }
-  100% { opacity:0.035; transform:translateX(-50%) scale(1.03); }
+@keyframes photoBreathe {
+  0% { opacity:0.05; transform:scale(1); }
+  100% { opacity:0.08; transform:scale(1.03); }
+}
+/* Red tint overlay on photo */
+.ud-photo::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 60% 50% at 50% 40%, rgba(255,20,20,0.3), rgba(0,0,0,0.7) 70%);
+  mix-blend-mode:multiply;
 }
 
 /* Particle embers */
@@ -815,66 +821,8 @@ body {
 </svg>
 </div>
 
-<!-- Monster silhouette -->
-<div class="ud-monster">
-<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <filter id="monsterBlur"><feGaussianBlur stdDeviation="3"/></filter>
-    <radialGradient id="monsterFade" cx="50%" cy="40%" r="50%">
-      <stop offset="0%" stop-color="#ff2a2a" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#ff2a2a" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <g fill="#ff2a2a" filter="url(#monsterBlur)">
-    <!-- Head -->
-    <ellipse cx="200" cy="95" rx="55" ry="65"/>
-    <!-- Crown spikes -->
-    <polygon points="160,40 155,5 170,35"/>
-    <polygon points="185,25 190,0 200,28"/>
-    <polygon points="210,25 215,0 220,28"/>
-    <polygon points="240,40 245,5 230,35"/>
-    <polygon points="145,55 125,20 155,50"/>
-    <polygon points="255,55 275,20 245,50"/>
-    <!-- Face features -->
-    <ellipse cx="180" cy="85" rx="10" ry="6" fill="#000" opacity=".5"/>
-    <ellipse cx="220" cy="85" rx="10" ry="6" fill="#000" opacity=".5"/>
-    <path d="M185,110 Q200,125 215,110" fill="none" stroke="#000" stroke-width="3" opacity=".4"/>
-    <!-- Neck -->
-    <path d="M170,150 L160,160 L155,200 L245,200 L240,160 L230,150 Z"/>
-    <!-- Shoulders & torso -->
-    <path d="M100,200 L80,190 L60,200 L70,210 L100,215 Z"/>
-    <path d="M300,200 L320,190 L340,200 L330,210 L300,215 Z"/>
-    <!-- Shoulder spikes -->
-    <polygon points="80,190 50,160 75,195"/>
-    <polygon points="65,195 30,175 60,200"/>
-    <polygon points="320,190 350,160 325,195"/>
-    <polygon points="335,195 370,175 340,200"/>
-    <!-- Torso -->
-    <path d="M120,200 L100,215 L95,320 L130,400 L200,430 L270,400 L305,320 L300,215 L280,200 Z"/>
-    <!-- Torso texture lines -->
-    <line x1="160" y1="220" x2="155" y2="350" stroke="#000" stroke-width="1" opacity=".15"/>
-    <line x1="200" y1="200" x2="200" y2="400" stroke="#000" stroke-width="1.5" opacity=".2"/>
-    <line x1="240" y1="220" x2="245" y2="350" stroke="#000" stroke-width="1" opacity=".15"/>
-    <!-- Left arm reaching forward -->
-    <path d="M100,215 L65,250 L40,310 L25,370 L15,400 L10,420"/>
-    <path d="M100,215 L60,255 L35,315 L20,375 L10,410 L5,430" fill="#ff2a2a"/>
-    <!-- Left hand/claws -->
-    <polygon points="10,420 -5,440 5,425"/>
-    <polygon points="5,430 -10,455 0,435"/>
-    <polygon points="15,425 5,450 12,430"/>
-    <polygon points="0,435 -15,465 -5,445"/>
-    <!-- Right arm -->
-    <path d="M300,215 L330,260 L345,320 L340,380"/>
-    <path d="M300,215 L335,265 L350,325 L345,385" fill="#ff2a2a"/>
-    <!-- Right claws -->
-    <polygon points="340,380 355,400 342,385"/>
-    <polygon points="345,385 365,410 348,392"/>
-    <!-- Lower body fading -->
-    <ellipse cx="200" cy="450" rx="80" ry="60" opacity=".5"/>
-    <rect x="150" y="450" width="100" height="150" opacity=".2" rx="20"/>
-  </g>
-</svg>
-</div>
+<!-- Photo watermark -->
+<div class="ud-photo"></div>
 
 <!-- Floating embers -->
 <div class="ember" style="left:15%;bottom:0;animation-duration:6s;animation-delay:0s;"></div>
