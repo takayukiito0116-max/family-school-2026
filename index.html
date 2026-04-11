@@ -1179,6 +1179,10 @@ body {
       </div>
       <div class="top-ai-input-wrap">
         <textarea class="top-ai-input" id="topAiInput" placeholder="何でも聞いてね..." rows="1"></textarea>
+        <input type="file" id="topFileInput" class="chat-photo-input" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" onchange="handleTopFile(this)">
+        <input type="file" id="topCameraInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handleTopFile(this)">
+        <button class="chat-btn chat-attach" onclick="document.getElementById('topCameraInput').click()" title="カメラ" style="width:36px;height:36px;font-size:15px;">&#128247;</button>
+        <button class="chat-btn chat-attach" onclick="document.getElementById('topFileInput').click()" title="ファイル" style="width:36px;height:36px;font-size:15px;">&#10133;</button>
         <button class="top-ai-send" id="topAiSend" onclick="sendTopAi()">&#10148;</button>
       </div>
       <!-- Conversation thread -->
@@ -1932,6 +1936,119 @@ async function sendTopAi() {
   aiProcessing = false;
   document.getElementById('topAiSend').disabled = false;
   document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
+}
+
+// === Top AI File Handler ===
+async function handleTopFile(input) {
+  const file = input.files[0];
+  if (!file || aiProcessing) return;
+
+  if (file.size > 10 * 1024 * 1024) {
+    addTopMsg('ファイルが大きすぎます（10MB以下）', 'ai');
+    input.value = ''; return;
+  }
+
+  const isImage = file.type.startsWith('image/');
+  const isPdf = file.type === 'application/pdf';
+  addTopMsg((isImage ? '📷 ' : '📎 ') + file.name, 'user');
+  aiProcessing = true;
+  document.getElementById('topAiSend').disabled = true;
+  document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Analyzing...';
+  showTopTyping();
+
+  try {
+    if (isImage) {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDim = 1200;
+            let w = img.width, h = img.height;
+            if (w > maxDim || h > maxDim) {
+              if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+              else { w = Math.round(w * maxDim / h); h = maxDim; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', 0.85).split(',')[1]);
+          };
+          img.onerror = reject;
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch(API_URL + '/analyze-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType: 'image/jpeg' }),
+      });
+      if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
+      const data = await res.json();
+      hideTopTyping();
+      if (data.error) { addTopMsg('エラー: ' + data.error, 'ai'); }
+      else {
+        pendingActions = data.actions || [];
+        const thread = document.getElementById('topAiThread');
+        const aiDiv = document.createElement('div');
+        aiDiv.className = 'top-ai-msg ai';
+        const rt = document.createElement('div'); rt.textContent = data.reply; aiDiv.appendChild(rt);
+        if (data.actions && data.actions.length) {
+          const btns = document.createElement('div'); btns.className = 'top-ai-actions';
+          data.actions.forEach((a, i) => {
+            const b = document.createElement('button');
+            b.textContent = a.type==='add'?'+ '+a.title:a.type==='complete'?'✓ '+a.title:'× '+a.title;
+            b.onclick = () => { applyOneAction(i); b.disabled=true; b.style.opacity='.3'; };
+            btns.appendChild(b);
+          });
+          const allBtn = document.createElement('button'); allBtn.textContent = 'すべて実行';
+          allBtn.style.background = 'rgba(255,42,42,.12)';
+          allBtn.onclick = () => { applyAllActions(); btns.querySelectorAll('button').forEach(b=>{b.disabled=true;b.style.opacity='.3';}); };
+          btns.appendChild(allBtn); aiDiv.appendChild(btns);
+        }
+        thread.appendChild(aiDiv);
+        setTimeout(() => { thread.scrollTop = thread.scrollHeight; }, 50);
+      }
+    } else if (isPdf) {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader(); reader.onerror = reject;
+        reader.onload = () => resolve(reader.result.split(',')[1]);
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch(API_URL + '/analyze-image', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, mimeType: 'application/pdf' }),
+      });
+      if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
+      const data = await res.json();
+      hideTopTyping();
+      if (data.error) { addTopMsg('エラー: ' + data.error, 'ai'); }
+      else { pendingActions = data.actions || []; addTopMsg(data.reply, 'ai'); }
+    } else {
+      let text = '';
+      try { text = await new Promise((r, j) => { const rd = new FileReader(); rd.onerror=j; rd.onload=()=>r(rd.result); rd.readAsText(file); }); }
+      catch { text = '[バイナリファイル]'; }
+      const prompt = 'ファイル「'+file.name+'」:\n\n'+text.slice(0,4000)+'\n\nタスクを抽出して。';
+      const res = await fetch(API_URL + '/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: prompt, currentTasks: tasks, history: [] }),
+      });
+      if (!res.ok) throw new Error('サーバーエラー: ' + res.status);
+      const data = await res.json();
+      hideTopTyping();
+      if (data.error) { addTopMsg('エラー: ' + data.error, 'ai'); }
+      else { pendingActions = data.actions || []; addTopMsg(data.reply, 'ai'); }
+    }
+  } catch (err) {
+    hideTopTyping();
+    addTopMsg('エラー: ' + err.message, 'ai');
+  }
+
+  aiProcessing = false;
+  document.getElementById('topAiSend').disabled = false;
+  document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
+  input.value = '';
 }
 
 // Enter to send / Shift+Enter for newline / IME composition safe
