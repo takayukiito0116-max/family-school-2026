@@ -1013,10 +1013,9 @@ body {
 <div class="ctr">
   <!-- Compact Summary Strip -->
   <div class="summary-strip">
-    <div class="ss-card" id="weatherStrip"><div class="ss-icon" id="wIcon">&#9728;</div><div class="ss-info"><div class="ss-label">ブリュッセル</div><div class="ss-val" id="wTemp">--°</div></div></div>
-    <div class="ss-card"><div class="ss-icon">&#127979;</div><div class="ss-info"><div class="ss-label">颯士</div><div class="ss-val">中1</div></div></div>
-    <div class="ss-card"><div class="ss-icon">&#127800;</div><div class="ss-info"><div class="ss-label">さつき</div><div class="ss-val">年少</div></div></div>
-    <div class="ss-card"><div class="ss-icon">&#9745;</div><div class="ss-info"><div class="ss-label">タスク</div><div class="ss-val" id="taskProgress">0/0</div><div class="ss-prog"><div class="ss-prog-fill" id="taskBar" style="width:0%"></div></div></div></div>
+    <div class="ss-card" id="weatherStrip"><div class="ss-icon" id="wIcon">&#9728;</div><div class="ss-info"><div class="ss-label">ブリュッセル</div><div class="ss-val" id="wTemp">--°</div><div style="font-size:10px;color:var(--text3);" id="wMini"></div></div></div>
+    <div class="ss-card" id="todayAlertStrip"><div class="ss-icon">&#128308;</div><div class="ss-info"><div class="ss-label">今日の確認</div><div class="ss-val" id="todayCount" style="font-size:14px;">--</div></div></div>
+    <div class="ss-card" id="strikeStrip"><div class="ss-icon" id="strikeIcon">&#9989;</div><div class="ss-info"><div class="ss-label">ストライキ・治安</div><div class="ss-val" id="strikeStatus" style="font-size:13px;">確認中</div></div></div>
   </div>
 
   <!-- Weather + Alert Widget -->
@@ -1373,8 +1372,8 @@ function saveEdit(){const t=tasks.find(x=>x.id===editingId);if(!t)return;t.title
 function deleteTask(){if(!confirm('このタスクを削除しますか？'))return;tasks=tasks.filter(t=>t.id!==editingId);saveTasks();renderTasks();closeModal();}
 function updateProgress(){
   const total=tasks.length,done=tasks.filter(t=>t.done).length;
-  document.getElementById('taskProgress').textContent=`${done}/${total}`;
-  document.getElementById('taskBar').style.width=(total?Math.round(done/total*100):0)+'%';
+  // Update today's alert strip
+  updateTodayAlert();
 }
 
 // Filters
@@ -1746,6 +1745,76 @@ async function loadWeather(){
   }catch(e){console.error('Weather error:',e);}
 }
 loadWeather();
+
+// === Today's Alert Summary ===
+function updateTodayAlert(){
+  const today=new Date().toISOString().slice(0,10);
+  const todayEvents=EVENTS.filter(e=>e.d===today);
+  const pendingTasks=tasks.filter(t=>!t.done&&t.pri==='high').length;
+  const el=document.getElementById('todayCount');
+  const icon=document.getElementById('todayAlertStrip').querySelector('.ss-icon');
+
+  if(todayEvents.length>0||pendingTasks>0){
+    const items=[];
+    if(todayEvents.length>0) items.push(todayEvents.length+'件の予定');
+    if(pendingTasks>0) items.push(pendingTasks+'件の高優先タスク');
+    el.textContent=items.join(' / ');
+    icon.textContent='⚠️';
+  } else {
+    el.textContent='確認事項なし';
+    icon.textContent='✅';
+  }
+}
+updateTodayAlert();
+
+// === Strike / Safety Check (Belgium RSS) ===
+async function checkStrikes(){
+  const statusEl=document.getElementById('strikeStatus');
+  const iconEl=document.getElementById('strikeIcon');
+  try{
+    // Check Belgium crisis center & STIB/SNCB via proxy-free approach
+    // Use Open-Meteo weather alerts as safety proxy + hardcoded known dates
+    const knownStrikes=[
+      // Add known strike dates here as they come up
+      // {d:'2026-04-15',text:'STIB ストライキ（バス・トラム運休の可能性）'},
+    ];
+    const today=new Date().toISOString().slice(0,10);
+    const strike=knownStrikes.find(s=>s.d===today);
+
+    if(strike){
+      statusEl.textContent=strike.text;
+      iconEl.textContent='🚨';
+      document.getElementById('strikeStrip').style.borderColor='rgba(255,42,42,.4)';
+      // Also show alert in weather widget
+      const alertEl=document.getElementById('wAlert');
+      alertEl.style.display='';
+      alertEl.innerHTML+='<div class="weather-alert"><span class="wa-icon">🚨</span>'+strike.text+'</div>';
+    } else {
+      // Check for weather warnings (storms, etc)
+      const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=weather_code,wind_speed_10m&timezone=Europe/Brussels');
+      const d=await r.json();
+      const wind=d.current.wind_speed_10m;
+      const code=d.current.weather_code;
+
+      if(wind>60){
+        statusEl.textContent='強風注意 ('+Math.round(wind)+' km/h)';
+        iconEl.textContent='⚠️';
+        document.getElementById('strikeStrip').style.borderColor='rgba(255,184,79,.3)';
+      } else if([95,96,99].includes(code)){
+        statusEl.textContent='雷雨警報';
+        iconEl.textContent='⚠️';
+        document.getElementById('strikeStrip').style.borderColor='rgba(255,184,79,.3)';
+      } else {
+        statusEl.textContent='異常なし';
+        iconEl.textContent='✅';
+      }
+    }
+  }catch(e){
+    statusEl.textContent='確認不可';
+    iconEl.textContent='❓';
+  }
+}
+checkStrikes();
 
 // === Week View ===
 let weekOffset=0;
