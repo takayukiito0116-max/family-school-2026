@@ -1995,6 +1995,64 @@ function addClItem(k){
 }
 renderChecklist();
 
+// === Push Notifications ===
+async function setupNotifications() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    // Ask permission on first AI tab visit
+    document.querySelector('[data-tab="ai"]').addEventListener('click', async () => {
+      if (Notification.permission === 'default') {
+        await Notification.requestPermission();
+      }
+    }, { once: true });
+  }
+}
+setupNotifications();
+
+// Check morning alert from Firebase
+const morningAlertRef = db.ref('dashboard/morning-alert');
+let lastAlertDate = localStorage.getItem('ito-last-alert-date') || '';
+
+morningAlertRef.on('value', snap => {
+  const alert = snap.val();
+  if (!alert || alert.date === lastAlertDate) return;
+
+  // Show push notification
+  if (Notification.permission === 'granted') {
+    const title = (alert.needUmbrella ? '☂️ ' : '') +
+                  (alert.urgentCount > 0 ? '🔴 ' : '☀️ ') +
+                  '朝のアラート';
+    const body = alert.body.slice(0, 200);
+    try {
+      new Notification(title, {
+        body,
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        tag: 'morning-alert-' + alert.date,
+        renotify: true,
+      });
+    } catch (e) {
+      // PWA service worker notification fallback
+      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.ready.then(reg => {
+          reg.showNotification(title, { body, icon: './icon-192.png', tag: 'morning-' + alert.date });
+        });
+      }
+    }
+  }
+
+  // Show in-app banner
+  const banner = document.createElement('div');
+  banner.className = 'weather-alert';
+  banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:200;max-width:90%;animation:msgIn .5s var(--spring) both;cursor:pointer;';
+  banner.innerHTML = '<span class="wa-icon">🌅</span><div style="flex:1;font-size:12px;white-space:pre-line;">' + escHtml(alert.body.slice(0, 300)) + '</div><span onclick="this.parentElement.remove()" style="cursor:pointer;padding:4px;">✕</span>';
+  document.body.appendChild(banner);
+  setTimeout(() => { if (banner.parentElement) banner.remove(); }, 30000);
+
+  lastAlertDate = alert.date;
+  localStorage.setItem('ito-last-alert-date', alert.date);
+});
+
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
 </script>
