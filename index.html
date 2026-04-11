@@ -1085,19 +1085,6 @@ body {
     <div class="upcoming-list" id="upcomingList"></div>
   </div>
 
-  <!-- Menu Drawer -->
-  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
-  <div class="menu-drawer" id="menuDrawer">
-    <div class="menu-header"><span>メニュー</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
-    <button class="menu-item active" data-tab="tasks"><span class="mi-icon">&#9745;</span><span class="mi-label">タスク</span></button>
-    <button class="menu-item" data-tab="ai"><span class="mi-icon">&#129302;</span><span class="mi-label">AIチャット</span></button>
-    <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">週間ビュー</span></button>
-    <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & 緊急連絡先</span></button>
-    <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">共有メモ</span></button>
-    <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">年間予定</span></button>
-    <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">学校情報</span></button>
-    <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">メール</span></button>
-  </div>
 
   <!-- TAB: Tasks -->
   <div class="tab-panel active" id="panel-tasks">
@@ -1320,6 +1307,20 @@ body {
   ITO FAMILY DASHBOARD 2026
   <div id="syncStatus" style="margin-top:4px;font-size:10px;color:var(--accent3);opacity:.7;"></div>
 </div>
+</div>
+
+<!-- Menu Drawer (outside appContent for proper z-index) -->
+<div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+<div class="menu-drawer" id="menuDrawer">
+  <div class="menu-header"><span>メニュー</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
+  <button class="menu-item active" data-tab="tasks"><span class="mi-icon">&#9745;</span><span class="mi-label">タスク</span></button>
+  <button class="menu-item" data-tab="ai"><span class="mi-icon">&#129302;</span><span class="mi-label">AIチャット</span></button>
+  <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">週間ビュー</span></button>
+  <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & 緊急連絡先</span></button>
+  <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">共有メモ</span></button>
+  <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">年間予定</span></button>
+  <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">学校情報</span></button>
+  <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">メール</span></button>
 </div>
 
 <!-- Firebase SDK (compat for simple usage) -->
