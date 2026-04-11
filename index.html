@@ -377,7 +377,7 @@ body {
 .ai-dot { width:6px; height:6px; border-radius:50%; background:var(--accent3); animation:pulse 2s infinite; }
 @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
 
-.ctr { max-width:1400px; margin:0 auto; padding:24px; }
+.ctr { max-width:1400px; margin:0 auto; padding:16px; }
 
 /* === Summary Cards === */
 .sg { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:28px; }
@@ -412,23 +412,54 @@ body {
 .prog-fill { height:100%; border-radius:2px; transition:width .5s var(--ease); background:linear-gradient(90deg,#ff2a2a,#c40000); box-shadow:0 0 8px rgba(255,42,42,.5); }
 
 /* === Tabs === */
-.tabs {
-  display:flex; gap:2px; margin-bottom:24px;
-  background:rgba(2,0,0,0.45); border-radius:14px; padding:4px;
-  border:1px solid var(--glass-border);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+/* === Menu Button & Drawer === */
+.menu-btn {
+  width:40px; height:40px; border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  background:var(--glass); color:var(--text); font-size:20px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s var(--ease); flex-shrink:0;
 }
-.tab {
-  flex:1; padding:10px 16px; font-size:13px; font-weight:600; cursor:pointer;
-  border:none; background:none; color:var(--text2); border-radius:var(--radius-sm);
-  transition:all .3s var(--ease); font-family:inherit; white-space:nowrap;
+.menu-btn:hover { background:rgba(255,42,42,.08); color:#ff5050; }
+
+.menu-drawer {
+  position:fixed; top:0; right:-280px; width:270px; height:100%; z-index:200;
+  background:rgba(8,2,2,0.95); backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+  border-left:1px solid var(--glass-border);
+  transition:right .35s var(--ease);
+  padding:20px 0; overflow-y:auto;
+  box-shadow:-10px 0 40px rgba(0,0,0,.5);
 }
-.tab.active {
-  background:linear-gradient(135deg, rgba(255,42,42,.15), rgba(196,0,0,.1));
-  color:#fff; box-shadow:0 2px 12px rgba(255,42,42,.2);
+.menu-drawer.open { right:0; }
+.menu-overlay {
+  position:fixed; inset:0; z-index:199; background:rgba(0,0,0,.4);
+  opacity:0; pointer-events:none; transition:opacity .3s var(--ease);
 }
-.tab:hover:not(.active) { color:var(--text); background:rgba(255,255,255,.03); }
-.tab-panel { display:none; animation:panelIn .5s var(--ease) both; }
+.menu-overlay.open { opacity:1; pointer-events:auto; }
+
+.menu-header {
+  padding:10px 20px 16px; display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--glass-border); margin-bottom:8px;
+}
+.menu-header span { font-size:14px; font-weight:700; color:var(--text); }
+.menu-close {
+  width:32px; height:32px; border:none; background:none; color:var(--text2);
+  font-size:20px; cursor:pointer; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+}
+.menu-close:hover { background:rgba(255,255,255,.05); }
+
+.menu-item {
+  display:flex; align-items:center; gap:12px; padding:14px 24px;
+  font-size:14px; font-weight:500; color:var(--text2); cursor:pointer;
+  transition:all .2s var(--ease); border:none; background:none; width:100%;
+  font-family:inherit; text-align:left;
+}
+.menu-item:hover { background:rgba(255,42,42,.06); color:var(--text); }
+.menu-item.active { color:#ff2a2a; background:rgba(255,42,42,.08); border-right:3px solid #ff2a2a; }
+.menu-item .mi-icon { font-size:18px; width:24px; text-align:center; }
+.menu-item .mi-label { flex:1; }
+
+.tab-panel { display:none; animation:panelIn .4s var(--ease) both; }
 .tab-panel.active { display:block; }
 @keyframes panelIn { from{opacity:0;transform:translateY(10px);} }
 
@@ -718,18 +749,28 @@ body {
 .memo-area:focus { border-color:rgba(255,42,42,.3); box-shadow:0 0 0 3px rgba(255,42,42,.08); }
 .memo-status { font-size:11px; color:var(--text3); margin-top:6px; min-height:16px; }
 
-/* === Responsive === */
+/* === Responsive (Mobile First) === */
+.ctr { max-width:1400px; margin:0 auto; padding:16px; }
+.header { padding:12px 16px; }
+
 @media(max-width:600px) {
-  .header { padding:12px 16px; }
-  .ctr { padding:12px; }
-  .tabs { overflow-x:auto; }
-  .tab { padding:8px 10px; font-size:11px; }
-  .ss-card { min-width:100px; padding:10px 12px; }
-  .ss-info .ss-val { font-size:14px; }
-  .upcoming-list { gap:8px; }
-  .up-item { min-width:140px; }
+  .ss-card { min-width:90px; padding:8px 10px; }
+  .ss-icon { font-size:16px; }
+  .ss-info .ss-label { font-size:9px; }
+  .ss-info .ss-val { font-size:13px; }
+  .upcoming-list { gap:6px; }
+  .up-item { min-width:130px; padding:8px 10px; }
+  .up-item .up-days { font-size:18px; }
   .neon-title-sm { font-size:18px; letter-spacing:3px; }
   .neon-subtitle-sm { font-size:10px; letter-spacing:4px; }
+  .sec { padding:16px; }
+  .chat-messages { max-height:40vh; }
+  .week-grid { gap:2px; }
+  .week-day { padding:6px 4px; min-height:60px; }
+  .ig { grid-template-columns:1fr; }
+  .tg { grid-template-columns:1fr; }
+  .checklist-grid { grid-template-columns:1fr; }
+  .em-grid { grid-template-columns:1fr; }
 }
 
 /* === Weather Widget === */
@@ -1007,8 +1048,8 @@ body {
     </div>
   </div>
   <div class="header-right">
-    <div class="sub" style="text-align:right;">令和8年度<br>ブラッセル日本人学校 & 幼稚園</div>
     <div class="ai-badge"><div class="ai-dot"></div>SYNC</div>
+    <button class="menu-btn" onclick="toggleMenu()" title="メニュー">&#9776;</button>
   </div>
 </div>
 
@@ -1044,15 +1085,18 @@ body {
     <div class="upcoming-list" id="upcomingList"></div>
   </div>
 
-  <!-- Tabs -->
-  <div class="tabs" id="tabBar">
-    <button class="tab active" data-tab="tasks">タスク</button>
-    <button class="tab" data-tab="ai">AI</button>
-    <button class="tab" data-tab="week">週間</button>
-    <button class="tab" data-tab="checklist">持ち物</button>
-    <button class="tab" data-tab="memo">メモ</button>
-    <button class="tab" data-tab="timeline">年間</button>
-    <button class="tab" data-tab="info">情報</button>
+  <!-- Menu Drawer -->
+  <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+  <div class="menu-drawer" id="menuDrawer">
+    <div class="menu-header"><span>メニュー</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
+    <button class="menu-item active" data-tab="tasks"><span class="mi-icon">&#9745;</span><span class="mi-label">タスク</span></button>
+    <button class="menu-item" data-tab="ai"><span class="mi-icon">&#129302;</span><span class="mi-label">AIチャット</span></button>
+    <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">週間ビュー</span></button>
+    <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & 緊急連絡先</span></button>
+    <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">共有メモ</span></button>
+    <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">年間予定</span></button>
+    <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">学校情報</span></button>
+    <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">メール</span></button>
   </div>
 
   <!-- TAB: Tasks -->
@@ -1312,14 +1356,22 @@ function unlock(){document.getElementById('lockScreen').classList.add('hidden');
 document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
 if(sessionStorage.getItem(SESSION_KEY)==='ok')unlock();
 
-// === Tabs ===
-document.getElementById('tabBar').addEventListener('click',e=>{
-  const t=e.target.closest('.tab'); if(!t)return;
-  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(x=>x.classList.remove('active'));
-  t.classList.add('active');
-  const panel=document.getElementById('panel-'+t.dataset.tab);
-  if(panel){panel.classList.add('active');panel.style.animation='none';panel.offsetHeight;panel.style.animation='';}
+// === Menu Drawer ===
+function toggleMenu() {
+  document.getElementById('menuDrawer').classList.toggle('open');
+  document.getElementById('menuOverlay').classList.toggle('open');
+}
+
+document.getElementById('menuDrawer').addEventListener('click', e => {
+  const item = e.target.closest('.menu-item');
+  if (!item) return;
+  document.querySelectorAll('.menu-item').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+  item.classList.add('active');
+  const panel = document.getElementById('panel-' + item.dataset.tab);
+  if (panel) { panel.classList.add('active'); panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = ''; }
+  toggleMenu();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 // === Tasks ===
