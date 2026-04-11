@@ -683,6 +683,61 @@ body {
   .neon-subtitle-sm { font-size:10px; letter-spacing:4px; }
 }
 
+/* === AI Chat === */
+.chat-container { display:flex; flex-direction:column; height:60vh; min-height:350px; }
+.chat-messages { flex:1; overflow-y:auto; padding:8px 0; display:flex; flex-direction:column; gap:8px; }
+.chat-msg {
+  max-width:85%; padding:10px 14px; border-radius:14px; font-size:13px; line-height:1.5;
+  animation:msgIn .3s var(--spring) both; word-break:break-word;
+}
+@keyframes msgIn { from{opacity:0;transform:translateY(8px) scale(.97);} }
+.chat-msg.user {
+  align-self:flex-end; background:linear-gradient(135deg,#ff2a2a,#c40000); color:#fff;
+  border-bottom-right-radius:4px;
+}
+.chat-msg.ai {
+  align-self:flex-start; background:var(--glass); border:1px solid var(--glass-border); color:var(--text);
+  border-bottom-left-radius:4px;
+}
+.chat-msg.ai .ai-actions { margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; }
+.chat-msg.ai .ai-action-btn {
+  padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; border:none;
+  background:rgba(255,42,42,.1); color:#ff5050; transition:all .2s var(--ease);
+}
+.chat-msg.ai .ai-action-btn:hover { background:rgba(255,42,42,.2); }
+.chat-msg.system { align-self:center; font-size:11px; color:var(--text3); background:none; padding:4px; }
+.chat-typing { align-self:flex-start; padding:10px 14px; font-size:13px; color:var(--text3); }
+.chat-typing span { animation:blink 1.2s infinite; }
+.chat-typing span:nth-child(2) { animation-delay:.2s; }
+.chat-typing span:nth-child(3) { animation-delay:.4s; }
+@keyframes blink { 0%,100%{opacity:.2;} 50%{opacity:1;} }
+
+.chat-input-bar {
+  display:flex; gap:8px; padding-top:12px; border-top:1px solid var(--glass-border); align-items:flex-end;
+}
+.chat-input {
+  flex:1; padding:10px 14px; border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  background:var(--glass); color:var(--text); font-size:14px; font-family:inherit; outline:none;
+  resize:none; min-height:42px; max-height:100px;
+  transition:border-color .2s, box-shadow .2s;
+}
+.chat-input:focus { border-color:rgba(255,42,42,.3); box-shadow:0 0 0 3px rgba(255,42,42,.08); }
+.chat-btn {
+  width:42px; height:42px; border:none; border-radius:var(--radius-sm); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  transition:all .2s var(--spring); flex-shrink:0;
+}
+.chat-send { background:linear-gradient(135deg,#ff2a2a,#c40000); color:#fff; }
+.chat-send:hover { transform:scale(1.05); box-shadow:0 4px 12px rgba(255,42,42,.3); }
+.chat-send:disabled { opacity:.4; cursor:default; transform:none; box-shadow:none; }
+.chat-mic { background:var(--glass); border:1px solid var(--glass-border); color:var(--text2); }
+.chat-mic:hover { background:rgba(255,42,42,.08); color:#ff5050; }
+.chat-mic.recording { background:rgba(255,42,42,.15); color:#ff2a2a; animation:micPulse 1s ease-in-out infinite; border-color:rgba(255,42,42,.3); }
+@keyframes micPulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,42,42,.3);} 50%{box-shadow:0 0 0 8px rgba(255,42,42,0);} }
+.chat-photo { background:var(--glass); border:1px solid var(--glass-border); color:var(--text2); }
+.chat-photo:hover { background:rgba(255,42,42,.08); color:#ff5050; }
+.chat-photo-input { display:none; }
+
 /* Scrollbar */
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -884,9 +939,10 @@ body {
   <!-- Tabs -->
   <div class="tabs" id="tabBar">
     <button class="tab active" data-tab="tasks">タスク</button>
+    <button class="tab" data-tab="ai">AI</button>
     <button class="tab" data-tab="memo">メモ</button>
-    <button class="tab" data-tab="timeline">年間予定</button>
-    <button class="tab" data-tab="info">学校情報</button>
+    <button class="tab" data-tab="timeline">予定</button>
+    <button class="tab" data-tab="info">情報</button>
     <button class="tab" data-tab="emails">メール</button>
   </div>
 
@@ -906,6 +962,26 @@ body {
         <select id="newPri"><option value="high">高</option><option value="mid" selected>中</option><option value="low">低</option></select>
         <select id="newCat"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
         <button class="btn btn-primary" onclick="addTask()">+ 追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: AI Chat -->
+  <div class="tab-panel" id="panel-ai">
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#129302;</div>AIアシスタント</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">チャット・写真・音声でタスクを追加・管理できます</p>
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg system">AIアシスタントに話しかけてください</div>
+        </div>
+        <div class="chat-input-bar">
+          <button class="chat-btn chat-photo" onclick="document.getElementById('photoInput').click()" title="写真">&#128247;</button>
+          <input type="file" id="photoInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handlePhoto(this)">
+          <textarea class="chat-input" id="chatInput" placeholder="メッセージを入力... 例:「体操服を買う」" rows="1"></textarea>
+          <button class="chat-btn chat-mic" id="micBtn" onclick="toggleMic()" title="音声入力">&#127908;</button>
+          <button class="chat-btn chat-send" id="sendBtn" onclick="sendChat()" title="送信">&#10148;</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1281,6 +1357,207 @@ tasksRef.once('value', snap => {
   }
   firebaseReady = true;
 });
+
+// === AI Chat ===
+const API_URL = 'https://ito-family-api.jsb-yochien.workers.dev';
+let aiProcessing = false;
+
+function addChatMsg(text, type) {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${type}`;
+  div.innerHTML = text;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<span>.</span><span>.</span><span>.</span>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+function hideTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+function applyActions(actions) {
+  if (!actions || !actions.length) return;
+  actions.forEach(a => {
+    if (a.type === 'add') {
+      const mx = tasks.reduce((m, t) => Math.max(m, t.id), 0);
+      tasks.push({ id: mx + 1, title: a.title, cat: a.cat || '共通', pri: a.pri || 'mid', done: false, note: a.note || '' });
+    } else if (a.type === 'complete') {
+      const t = tasks.find(x => !x.done && x.title.includes(a.title));
+      if (t) t.done = true;
+    } else if (a.type === 'delete') {
+      const idx = tasks.findIndex(x => x.title.includes(a.title));
+      if (idx >= 0) tasks.splice(idx, 1);
+    }
+  });
+  saveTasks();
+  renderTasks();
+}
+
+function actionButtons(actions) {
+  if (!actions || !actions.length) return '';
+  return '<div class="ai-actions">' + actions.map((a, i) => {
+    const label = a.type === 'add' ? `+ ${a.title}` : a.type === 'complete' ? `✓ ${a.title}` : `× ${a.title}`;
+    return `<button class="ai-action-btn" onclick="applyOneAction(${i})" data-idx="${i}">${label}</button>`;
+  }).join('') + '<button class="ai-action-btn" onclick="applyAllActions()" style="background:rgba(255,42,42,.2);">すべて実行</button></div>';
+}
+
+let pendingActions = [];
+function applyOneAction(idx) {
+  if (pendingActions[idx]) {
+    applyActions([pendingActions[idx]]);
+    pendingActions[idx] = null;
+    // Disable button
+    document.querySelectorAll(`.ai-action-btn[data-idx="${idx}"]`).forEach(b => { b.disabled = true; b.style.opacity = '.3'; });
+  }
+}
+function applyAllActions() {
+  applyActions(pendingActions.filter(Boolean));
+  pendingActions = [];
+  document.querySelectorAll('.ai-action-btn').forEach(b => { b.disabled = true; b.style.opacity = '.3'; });
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg || aiProcessing) return;
+
+  addChatMsg(msg, 'user');
+  input.value = '';
+  input.style.height = 'auto';
+  aiProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const res = await fetch(API_URL + '/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg, currentTasks: tasks }),
+    });
+    const data = await res.json();
+    hideTyping();
+
+    if (data.error) {
+      addChatMsg('エラー: ' + data.error, 'system');
+    } else {
+      pendingActions = data.actions || [];
+      addChatMsg(escHtml(data.reply) + actionButtons(data.actions), 'ai');
+    }
+  } catch (err) {
+    hideTyping();
+    addChatMsg('接続エラー: ' + err.message, 'system');
+  }
+
+  aiProcessing = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// Enter to send (Shift+Enter for newline)
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+});
+// Auto-resize textarea
+document.getElementById('chatInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+});
+
+// === Voice Input (Web Speech API) ===
+let recognition = null;
+let isRecording = false;
+
+function toggleMic() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    addChatMsg('このブラウザは音声入力に対応していません', 'system');
+    return;
+  }
+
+  if (isRecording) {
+    recognition.stop();
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById('micBtn').classList.add('recording');
+  };
+  recognition.onend = () => {
+    isRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+  };
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    document.getElementById('chatInput').value = text;
+    document.getElementById('chatInput').dispatchEvent(new Event('input'));
+  };
+  recognition.onerror = (e) => {
+    isRecording = false;
+    document.getElementById('micBtn').classList.remove('recording');
+    if (e.error !== 'no-speech') addChatMsg('音声認識エラー: ' + e.error, 'system');
+  };
+
+  recognition.start();
+}
+
+// === Photo Analysis ===
+async function handlePhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  // Show preview
+  addChatMsg('&#128247; 写真を分析中...', 'user');
+  aiProcessing = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+    const res = await fetch(API_URL + '/analyze-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64, mimeType: file.type }),
+    });
+    const data = await res.json();
+    hideTyping();
+
+    if (data.error) {
+      addChatMsg('エラー: ' + data.error, 'system');
+    } else {
+      pendingActions = data.actions || [];
+      addChatMsg(escHtml(data.reply) + actionButtons(data.actions), 'ai');
+    }
+  } catch (err) {
+    hideTyping();
+    addChatMsg('接続エラー: ' + err.message, 'system');
+  }
+
+  aiProcessing = false;
+  document.getElementById('sendBtn').disabled = false;
+  input.value = '';
+}
 
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
