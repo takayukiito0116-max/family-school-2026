@@ -1940,61 +1940,73 @@ renderChecklist();
 async function setupNotifications() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') {
-    // Ask permission on first AI tab visit
-    document.querySelector('[data-tab="ai"]').addEventListener('click', async () => {
-      if (Notification.permission === 'default') {
-        await Notification.requestPermission();
-      }
-    }, { once: true });
+    // Show a non-intrusive prompt after 3 seconds
+    setTimeout(() => {
+      if (Notification.permission !== 'default') return;
+      const prompt = document.createElement('div');
+      prompt.className = 'weather-alert';
+      prompt.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:200;max-width:90%;animation:msgIn .5s var(--spring) both;cursor:pointer;';
+      const pt = document.createElement('span');pt.textContent = '🔔 通知を許可すると朝のアラート（天気・タスク）が届きます';pt.style.fontSize='12px';
+      const pb = document.createElement('button');pb.className='btn btn-primary';pb.style.cssText='margin-left:12px;padding:6px 14px;font-size:11px;';
+      pb.textContent='許可する';
+      pb.onclick = async () => { await Notification.requestPermission(); prompt.remove(); };
+      const pc = document.createElement('span');pc.textContent='✕';pc.style.cssText='margin-left:8px;cursor:pointer;padding:4px;';
+      pc.onclick = () => prompt.remove();
+      prompt.appendChild(pt);prompt.appendChild(pb);prompt.appendChild(pc);
+      document.body.appendChild(prompt);
+      setTimeout(() => { if(prompt.parentElement) prompt.remove(); }, 15000);
+    }, 3000);
   }
 }
 setupNotifications();
+
+// Send notification via Service Worker (works on iOS PWA + Android + Desktop)
+async function sendNotification(title, body) {
+  if (Notification.permission !== 'granted') return;
+  try {
+    if ('serviceWorker' in navigator) {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(title, {
+        body,
+        icon: './icon-192.png',
+        badge: './icon-192.png',
+        tag: 'ito-alert-' + Date.now(),
+        renotify: true,
+        vibrate: [200, 100, 200],
+      });
+    }
+  } catch (e) {
+    console.warn('Notification failed:', e);
+  }
+}
 
 // Check morning alert from Firebase
 const morningAlertRef = db.ref('dashboard/morning-alert');
 let lastAlertDate = localStorage.getItem('ito-last-alert-date') || '';
 
 morningAlertRef.on('value', snap => {
-  const alert = snap.val();
-  if (!alert || alert.date === lastAlertDate) return;
+  const data = snap.val();
+  if (!data || data.date === lastAlertDate) return;
 
-  // Show push notification
-  if (Notification.permission === 'granted') {
-    const title = (alert.needUmbrella ? '☂️ ' : '') +
-                  (alert.urgentCount > 0 ? '🔴 ' : '☀️ ') +
-                  '朝のアラート';
-    const body = alert.body.slice(0, 200);
-    try {
-      new Notification(title, {
-        body,
-        icon: './icon-192.png',
-        badge: './icon-192.png',
-        tag: 'morning-alert-' + alert.date,
-        renotify: true,
-      });
-    } catch (e) {
-      // PWA service worker notification fallback
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(reg => {
-          reg.showNotification(title, { body, icon: './icon-192.png', tag: 'morning-' + alert.date });
-        });
-      }
-    }
-  }
+  // Push notification via Service Worker
+  const nTitle = (data.needUmbrella ? '☂️ ' : '') +
+                (data.urgentCount > 0 ? '🔴 ' : '☀️ ') +
+                '朝のアラート';
+  sendNotification(nTitle, data.body.slice(0, 200));
 
-  // Show in-app banner
+  // In-app banner (always show)
   const banner = document.createElement('div');
   banner.className = 'weather-alert';
   banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:200;max-width:90%;animation:msgIn .5s var(--spring) both;cursor:pointer;';
   const bIcon=document.createElement('span');bIcon.className='wa-icon';bIcon.textContent='🌅';
-  const bText=document.createElement('div');bText.style.cssText='flex:1;font-size:12px;white-space:pre-line;';bText.textContent=alert.body.slice(0,300);
+  const bText=document.createElement('div');bText.style.cssText='flex:1;font-size:12px;white-space:pre-line;';bText.textContent=data.body.slice(0,300);
   const bClose=document.createElement('span');bClose.style.cssText='cursor:pointer;padding:4px;';bClose.textContent='✕';bClose.onclick=()=>banner.remove();
   banner.appendChild(bIcon);banner.appendChild(bText);banner.appendChild(bClose);
   document.body.appendChild(banner);
   setTimeout(() => { if (banner.parentElement) banner.remove(); }, 30000);
 
-  lastAlertDate = alert.date;
-  localStorage.setItem('ito-last-alert-date', alert.date);
+  lastAlertDate = data.date;
+  localStorage.setItem('ito-last-alert-date', data.date);
 });
 
 // === Service Worker ===

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ito-family-dash-v15';
+const CACHE_NAME = 'ito-family-dash-v16';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg.webp'];
 
 self.addEventListener('install', e => {
