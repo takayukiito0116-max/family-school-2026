@@ -275,6 +275,14 @@ body {
   box-shadow:0 0 4px rgba(255,42,42,.4);
 }
 
+/* Vecna's Clock on Lock Screen */
+.lock-clock {
+  position:absolute; width:80vmin; height:80vmin; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  opacity:.5; animation:clockSpin 120s linear infinite;
+}
+@keyframes clockSpin { from{transform:translate(-50%,-50%) rotate(0deg);} to{transform:translate(-50%,-50%) rotate(360deg);} }
+
 /* === Lock Screen === */
 #lockScreen {
   position:fixed; inset:0; z-index:9999;
@@ -423,11 +431,14 @@ body {
 
 .menu-drawer {
   position:fixed; top:0; right:-280px; width:270px; height:100%; z-index:200;
-  background:rgba(8,2,2,0.95); backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
-  border-left:1px solid var(--glass-border);
+  background:rgba(8,2,2,0.97); backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px);
+  border-left:1px solid rgba(255,42,42,.1);
   transition:right .35s var(--ease);
   padding:20px 0; overflow-y:auto;
-  box-shadow:-10px 0 40px rgba(0,0,0,.5);
+  box-shadow:-10px 0 40px rgba(255,0,0,.1), -20px 0 80px rgba(0,0,0,.5);
+  background-image:
+    radial-gradient(ellipse 100% 30% at 50% 100%, rgba(255,42,42,.04), transparent),
+    linear-gradient(180deg, rgba(255,42,42,.02) 0%, transparent 30%);
 }
 .menu-drawer.open { right:0; }
 .menu-overlay {
@@ -1020,18 +1031,34 @@ body {
 <!-- Lock Screen -->
 <div id="lockScreen">
   <div class="lock-bg"></div>
+  <!-- Vecna's clock SVG background -->
+  <svg class="lock-clock" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="100" cy="100" r="90" fill="none" stroke="rgba(255,42,42,.08)" stroke-width="1"/>
+    <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,42,42,.05)" stroke-width="0.5"/>
+    <g stroke="rgba(255,42,42,.1)" stroke-width="0.8" fill="none">
+      <line x1="100" y1="12" x2="100" y2="25"/><line x1="100" y1="175" x2="100" y2="188"/>
+      <line x1="12" y1="100" x2="25" y2="100"/><line x1="175" y1="100" x2="188" y2="100"/>
+      <line x1="38" y1="38" x2="47" y2="47"/><line x1="153" y1="153" x2="162" y2="162"/>
+      <line x1="162" y1="38" x2="153" y2="47"/><line x1="38" y1="162" x2="47" y2="153"/>
+    </g>
+    <!-- Clock hands (frozen at Vecna's hour) -->
+    <line x1="100" y1="100" x2="100" y2="35" stroke="rgba(255,42,42,.12)" stroke-width="2" stroke-linecap="round"/>
+    <line x1="100" y1="100" x2="145" y2="120" stroke="rgba(255,42,42,.08)" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="100" cy="100" r="3" fill="rgba(255,42,42,.15)"/>
+  </svg>
   <div class="lock-box">
-    <div class="neon-logo" style="margin-bottom:24px;">
+    <div class="neon-logo" style="margin-bottom:20px;">
       <div class="neon-line"></div>
-      <div class="neon-title">ITO</div>
-      <div class="neon-subtitle">FAMILY</div>
-      <div class="neon-line"></div>
+      <div class="neon-title" style="font-size:42px;">STRANGER</div>
+      <div class="neon-subtitle" style="font-size:20px;letter-spacing:10px;">THINGS</div>
+      <div class="neon-line" style="margin:6px auto;"></div>
+      <div style="font-family:'Playfair Display',serif;font-size:14px;color:#ff5050;letter-spacing:6px;text-shadow:0 0 8px rgba(255,42,42,.4);margin-top:4px;">ITO FAMILY</div>
     </div>
-    <p style="color:var(--text2);font-size:13px;margin-bottom:24px;">パスワードを入力してください</p>
+    <p style="color:var(--text3);font-size:12px;margin-bottom:20px;">The Upside Down awaits...</p>
     <div class="lock-input-wrap" id="lockWrap">
       <input type="text" id="pwInput" placeholder="パスワード" autocomplete="off">
     </div>
-    <button class="lock-btn" onclick="tryUnlock()">ログイン</button>
+    <button class="lock-btn" onclick="tryUnlock()">ENTER</button>
     <div class="lock-error" id="lockError"></div>
   </div>
 </div>
@@ -1042,8 +1069,8 @@ body {
   <div class="header-left">
     <div class="neon-logo neon-logo-sm">
       <div class="neon-line-sm"></div>
-      <div class="neon-title-sm">ITO</div>
-      <div class="neon-subtitle-sm">FAMILY</div>
+      <div class="neon-title-sm">STRANGER</div>
+      <div class="neon-subtitle-sm">ITO FAMILY</div>
       <div class="neon-line-sm"></div>
     </div>
   </div>
@@ -1109,8 +1136,8 @@ body {
   <!-- TAB: AI Chat -->
   <div class="tab-panel" id="panel-ai">
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#129302;</div>AIアシスタント</div>
-      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">チャット・写真・音声でタスクを追加・管理できます</p>
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#8a0000);">&#129302;</div>Eleven AI</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">Friends don't lie. 何でも聞いてください。</p>
       <div class="chat-container">
         <div class="chat-input-area">
           <div class="chat-input-row">
@@ -1304,7 +1331,7 @@ body {
 </div>
 
 <div class="footer" style="font-family:'Playfair Display',Georgia,serif;letter-spacing:2px;">
-  ITO FAMILY DASHBOARD 2026
+  STRANGER THINGS — ITO FAMILY EDITION
   <div id="syncStatus" style="margin-top:4px;font-size:10px;color:var(--accent3);opacity:.7;"></div>
 </div>
 </div>
@@ -1312,15 +1339,15 @@ body {
 <!-- Menu Drawer (outside appContent for proper z-index) -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
-  <div class="menu-header"><span>メニュー</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
+  <div class="menu-header"><span style="font-family:'Playfair Display',serif;letter-spacing:2px;color:#ff2a2a;text-shadow:0 0 8px rgba(255,42,42,.3);">THE UPSIDE DOWN</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
   <button class="menu-item active" data-tab="tasks"><span class="mi-icon">&#9745;</span><span class="mi-label">タスク</span></button>
-  <button class="menu-item" data-tab="ai"><span class="mi-icon">&#129302;</span><span class="mi-label">AIチャット</span></button>
-  <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">週間ビュー</span></button>
-  <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & 緊急連絡先</span></button>
-  <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">共有メモ</span></button>
-  <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">年間予定</span></button>
-  <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">学校情報</span></button>
-  <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">メール</span></button>
+  <button class="menu-item" data-tab="ai"><span class="mi-icon">&#129302;</span><span class="mi-label">Eleven AI</span></button>
+  <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">Hawkins Calendar</span></button>
+  <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & SOS</span></button>
+  <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">Walkie Talkie</span></button>
+  <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">Year Plan</span></button>
+  <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">Hawkins Lab</span></button>
+  <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">Messages</span></button>
 </div>
 
 <!-- Firebase SDK (compat for simple usage) -->
