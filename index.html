@@ -2480,6 +2480,102 @@ morningAlertRef.on('value', snap => {
   localStorage.setItem('ito-last-alert-date', data.date);
 });
 
+// === School Email Auto-Feed ===
+const schoolEmailsRef = db.ref('dashboard/school-emails');
+const emailNotifRef = db.ref('dashboard/email-notification');
+
+schoolEmailsRef.on('value', snap => {
+  const emails = snap.val();
+  if (!emails || !Array.isArray(emails)) return;
+
+  // Update the emails tab with auto-scanned emails
+  const panel = document.getElementById('panel-emails');
+  if (!panel) return;
+
+  // Find or create auto-email section
+  let autoSec = document.getElementById('autoEmailSec');
+  if (!autoSec) {
+    autoSec = document.createElement('div');
+    autoSec.className = 'sec';
+    autoSec.id = 'autoEmailSec';
+    panel.insertBefore(autoSec, panel.firstChild);
+  }
+
+  const title = document.createElement('div');
+  title.className = 'st';
+  title.innerHTML = '<div class="st-icon" style="background:linear-gradient(135deg,#ff2a2a,#c40000);">&#128232;</div>自動取得メール（学校・幼稚園）';
+
+  autoSec.textContent = '';
+  autoSec.appendChild(title);
+
+  const grid = document.createElement('div');
+  grid.className = 'eg';
+
+  emails.slice(0, 20).forEach(e => {
+    const card = document.createElement('div');
+    card.className = 'ec';
+    card.style.cursor = 'pointer';
+    card.onclick = () => {
+      // Show full email in a modal-like expansion
+      const existing = card.querySelector('.email-body-expand');
+      if (existing) { existing.remove(); return; }
+      const expand = document.createElement('div');
+      expand.className = 'email-body-expand';
+      expand.style.cssText = 'margin-top:8px;padding:8px;background:rgba(255,255,255,.02);border-radius:6px;font-size:11px;color:var(--text2);white-space:pre-wrap;max-height:200px;overflow-y:auto;';
+      expand.textContent = e.body || '(本文なし)';
+      card.appendChild(expand);
+    };
+
+    const badge = e.category === 'JSB' ? 'b-jsb' : e.category === '幼稚園' ? 'b-yochi' : 'b-common';
+    const date = e.date ? new Date(e.date).toLocaleDateString('ja-JP') : '';
+    const attHtml = (e.attachments || []).map(a => {
+      const el = document.createElement('span');
+      el.className = 'ea';
+      el.textContent = a.name;
+      return el;
+    });
+
+    const subj = document.createElement('div');
+    subj.className = 'es';
+    subj.textContent = e.subject || '(件名なし)';
+
+    const from = document.createElement('div');
+    from.className = 'ef';
+    from.textContent = (e.from || '').replace(/<.*>/, '').trim();
+
+    const dt = document.createElement('div');
+    dt.className = 'edt';
+    const badgeEl = document.createElement('span');
+    badgeEl.className = 'badge ' + badge;
+    badgeEl.textContent = e.category;
+    badgeEl.style.marginRight = '6px';
+    dt.appendChild(badgeEl);
+    dt.appendChild(document.createTextNode(date));
+
+    card.appendChild(subj);
+    card.appendChild(from);
+    card.appendChild(dt);
+    attHtml.forEach(el => card.appendChild(el));
+    grid.appendChild(card);
+  });
+
+  autoSec.appendChild(grid);
+});
+
+// Email notification banner
+let lastEmailNotif = localStorage.getItem('ito-last-email-notif') || '';
+emailNotifRef.on('value', snap => {
+  const data = snap.val();
+  if (!data || data.timestamp === lastEmailNotif) return;
+
+  if (Notification.permission === 'granted') {
+    sendNotification('📧 ' + data.message, data.subjects.slice(0, 150));
+  }
+
+  lastEmailNotif = data.timestamp;
+  localStorage.setItem('ito-last-email-notif', data.timestamp);
+});
+
 // === Eddie Munson Quotes ===
 const EDDIE_QUOTES = [
   '"This is music!" — Eddie Munson',
