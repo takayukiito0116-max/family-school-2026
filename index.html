@@ -458,9 +458,10 @@ body {
 }
 .menu-header span { font-size:14px; font-weight:700; color:var(--text); }
 .menu-close {
-  width:32px; height:32px; border:none; background:none; color:var(--text2);
-  font-size:20px; cursor:pointer; border-radius:8px;
+  width:44px; height:44px; border:none; background:none; color:var(--text2);
+  font-size:22px; cursor:pointer; border-radius:8px;
   display:flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .menu-close:hover { background:rgba(255,255,255,.05); }
 
@@ -560,9 +561,10 @@ body {
 /* Filter Buttons */
 .filter-bar { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
 .filter-btn {
-  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600;
+  padding:10px 16px; border-radius:20px; font-size:13px; font-weight:600;
   border:1px solid var(--glass-border); background:var(--glass); color:var(--text2);
   cursor:pointer; transition:all .2s var(--ease); font-family:inherit;
+  min-height:44px; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .filter-btn.active { background:rgba(255,42,42,.12); color:var(--accent3); border-color:rgba(255,42,42,.25); }
 .filter-btn:hover:not(.active) { background:rgba(255,255,255,.05); color:var(--text); }
@@ -1053,9 +1055,10 @@ body {
 .chat-input:focus { border-color:rgba(255,42,42,.3); box-shadow:0 0 0 3px rgba(255,42,42,.08); }
 .chat-input::placeholder { color:var(--text3); font-size:12px; }
 .chat-btn {
-  width:40px; height:40px; border:none; border-radius:var(--radius-sm); cursor:pointer;
+  width:44px; height:44px; border:none; border-radius:var(--radius-sm); cursor:pointer;
   display:flex; align-items:center; justify-content:center; font-size:17px;
   transition:all .2s var(--spring); flex-shrink:0;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .chat-send { background:linear-gradient(135deg,#ff2a2a,#c40000); color:#fff; }
 .chat-send:hover { transform:scale(1.05); box-shadow:0 4px 12px rgba(255,42,42,.3); }
@@ -1078,8 +1081,9 @@ body {
 }
 .chat-msg.ai .ai-actions { margin-top:8px; display:flex; flex-wrap:wrap; gap:4px; }
 .chat-msg.ai .ai-action-btn {
-  padding:4px 10px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; border:none;
+  padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none;
   background:rgba(255,42,42,.1); color:#ff5050; transition:all .2s var(--ease);
+  min-height:36px; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
 }
 .chat-msg.ai .ai-action-btn:hover { background:rgba(255,42,42,.2); }
 .chat-msg.system { align-self:center; font-size:11px; color:var(--text3); background:none; padding:4px; }
@@ -1229,6 +1233,27 @@ body {
 
 <div class="ctr">
   <!-- 1. Top AI Chat Box (最上部) -->
+  <div class="top-ai-box" id="topAiBox">
+    <div class="top-ai-glow"></div>
+    <div class="top-ai-inner">
+      <div class="top-ai-header">
+        <div class="top-ai-avatar"><img src="eleven2.jpg" alt="Eleven" style="width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 20%;"></div>
+        <div class="top-ai-label">
+          <span class="top-ai-name">Eleven</span>
+          <span class="top-ai-status" id="topAiStatus"><span class="ai-dot"></span> Ready</span>
+        </div>
+      </div>
+      <div class="top-ai-input-wrap">
+        <textarea class="top-ai-input" id="topAiInput" placeholder="何でも聞いてね..." rows="1"></textarea>
+        <input type="file" id="topFileInput" class="chat-photo-input" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" onchange="handleTopFile(this)">
+        <input type="file" id="topCameraInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handleTopFile(this)">
+        <button class="chat-btn chat-attach" onclick="document.getElementById('topCameraInput').click()" title="カメラ" style="width:44px;height:44px;font-size:17px;">&#128247;</button>
+        <button class="chat-btn chat-attach" onclick="document.getElementById('topFileInput').click()" title="ファイル" style="width:44px;height:44px;font-size:17px;">&#10133;</button>
+        <button class="top-ai-send" id="topAiSend" onclick="sendTopAi()">&#10148;</button>
+      </div>
+      <div class="top-ai-thread" id="topAiThread"></div>
+    </div>
+  </div>
 
   <!-- 2. Transit Alert -->
   <div class="transit-alert" id="transitAlert" style="display:none;"></div>
@@ -1245,30 +1270,6 @@ body {
 
   <!-- Eddie Quote -->
   <div style="text-align:center;padding:4px 16px;font-style:italic;font-size:10px;color:var(--text3);margin-bottom:8px;" id="eddieQuote"></div>
-
-  <!-- Top AI Chat Box -->
-  <div class="top-ai-box" id="topAiBox">
-    <div class="top-ai-glow"></div>
-    <div class="top-ai-inner">
-      <div class="top-ai-header">
-        <div class="top-ai-avatar"><img src="eleven2.jpg" alt="Eleven" style="width:100%;height:100%;border-radius:50%;object-fit:cover;object-position:center 20%;"></div>
-        <div class="top-ai-label">
-          <span class="top-ai-name">Eleven</span>
-          <span class="top-ai-status" id="topAiStatus"><span class="ai-dot"></span> Ready</span>
-        </div>
-      </div>
-      <div class="top-ai-input-wrap">
-        <textarea class="top-ai-input" id="topAiInput" placeholder="何でも聞いてね..." rows="1"></textarea>
-        <input type="file" id="topFileInput" class="chat-photo-input" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip" onchange="handleTopFile(this)">
-        <input type="file" id="topCameraInput" class="chat-photo-input" accept="image/*" capture="environment" onchange="handleTopFile(this)">
-        <button class="chat-btn chat-attach" onclick="document.getElementById('topCameraInput').click()" title="カメラ" style="width:36px;height:36px;font-size:15px;">&#128247;</button>
-        <button class="chat-btn chat-attach" onclick="document.getElementById('topFileInput').click()" title="ファイル" style="width:36px;height:36px;font-size:15px;">&#10133;</button>
-        <button class="top-ai-send" id="topAiSend" onclick="sendTopAi()">&#10148;</button>
-      </div>
-      <!-- Conversation thread -->
-      <div class="top-ai-thread" id="topAiThread"></div>
-    </div>
-  </div>
 
   <!-- Weather + Alert Widget -->
   <div class="upcoming" id="weatherWidget" style="display:none;">
