@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ito-family-ghibli-v2';
+const CACHE_NAME = 'ito-family-ghibli-v3';
 const ASSETS = ['./index.html', './manifest.json', './icon-192.png', './icon-512.png', './bg.webp', './eddie.jpg', './eddie2.jpg', './eleven.jpg', './eleven2.jpg', './st-logo.png', './st-logo2.png'];
 
 self.addEventListener('install', e => {
