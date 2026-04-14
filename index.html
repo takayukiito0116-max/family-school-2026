@@ -364,7 +364,7 @@ body {
 
 /* === Header === */
 .header {
-  padding:12px 16px; padding-top:max(12px, env(safe-area-inset-top));
+  padding:14px 16px; padding-top:max(16px, calc(env(safe-area-inset-top) + 4px));
   display:flex; justify-content:space-between; align-items:center;
   flex-wrap:nowrap; gap:8px;
   background:rgba(20,40,25,0.55); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px);
@@ -424,11 +424,12 @@ body {
 /* === Tabs === */
 /* === Menu Button & Drawer === */
 .menu-btn {
-  width:44px; height:44px; border:1px solid var(--glass-border); border-radius:var(--radius-sm);
-  background:var(--glass); color:var(--text); font-size:22px; cursor:pointer;
+  width:48px; height:48px; border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  background:var(--glass); color:var(--text); font-size:24px; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   transition:all .2s var(--ease); flex-shrink:0;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  margin:-4px -4px -4px 0; padding:4px;
 }
 .menu-btn:hover { background:rgba(92,184,92,.08); color:#80d080; }
 
@@ -1176,8 +1177,11 @@ body {
 <div class="ud-photo-bottom"></div>
 <div class="ud-photo-left"></div>
 <div class="ud-photo-right"></div>
-<!-- Totoro watermark -->
-<div style="position:fixed;z-index:0;pointer-events:none;bottom:5%;right:-5%;width:40vw;height:50vh;background:url('totoro-umbrella.png') center/contain no-repeat;opacity:0.06;"></div>
+<!-- Ghibli character decorations -->
+<div style="position:fixed;z-index:0;pointer-events:none;bottom:3%;right:-2%;width:30vw;max-width:150px;height:40vh;background:url('totoro-umbrella.png') bottom right/contain no-repeat;opacity:0.08;"></div>
+<div style="position:fixed;z-index:0;pointer-events:none;bottom:5%;left:-2%;width:20vw;max-width:100px;height:30vh;background:url('noface.png') bottom left/contain no-repeat;opacity:0.06;"></div>
+<div style="position:fixed;z-index:0;pointer-events:none;top:15%;right:2%;width:15vw;max-width:80px;height:20vh;background:url('totoro-moon.png') top right/contain no-repeat;opacity:0.05;"></div>
+<div style="position:fixed;z-index:0;pointer-events:none;top:40%;left:3%;width:18vw;max-width:90px;height:25vh;background:url('totoro-big.png') center/contain no-repeat;opacity:0.04;"></div>
 
 <!-- Floating embers -->
 <div class="ember" style="left:15%;bottom:0;animation-duration:6s;animation-delay:0s;"></div>
@@ -1227,7 +1231,6 @@ body {
     <span style="font-family:'Noto Serif JP',serif;font-size:14px;font-weight:700;color:var(--text);letter-spacing:1px;">となりの伊藤家</span>
   </div>
   <div class="header-right">
-    <div class="ai-badge"><div class="ai-dot"></div>🌿 同期</div>
     <button class="menu-btn" onclick="toggleMenu()" title="メニュー">&#9776;</button>
   </div>
 </div>
@@ -1353,6 +1356,15 @@ body {
         <button class="filter-btn" onclick="shiftCal(1)">&#9654;</button>
       </div>
       <div class="week-grid" id="weekGrid"></div>
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--glass-border);">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">🌸 予定を追加</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <input type="date" id="addEventDate" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+          <input type="text" id="addEventName" placeholder="予定名..." style="flex:1;min-width:120px;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+          <select id="addEventCat" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
+          <button class="btn btn-primary" onclick="addEvent()" style="min-height:44px;">追加</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1543,14 +1555,14 @@ body {
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
   <div class="menu-header"><span style="font-family:'Noto Serif JP',serif;letter-spacing:2px;color:#5cb85c;text-shadow:0 0 8px rgba(92,184,92,.3);">となりの伊藤家</span><button class="menu-close" onclick="toggleMenu()">&#10005;</button></div>
-  <button class="menu-item active" data-tab="tasks"><span class="mi-icon">&#9745;</span><span class="mi-label">タスク</span></button>
-  <button class="menu-item" data-tab="ai"><span class="mi-icon">&#127908;</span><span class="mi-label">トトロ AI</span></button>
-  <button class="menu-item" data-tab="week"><span class="mi-icon">&#128197;</span><span class="mi-label">森のカレンダー</span></button>
-  <button class="menu-item" data-tab="checklist"><span class="mi-icon">&#127890;</span><span class="mi-label">持ち物 & 連絡先</span></button>
-  <button class="menu-item" data-tab="memo"><span class="mi-icon">&#128221;</span><span class="mi-label">森のメモ</span></button>
-  <button class="menu-item" data-tab="timeline"><span class="mi-icon">&#128467;</span><span class="mi-label">年間の予定</span></button>
-  <button class="menu-item" data-tab="info"><span class="mi-icon">&#127979;</span><span class="mi-label">森の情報</span></button>
-  <button class="menu-item" data-tab="emails"><span class="mi-icon">&#9993;</span><span class="mi-label">手紙</span></button>
+  <button class="menu-item active" data-tab="tasks"><span class="mi-icon">🌰</span><span class="mi-label">タスク</span></button>
+  <button class="menu-item" data-tab="ai"><span class="mi-icon">🌿</span><span class="mi-label">トトロ AI</span></button>
+  <button class="menu-item" data-tab="week"><span class="mi-icon">🌸</span><span class="mi-label">カレンダー</span></button>
+  <button class="menu-item" data-tab="checklist"><span class="mi-icon">🎒</span><span class="mi-label">持ち物 & 連絡先</span></button>
+  <button class="menu-item" data-tab="memo"><span class="mi-icon">🍃</span><span class="mi-label">メモ</span></button>
+  <button class="menu-item" data-tab="timeline"><span class="mi-icon">🌳</span><span class="mi-label">年間予定</span></button>
+  <button class="menu-item" data-tab="info"><span class="mi-icon">🏡</span><span class="mi-label">学校情報</span></button>
+  <button class="menu-item" data-tab="emails"><span class="mi-icon">✉️</span><span class="mi-label">手紙</span></button>
 </div>
 
 <!-- Firebase SDK (compat for simple usage) -->
@@ -1935,13 +1947,8 @@ async function sendChat() {
 }
 
 // === Top AI Box ===
-let topAiComposing = false;
-const topAiInputEl = document.getElementById('topAiInput');
-topAiInputEl.addEventListener('compositionstart', () => { topAiComposing = true; });
-topAiInputEl.addEventListener('compositionend', () => { topAiComposing = false; });
-topAiInputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && !topAiComposing) { e.preventDefault(); sendTopAi(); }
-});
+// Top AI input: NO Enter send (mobile IME問題回避) — 送信ボタンのみ
+var topAiInputEl = document.getElementById('topAiInput');
 topAiInputEl.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 80) + 'px';
@@ -2151,18 +2158,8 @@ async function handleTopFile(input) {
   input.value = '';
 }
 
-// Enter to send / Shift+Enter for newline / IME composition safe
-let isComposing = false;
-const chatInputEl = document.getElementById('chatInput');
-chatInputEl.addEventListener('compositionstart', () => { isComposing = true; });
-chatInputEl.addEventListener('compositionend', () => { isComposing = false; });
-chatInputEl.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
-    e.preventDefault();
-    sendChat();
-  }
-});
-// Auto-resize
+// Chat input: NO Enter send (mobile IME問題回避) — 送信ボタンのみ
+var chatInputEl = document.getElementById('chatInput');
 chatInputEl.addEventListener('input', function() {
   this.style.height = 'auto';
   this.style.height = Math.min(this.scrollHeight, 80) + 'px';
@@ -2534,6 +2531,36 @@ function renderMonthView() {
 
 // Backward compat
 function shiftWeek(dir) { shiftCal(dir); }
+
+// Add custom event
+var customEventsRef = db.ref('dashboard/custom-events');
+var customEvents = [];
+customEventsRef.on('value', function(snap) {
+  var data = snap.val();
+  customEvents = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
+  // Merge into EVENTS for display
+  for (var i = 0; i < customEvents.length; i++) {
+    var exists = false;
+    for (var j = 0; j < EVENTS.length; j++) {
+      if (EVENTS[j].d === customEvents[i].d && EVENTS[j].n === customEvents[i].n) { exists = true; break; }
+    }
+    if (!exists) EVENTS.push(customEvents[i]);
+  }
+  renderCal();
+  renderUpcoming();
+});
+
+function addEvent() {
+  var date = document.getElementById('addEventDate').value;
+  var name = document.getElementById('addEventName').value.trim();
+  var cat = document.getElementById('addEventCat').value;
+  if (!date || !name) return;
+  var newEvent = { d: date, n: name, c: cat };
+  customEvents.push(newEvent);
+  customEventsRef.set(customEvents);
+  document.getElementById('addEventName').value = '';
+  document.getElementById('addEventDate').value = '';
+}
 renderCal();
 
 // === Checklist (localStorage, daily reset) ===
