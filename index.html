@@ -424,14 +424,18 @@ body {
 /* === Tabs === */
 /* === Menu Button & Drawer === */
 .menu-btn {
-  width:48px; height:48px; border:1px solid var(--glass-border); border-radius:var(--radius-sm);
-  background:var(--glass); color:var(--text); font-size:24px; cursor:pointer;
+  width:56px; height:56px; border:2px solid rgba(92,184,92,.25); border-radius:14px;
+  background:linear-gradient(135deg, rgba(92,184,92,.12), rgba(58,138,58,.08));
+  color:var(--text); font-size:28px; cursor:pointer;
   display:flex; align-items:center; justify-content:center;
   transition:all .2s var(--ease); flex-shrink:0;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-  margin:-4px -4px -4px 0; padding:4px;
+  margin:0; padding:0;
+  box-shadow:0 2px 12px rgba(92,184,92,.15);
+  position:relative; z-index:10;
 }
-.menu-btn:hover { background:rgba(92,184,92,.08); color:#80d080; }
+.menu-btn:hover { background:linear-gradient(135deg, rgba(92,184,92,.2), rgba(58,138,58,.15)); color:#80d080; border-color:rgba(92,184,92,.4); }
+.menu-btn:active { transform:scale(0.95); }
 
 .menu-drawer {
   position:fixed; top:0; right:-280px; width:270px; height:100%; z-index:200;
@@ -472,11 +476,27 @@ body {
   transition:all .2s var(--ease); border:none; background:none; width:100%;
   font-family:inherit; text-align:left;
   -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-  min-height:50px;
+  min-height:54px;
 }
 .menu-item:hover { background:rgba(92,184,92,.06); color:var(--text); }
-.menu-item.active { color:#5cb85c; background:rgba(92,184,92,.08); border-right:3px solid #5cb85c; }
-.menu-item .mi-icon { font-size:18px; width:24px; text-align:center; }
+.menu-item.active { color:#5cb85c; background:rgba(92,184,92,.1); border-right:3px solid #5cb85c; font-weight:700; }
+.menu-item .mi-icon { font-size:20px; width:28px; text-align:center; }
+
+/* Floating menu button (visible when scrolled down) */
+.fab-menu {
+  position:fixed; bottom:20px; right:20px; z-index:90;
+  width:56px; height:56px; border-radius:50%;
+  background:linear-gradient(135deg, #5cb85c, #3a8a3a);
+  color:#fff; font-size:24px; border:none; cursor:pointer;
+  display:none; align-items:center; justify-content:center;
+  box-shadow:0 4px 20px rgba(92,184,92,.4), 0 0 40px rgba(92,184,92,.1);
+  transition:all .3s var(--spring);
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+}
+.fab-menu:hover { transform:scale(1.1); box-shadow:0 6px 30px rgba(92,184,92,.5); }
+.fab-menu:active { transform:scale(0.95); }
+.fab-menu.visible { display:flex; animation:msgIn .3s var(--spring) both; }
+
 .menu-item .mi-label { flex:1; }
 
 .tab-panel { display:none; animation:panelIn .4s var(--ease) both; }
@@ -1231,7 +1251,7 @@ body {
     <span style="font-family:'Noto Serif JP',serif;font-size:14px;font-weight:700;color:var(--text);letter-spacing:1px;">となりの伊藤家</span>
   </div>
   <div class="header-right">
-    <button class="menu-btn" onclick="toggleMenu()" title="メニュー">&#9776;</button>
+    <button class="menu-btn" onclick="toggleMenu()" title="メニュー" aria-label="メニューを開く">&#9776;</button>
   </div>
 </div>
 
@@ -1259,8 +1279,15 @@ body {
     </div>
   </div>
 
-  <!-- 2. Transit Alert -->
-  <div class="transit-alert" id="transitAlert" style="display:none;"></div>
+  <!-- 2. Transit Status Panel -->
+  <div id="transitPanel" style="margin-bottom:12px;">
+    <div class="transit-alert transit-ok" id="transitMetro" style="display:none;">
+      <span>🚇</span> <span id="transitMetroText">Metro 5: 確認中...</span>
+    </div>
+    <div class="transit-alert transit-ok" id="transitBus" style="display:none;">
+      <span>🚌</span> <span id="transitBusText">Bus 43: 確認中...</span>
+    </div>
+  </div>
 
   <!-- 3. Compact Summary Strip -->
   <div class="summary-strip">
@@ -1336,7 +1363,7 @@ body {
             <button class="chat-btn chat-send" id="sendBtn" onclick="sendChat()" title="送信">&#10148;</button>
           </div>
         </div>
-        <div class="chat-messages" id="chat手紙">
+        <div class="chat-messages" id="chatMessages">
           <div class="chat-msg system">何でも聞いてください。例:「体操服を買って」「未完了タスクは？」</div>
         </div>
       </div>
@@ -1348,8 +1375,8 @@ body {
     <div class="sec">
       <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#5cb85c,#2a6a2a);">&#128197;</div>カレンダー <span id="weekLabel" style="font-size:12px;color:var(--text2);font-weight:400;margin-left:8px;"></span></div>
       <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;">
-        <button class="filter-btn" id="calWeekBtn" onclick="setCalView('week')" style="font-weight:700;">週</button>
-        <button class="filter-btn" id="calMonthBtn" onclick="setCalView('month')">月</button>
+        <button class="filter-btn" id="calWeekBtn" onclick="setCalView('week')">週</button>
+        <button class="filter-btn" id="calMonthBtn" onclick="setCalView('month')" style="font-weight:700;">月</button>
         <span style="flex:1;"></span>
         <button class="filter-btn" onclick="shiftCal(-1)">&#9664;</button>
         <button class="filter-btn" onclick="shiftCal(0)">今日</button>
@@ -1358,12 +1385,24 @@ body {
       <div class="week-grid" id="weekGrid"></div>
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--glass-border);">
         <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">🌸 予定を追加</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;">
-          <input type="date" id="addEventDate" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <label style="font-size:10px;color:var(--text3);">日付</label>
+            <input type="date" id="addEventDate" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <label style="font-size:10px;color:var(--text3);">開始時間</label>
+            <input type="time" id="addEventStartTime" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <label style="font-size:10px;color:var(--text3);">終了時間</label>
+            <input type="time" id="addEventEndTime" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
+          </div>
           <input type="text" id="addEventName" placeholder="予定名..." style="flex:1;min-width:120px;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;">
           <select id="addEventCat" style="padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;min-height:44px;"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>
           <button class="btn btn-primary" onclick="addEvent()" style="min-height:44px;">追加</button>
         </div>
+        <div style="font-size:10px;color:var(--text3);margin-top:6px;">※ カレンダー上の予定をタップすると編集・削除できます</div>
       </div>
     </div>
   </div>
@@ -1551,6 +1590,9 @@ body {
 </div>
 </div>
 
+<!-- Floating Action Button for menu (shows when scrolled down) -->
+<button class="fab-menu" id="fabMenu" onclick="toggleMenu()" aria-label="メニューを開く">&#9776;</button>
+
 <!-- Menu Drawer (outside appContent for proper z-index) -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
 <div class="menu-drawer" id="menuDrawer">
@@ -1612,9 +1654,21 @@ document.getElementById('menuDrawer').addEventListener('click', e => {
   document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
   item.classList.add('active');
   const panel = document.getElementById('panel-' + item.dataset.tab);
-  if (panel) { panel.classList.add('active'); panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = ''; }
+  if (panel) {
+    panel.classList.add('active');
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+  }
   toggleMenu();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll to the panel section (not top of page)
+  setTimeout(() => {
+    if (panel) {
+      const headerH = document.querySelector('.header').offsetHeight;
+      const panelTop = panel.getBoundingClientRect().top + window.scrollY - headerH - 12;
+      window.scrollTo({ top: Math.max(0, panelTop), behavior: 'smooth' });
+    }
+  }, 350); // wait for menu close animation
 });
 
 // === Tasks ===
@@ -1877,12 +1931,12 @@ let aiProcessing = false;
 let chatHistory = []; // {role:'user'|'assistant', content:string}
 
 function scrollChat() {
-  const el = document.getElementById('chat手紙');
+  const el = document.getElementById('chatMessages');
   setTimeout(() => { el.scrollTop = el.scrollHeight; }, 50);
 }
 
 function addChatMsg(text, type) {
-  const el = document.getElementById('chat手紙');
+  const el = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = `chat-msg ${type}`;
   div.textContent = text;
@@ -1892,7 +1946,7 @@ function addChatMsg(text, type) {
 }
 
 function addAiMsg(reply, actions) {
-  const el = document.getElementById('chat手紙');
+  const el = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = 'chat-msg ai';
   const replySpan = document.createElement('span');
@@ -1922,7 +1976,7 @@ function addAiMsg(reply, actions) {
 }
 
 function showTyping() {
-  const el = document.getElementById('chat手紙');
+  const el = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = 'chat-typing';
   div.id = 'typingIndicator';
@@ -1954,18 +2008,17 @@ function applyActions(actions) {
 }
 
 let pendingActions = [];
-function applyOneAction(idx) {
-  if (pendingActions[idx]) {
-    applyActions([pendingActions[idx]]);
-    pendingActions[idx] = null;
-    // Disable button
-    document.querySelectorAll(`.ai-action-btn[data-idx="${idx}"]`).forEach(b => { b.disabled = true; b.style.opacity = '.3'; });
+function applyOneAction(idx, actionSource) {
+  var src = actionSource || pendingActions;
+  if (src[idx]) {
+    applyActions([src[idx]]);
+    src[idx] = null;
   }
 }
-function applyAllActions() {
-  applyActions(pendingActions.filter(Boolean));
-  pendingActions = [];
-  document.querySelectorAll('.ai-action-btn').forEach(b => { b.disabled = true; b.style.opacity = '.3'; });
+function applyAllActions(actionSource) {
+  var src = actionSource || pendingActions;
+  applyActions(src.filter(Boolean));
+  src.length = 0;
 }
 
 async function sendChat() {
@@ -2458,46 +2511,147 @@ async function checkStrikes(){
 }
 checkStrikes();
 
-// === Transit / Traffic Alert ===
-function checkTransit() {
-  var hour = new Date().getHours();
-  var alertEl = document.getElementById('transitAlert');
-  if (!alertEl) return;
-  // Only show during commute hours (6-9 AM)
-  if (hour < 6 || hour > 9) {
-    alertEl.style.display = 'none';
-    return;
+// === Transit / Traffic Alert (Metro 5: Demey→Beaulieu, Bus 43: Auderghem Shopping→Arsenal) ===
+// STIB schedule data (weekday, approximate)
+var STIB_SCHEDULE = {
+  metro5: {
+    line: 'Metro 5',
+    from: 'Demey',
+    to: 'Beaulieu',
+    duration: '2 min',
+    firstTrain: '05:30',
+    lastTrain: '00:15',
+    peakFreq: '3-5 min',
+    offPeakFreq: '6-10 min',
+  },
+  bus43: {
+    line: 'Bus 43',
+    from: 'Auderghem Shopping',
+    to: 'Arsenal',
+    duration: '~15 min',
+    firstBus: '06:00',
+    lastBus: '22:30',
+    peakFreq: '8-12 min',
+    offPeakFreq: '15-20 min',
   }
-  // Check weather for transit impact
-  fetch('https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35&current=weather_code,wind_speed_10m,precipitation_probability&timezone=Europe/Brussels')
+};
+
+function checkTransitStatus() {
+  var now = new Date();
+  var hour = now.getHours();
+  var min = now.getMinutes();
+  var timeStr = String(hour).padStart(2,'0') + ':' + String(min).padStart(2,'0');
+  var dayOfWeek = now.getDay(); // 0=Sun
+  var isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+  var metroEl = document.getElementById('transitMetro');
+  var metroText = document.getElementById('transitMetroText');
+  var busEl = document.getElementById('transitBus');
+  var busText = document.getElementById('transitBusText');
+
+  // Always show transit info (hide only between midnight-5am)
+  var showTransit = (hour >= 5 || hour < 1);
+  metroEl.style.display = showTransit ? 'flex' : 'none';
+  busEl.style.display = showTransit ? 'flex' : 'none';
+
+  if (!showTransit) return;
+
+  // Determine peak hours (7-9 AM, 16-19 PM)
+  var isPeak = (hour >= 7 && hour <= 9) || (hour >= 16 && hour <= 19);
+
+  // Check weather impact on transit
+  fetch('https://api.open-meteo.com/v1/forecast?latitude=50.82&longitude=4.42&current=weather_code,wind_speed_10m,precipitation_probability&timezone=Europe/Brussels')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       var code = d.current.weather_code;
       var wind = d.current.wind_speed_10m;
       var rain = d.current.precipitation_probability || 0;
-      var warnings = [];
-      if ([65,82,95,96,99].indexOf(code) >= 0) warnings.push('⚠️ 大雨・雷雨 — バス遅延の可能性');
-      if (wind > 50) warnings.push('⚠️ 強風 ' + Math.round(wind) + 'km/h — 交通影響の可能性');
-      if ([71,73,75].indexOf(code) >= 0) warnings.push('❄️ 降雪 — 道路凍結注意');
-      if (rain > 60) warnings.push('☂️ 降水確率 ' + rain + '% — 傘必要');
 
-      if (warnings.length > 0) {
-        alertEl.style.display = 'flex';
-        alertEl.className = 'transit-alert';
-        alertEl.textContent = '🚌 通勤情報: ' + warnings.join(' / ');
-      } else {
-        alertEl.style.display = 'flex';
-        alertEl.className = 'transit-alert transit-ok';
-        alertEl.textContent = '🚌 通勤情報: 交通への影響なし（Auderghem Shopping → Arsenal）';
-      }
+      // Weather impact assessment
+      var weatherImpact = 'none';
+      var weatherNote = '';
+      if ([95,96,99].indexOf(code) >= 0) { weatherImpact = 'severe'; weatherNote = '雷雨で遅延の可能性'; }
+      else if ([65,82].indexOf(code) >= 0 || wind > 60) { weatherImpact = 'moderate'; weatherNote = '悪天候で遅延の可能性'; }
+      else if ([71,73,75].indexOf(code) >= 0) { weatherImpact = 'moderate'; weatherNote = '降雪で遅延の可能性'; }
+      else if (rain > 70 || wind > 40) { weatherImpact = 'minor'; weatherNote = '天候により若干遅延の可能性'; }
+
+      // Check known disruptions from Firebase
+      var transitRef = db.ref('dashboard/transit-alerts');
+      transitRef.once('value').then(function(snap) {
+        var alerts = snap.val() || {};
+        var metroAlert = alerts.metro5 || null;
+        var busAlert = alerts.bus43 || null;
+
+        // Metro 5 status
+        var metroFreq = isPeak ? STIB_SCHEDULE.metro5.peakFreq : STIB_SCHEDULE.metro5.offPeakFreq;
+        if (isWeekend) metroFreq = STIB_SCHEDULE.metro5.offPeakFreq;
+
+        if (metroAlert) {
+          metroEl.className = 'transit-alert';
+          metroText.textContent = 'Metro 5 (Demey→Beaulieu): ⚠️ ' + metroAlert;
+        } else if (weatherImpact === 'severe') {
+          metroEl.className = 'transit-alert';
+          metroText.textContent = 'Metro 5 (Demey→Beaulieu): ⚠️ ' + weatherNote + ' / 通常' + metroFreq + '間隔';
+        } else {
+          metroEl.className = 'transit-alert transit-ok';
+          var metroStatus = 'Metro 5 (Demey→Beaulieu): ✅ 通常運行 / ' + metroFreq + '間隔 / 所要' + STIB_SCHEDULE.metro5.duration;
+          if (weatherImpact !== 'none') metroStatus += ' / ⚠️ ' + weatherNote;
+          metroText.textContent = metroStatus;
+        }
+
+        // Bus 43 status
+        var busFreq = isPeak ? STIB_SCHEDULE.bus43.peakFreq : STIB_SCHEDULE.bus43.offPeakFreq;
+        if (isWeekend) busFreq = '20-30 min';
+
+        if (busAlert) {
+          busEl.className = 'transit-alert';
+          busText.textContent = 'Bus 43 (Auderghem Shopping→Arsenal): ⚠️ ' + busAlert;
+        } else if (weatherImpact === 'severe' || weatherImpact === 'moderate') {
+          busEl.className = 'transit-alert';
+          busText.textContent = 'Bus 43 (Auderghem Shopping→Arsenal): ⚠️ ' + weatherNote + ' / 通常' + busFreq + '間隔';
+        } else {
+          busEl.className = 'transit-alert transit-ok';
+          var busStatus = 'Bus 43 (Auderghem Shopping→Arsenal): ✅ 通常運行 / ' + busFreq + '間隔 / 所要' + STIB_SCHEDULE.bus43.duration;
+          if (weatherImpact !== 'none') busStatus += ' / ⚠️ ' + weatherNote;
+          busText.textContent = busStatus;
+        }
+
+        // Update strike strip with transit summary
+        var strikeStatus = document.getElementById('strikeStatus');
+        var strikeIcon = document.getElementById('strikeIcon');
+        if (metroAlert || busAlert || weatherImpact === 'severe') {
+          strikeStatus.textContent = '⚠️ 運行注意';
+          strikeIcon.textContent = '⚠️';
+          document.getElementById('strikeStrip').style.borderColor = 'rgba(255,184,79,.3)';
+        } else if (weatherImpact === 'moderate') {
+          strikeStatus.textContent = '注意: ' + weatherNote;
+          strikeIcon.textContent = '⚠️';
+        }
+      }).catch(function() {
+        // Firebase unavailable, show basic status
+        metroEl.className = 'transit-alert transit-ok';
+        metroText.textContent = 'Metro 5 (Demey→Beaulieu): ' + (isPeak ? metroFreq : metroFreq) + '間隔';
+        busEl.className = 'transit-alert transit-ok';
+        busText.textContent = 'Bus 43 (Auderghem Shopping→Arsenal): ' + (isPeak ? busFreq : busFreq) + '間隔';
+      });
     })
-    .catch(function() { alertEl.style.display = 'none'; });
+    .catch(function() {
+      // Weather API failed, show schedule only
+      var metroFreq = isPeak ? STIB_SCHEDULE.metro5.peakFreq : STIB_SCHEDULE.metro5.offPeakFreq;
+      var busFreq = isPeak ? STIB_SCHEDULE.bus43.peakFreq : STIB_SCHEDULE.bus43.offPeakFreq;
+      metroEl.className = 'transit-alert transit-ok';
+      metroText.textContent = 'Metro 5 (Demey→Beaulieu): ' + metroFreq + '間隔 / 所要' + STIB_SCHEDULE.metro5.duration;
+      busEl.className = 'transit-alert transit-ok';
+      busText.textContent = 'Bus 43 (Auderghem Shopping→Arsenal): ' + busFreq + '間隔 / 所要' + STIB_SCHEDULE.bus43.duration;
+    });
 }
-checkTransit();
+checkTransitStatus();
+// Auto-refresh transit every 5 minutes
+setInterval(checkTransitStatus, 5 * 60 * 1000);
 
 // === Calendar (Week/Month View) ===
 var calOffset = 0;
-var calView = 'week'; // 'week' or 'month'
+var calView = 'month'; // 'week' or 'month' — default to month view
 
 function setCalView(v) {
   calView = v;
@@ -2617,19 +2771,137 @@ function addEvent() {
   var date = document.getElementById('addEventDate').value;
   var name = document.getElementById('addEventName').value.trim();
   var cat = document.getElementById('addEventCat').value;
+  var startTime = document.getElementById('addEventStartTime').value;
+  var endTime = document.getElementById('addEventEndTime').value;
   if (!date || !name) { alert('日付と予定名を入力してください'); return; }
   var newEvent = { d: date, n: name, c: cat, custom: true };
+  if (startTime) newEvent.startTime = startTime;
+  if (endTime) newEvent.endTime = endTime;
   customEvents.push(newEvent);
   customEventsRef.set(customEvents).then(function() {
     document.getElementById('addEventName').value = '';
     document.getElementById('addEventDate').value = '';
+    document.getElementById('addEventStartTime').value = '';
+    document.getElementById('addEventEndTime').value = '';
   });
 }
 
-// === Event Detail Popup ===
+// Edit event in a Google Calendar-like modal
+function editEventModal(ev, idx) {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;animation:modalBgIn .2s ease;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:400px;width:90%;max-height:80vh;overflow-y:auto;animation:modalIn .3s var(--spring);';
+
+  var title = document.createElement('div');
+  title.style.cssText = 'font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;';
+  title.textContent = ev.custom ? '予定を編集' : '予定の詳細';
+  var closeBtn = document.createElement('span');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'cursor:pointer;padding:8px;font-size:18px;';
+  closeBtn.onclick = function() { overlay.remove(); };
+  title.appendChild(closeBtn);
+  modal.appendChild(title);
+
+  if (ev.custom) {
+    // Editable fields
+    var fields = [
+      { label: '予定名', id: 'evEditName', type: 'text', value: ev.n },
+      { label: '日付', id: 'evEditDate', type: 'date', value: ev.d },
+      { label: '開始時間', id: 'evEditStart', type: 'time', value: ev.startTime || '' },
+      { label: '終了時間', id: 'evEditEnd', type: 'time', value: ev.endTime || '' },
+    ];
+    fields.forEach(function(f) {
+      var lbl = document.createElement('label');
+      lbl.style.cssText = 'display:block;font-size:11px;color:var(--text2);margin-bottom:4px;margin-top:12px;font-weight:600;';
+      lbl.textContent = f.label;
+      modal.appendChild(lbl);
+      var inp = document.createElement('input');
+      inp.type = f.type; inp.id = f.id; inp.value = f.value;
+      inp.style.cssText = 'width:100%;padding:10px 14px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:14px;font-family:inherit;outline:none;';
+      modal.appendChild(inp);
+    });
+    // Category select
+    var catLbl = document.createElement('label');
+    catLbl.style.cssText = 'display:block;font-size:11px;color:var(--text2);margin-bottom:4px;margin-top:12px;font-weight:600;';
+    catLbl.textContent = 'カテゴリ';
+    modal.appendChild(catLbl);
+    var catSel = document.createElement('select');
+    catSel.id = 'evEditCat';
+    catSel.style.cssText = 'width:100%;padding:10px 14px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:14px;font-family:inherit;';
+    ['JSB','幼稚園','共通'].forEach(function(c) {
+      var opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+      if (c === ev.c) opt.selected = true;
+      catSel.appendChild(opt);
+    });
+    modal.appendChild(catSel);
+
+    // Buttons
+    var btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px;margin-top:20px;';
+    var saveBtn = document.createElement('button');
+    saveBtn.className = 'btn btn-primary';
+    saveBtn.style.cssText = 'flex:1;min-height:44px;';
+    saveBtn.textContent = '保存';
+    saveBtn.onclick = function() {
+      var newName = document.getElementById('evEditName').value.trim();
+      var newDate = document.getElementById('evEditDate').value;
+      var newStart = document.getElementById('evEditStart').value;
+      var newEnd = document.getElementById('evEditEnd').value;
+      var newCat = document.getElementById('evEditCat').value;
+      if (!newName || !newDate) { alert('予定名と日付は必須です'); return; }
+      customEvents[idx] = { d: newDate, n: newName, c: newCat, custom: true };
+      if (newStart) customEvents[idx].startTime = newStart;
+      if (newEnd) customEvents[idx].endTime = newEnd;
+      customEventsRef.set(customEvents).then(function() { overlay.remove(); });
+    };
+    var delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-ghost';
+    delBtn.style.cssText = 'min-height:44px;color:#e05555;border-color:rgba(224,85,85,.3);';
+    delBtn.textContent = '削除';
+    delBtn.onclick = function() {
+      if (!confirm('この予定を削除しますか？')) return;
+      customEvents.splice(idx, 1);
+      customEventsRef.set(customEvents).then(function() { overlay.remove(); });
+    };
+    btnRow.appendChild(saveBtn);
+    btnRow.appendChild(delBtn);
+    modal.appendChild(btnRow);
+  } else {
+    // Read-only for built-in events
+    var info = [
+      { label: '予定名', value: ev.n },
+      { label: '日付', value: ev.d },
+      { label: 'カテゴリ', value: ev.c },
+    ];
+    if (ev.startTime) info.push({ label: '時間', value: ev.startTime + (ev.endTime ? ' ~ ' + ev.endTime : '') });
+    info.forEach(function(item) {
+      var row = document.createElement('div');
+      row.style.cssText = 'padding:8px 0;border-bottom:1px solid var(--glass-border);display:flex;gap:8px;font-size:13px;';
+      var lbl = document.createElement('span');
+      lbl.style.cssText = 'color:var(--text2);min-width:70px;';
+      lbl.textContent = item.label;
+      var val = document.createElement('span');
+      val.style.cssText = 'color:var(--text);flex:1;';
+      val.textContent = item.value;
+      row.appendChild(lbl); row.appendChild(val);
+      modal.appendChild(row);
+    });
+    var note = document.createElement('div');
+    note.style.cssText = 'margin-top:12px;font-size:11px;color:var(--text3);';
+    note.textContent = '※ 学校の年間予定は編集できません。カスタム予定は追加・編集可能です。';
+    modal.appendChild(note);
+  }
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
+// === Event Detail Popup (Google Calendar-like) ===
 function showEventDetail(dateStr) {
   var dayEvents = EVENTS.filter(function(e) { return e.d === dateStr; });
-  if (dayEvents.length === 0) return;
   var d = new Date(dateStr + 'T00:00:00');
   var days = ['日','月','火','水','木','金','土'];
   var dateLabel = (d.getMonth()+1) + '/' + d.getDate() + '（' + days[d.getDay()] + '）';
@@ -2639,11 +2911,11 @@ function showEventDetail(dateStr) {
   overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
 
   var modal = document.createElement('div');
-  modal.style.cssText = 'background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:20px;max-width:340px;width:90%;max-height:80vh;overflow-y:auto;animation:modalIn .3s var(--spring);';
+  modal.style.cssText = 'background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:20px;max-width:380px;width:90%;max-height:80vh;overflow-y:auto;animation:modalIn .3s var(--spring);';
 
   var title = document.createElement('div');
   title.style.cssText = 'font-size:16px;font-weight:700;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;';
-  title.textContent = '📅 ' + dateLabel;
+  title.textContent = dateLabel;
   var closeBtn = document.createElement('span');
   closeBtn.textContent = '✕';
   closeBtn.style.cssText = 'cursor:pointer;padding:8px;font-size:18px;';
@@ -2651,22 +2923,66 @@ function showEventDetail(dateStr) {
   title.appendChild(closeBtn);
   modal.appendChild(title);
 
-  for (var i = 0; i < dayEvents.length; i++) {
-    var ev = dayEvents[i];
-    var card = document.createElement('div');
-    card.style.cssText = 'padding:10px 12px;margin-bottom:8px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);';
-    var badge = ev.c === 'JSB' ? '🏫 JSB' : ev.c === '幼稚園' ? '🌸 幼稚園' : '📌 共通';
-    var nameEl = document.createElement('div');
-    nameEl.style.cssText = 'font-size:14px;font-weight:600;';
-    nameEl.textContent = ev.n;
-    card.appendChild(nameEl);
-    var metaEl = document.createElement('div');
-    metaEl.style.cssText = 'font-size:11px;color:var(--text2);margin-top:4px;';
-    metaEl.textContent = badge;
-    if (ev.custom) metaEl.textContent += ' · ユーザー追加';
-    card.appendChild(metaEl);
-    modal.appendChild(card);
+  if (dayEvents.length > 0) {
+    for (var i = 0; i < dayEvents.length; i++) {
+      (function(ev, index) {
+        var card = document.createElement('div');
+        card.style.cssText = 'padding:12px 14px;margin-bottom:8px;border-radius:10px;border:1px solid var(--glass-border);background:var(--glass);cursor:pointer;transition:all .2s;';
+        card.onmouseenter = function() { card.style.background = 'rgba(92,184,92,.06)'; };
+        card.onmouseleave = function() { card.style.background = 'var(--glass)'; };
+
+        var catColor = ev.c === 'JSB' ? '#4a9ede' : ev.c === '幼稚園' ? '#e8a040' : '#5cb85c';
+        var dot = document.createElement('span');
+        dot.style.cssText = 'display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;background:' + catColor + ';';
+
+        var nameEl = document.createElement('div');
+        nameEl.style.cssText = 'font-size:14px;font-weight:600;display:flex;align-items:center;';
+        nameEl.appendChild(dot);
+        nameEl.appendChild(document.createTextNode(ev.n));
+        card.appendChild(nameEl);
+
+        var metaEl = document.createElement('div');
+        metaEl.style.cssText = 'font-size:11px;color:var(--text2);margin-top:4px;margin-left:16px;';
+        var timeStr = ev.startTime ? ev.startTime + (ev.endTime ? ' ~ ' + ev.endTime : '') + ' · ' : '';
+        metaEl.textContent = timeStr + ev.c + (ev.custom ? ' · カスタム' : ' · 学校予定');
+        card.appendChild(metaEl);
+
+        if (ev.custom) {
+          var editIcon = document.createElement('div');
+          editIcon.style.cssText = 'font-size:10px;color:var(--accent3);margin-top:4px;margin-left:16px;';
+          editIcon.textContent = '✏️ タップして編集';
+          card.appendChild(editIcon);
+          // Find index in customEvents
+          var customIdx = customEvents.findIndex(function(ce) { return ce.d === ev.d && ce.n === ev.n; });
+          card.onclick = function() { overlay.remove(); editEventModal(ev, customIdx); };
+        }
+        modal.appendChild(card);
+      })(dayEvents[i], i);
+    }
+  } else {
+    var empty = document.createElement('div');
+    empty.style.cssText = 'text-align:center;padding:16px;font-size:13px;color:var(--text3);';
+    empty.textContent = 'この日の予定はありません';
+    modal.appendChild(empty);
   }
+
+  // Quick add button
+  var addRow = document.createElement('div');
+  addRow.style.cssText = 'margin-top:12px;padding-top:12px;border-top:1px solid var(--glass-border);';
+  var addBtn = document.createElement('button');
+  addBtn.className = 'btn btn-primary';
+  addBtn.style.cssText = 'width:100%;min-height:44px;font-size:14px;';
+  addBtn.textContent = '+ この日に予定を追加';
+  addBtn.onclick = function() {
+    overlay.remove();
+    // Pre-fill the date in the add form and scroll to it
+    document.getElementById('addEventDate').value = dateStr;
+    var addForm = document.getElementById('addEventName');
+    addForm.focus();
+    addForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  addRow.appendChild(addBtn);
+  modal.appendChild(addRow);
 
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
@@ -2980,6 +3296,19 @@ var GHIBLI_QUOTES = [
 ];
 var qEl = document.getElementById('eddieQuote');
 if(qEl) qEl.textContent = GHIBLI_QUOTES[Math.floor(Math.random() * GHIBLI_QUOTES.length)];
+
+// === Floating Menu Button (show when scrolled past header) ===
+var fabMenu = document.getElementById('fabMenu');
+var lastScrollY = 0;
+window.addEventListener('scroll', function() {
+  var scrollY = window.scrollY || window.pageYOffset;
+  if (scrollY > 200) {
+    fabMenu.classList.add('visible');
+  } else {
+    fabMenu.classList.remove('visible');
+  }
+  lastScrollY = scrollY;
+}, { passive: true });
 
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
