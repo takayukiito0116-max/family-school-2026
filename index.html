@@ -1114,6 +1114,36 @@ body {
 .chat-typing span:nth-child(3) { animation-delay:.4s; }
 @keyframes blink { 0%,100%{opacity:.2;} 50%{opacity:1;} }
 
+/* === Mobile Bottom Nav === */
+.bottom-nav {
+  display:none; position:fixed; bottom:0; left:0; right:0; z-index:80;
+  background:rgba(18,35,22,0.97); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(92,184,92,.12);
+  padding:4px 0 max(4px, env(safe-area-inset-bottom));
+  box-shadow:0 -4px 20px rgba(0,0,0,.4);
+}
+.bottom-nav-inner {
+  display:flex; justify-content:space-around; align-items:center; max-width:500px; margin:0 auto;
+}
+.bnav-item {
+  display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:6px 8px; border:none; background:none; color:var(--text3);
+  font-size:10px; font-weight:500; cursor:pointer; font-family:inherit;
+  -webkit-tap-highlight-color:transparent; touch-action:manipulation;
+  min-width:52px; transition:color .2s;
+}
+.bnav-item .bnav-icon { font-size:20px; line-height:1; }
+.bnav-item.active { color:#5cb85c; }
+.bnav-item.active .bnav-icon { transform:scale(1.1); }
+
+@media(max-width:768px) {
+  .bottom-nav { display:block; }
+  /* Add bottom padding to content so it's not hidden behind nav */
+  .footer { padding-bottom:80px; }
+  /* Hide the floating FAB on mobile (bottom nav replaces it) */
+  .fab-menu { display:none !important; }
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar { width:6px; }
 ::-webkit-scrollbar-track { background:transparent; }
@@ -1281,11 +1311,13 @@ body {
 
   <!-- 2. Transit Status Panel -->
   <div id="transitPanel" style="margin-bottom:12px;">
-    <div class="transit-alert transit-ok" id="transitMetro" style="display:none;">
+    <div class="transit-alert transit-ok" id="transitMetro" style="display:none;cursor:pointer;" onclick="window.open('https://www.stib-mivb.be/horaires-dienstregeling2.html?l=fr&_line=5&_directioncode=V&_stop=8251','_blank')">
       <span>🚇</span> <span id="transitMetroText">Metro 5: 確認中...</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--text3);">タップで時刻表 →</span>
     </div>
-    <div class="transit-alert transit-ok" id="transitBus" style="display:none;">
+    <div class="transit-alert transit-ok" id="transitBus" style="display:none;cursor:pointer;" onclick="window.open('https://www.google.com/maps/dir/Auderghem+Shopping,+Brussels/Arsenal,+Etterbeek/@50.828,4.4,14z/data=!3m1!4b1!4m14!4m13!1m5!1m1!1s0x47c3dd3e3f62f4a1:0x1!2m2!1d4.42!2d50.82!1m5!1m1!1s0x47c3c4a4a3c8d0e1:0x2!2m2!1d4.39!2d50.84!3e3','_blank')">
       <span>🚌</span> <span id="transitBusText">Bus 43: 確認中...</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--text3);">タップでGoogle Maps →</span>
     </div>
   </div>
 
@@ -1590,8 +1622,19 @@ body {
 </div>
 </div>
 
-<!-- Floating Action Button for menu (shows when scrolled down) -->
+<!-- Floating Action Button for menu (desktop, shows when scrolled down) -->
 <button class="fab-menu" id="fabMenu" onclick="toggleMenu()" aria-label="メニューを開く">&#9776;</button>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-item active" data-tab="tasks"><span class="bnav-icon">🌰</span>タスク</button>
+    <button class="bnav-item" data-tab="week"><span class="bnav-icon">🌸</span>カレンダー</button>
+    <button class="bnav-item" data-tab="ai"><span class="bnav-icon">🌿</span>AI</button>
+    <button class="bnav-item" data-tab="checklist"><span class="bnav-icon">🎒</span>持ち物</button>
+    <button class="bnav-item" onclick="toggleMenu()" style="color:var(--text2);"><span class="bnav-icon">&#9776;</span>その他</button>
+  </div>
+</nav>
 
 <!-- Menu Drawer (outside appContent for proper z-index) -->
 <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
@@ -3296,6 +3339,46 @@ var GHIBLI_QUOTES = [
 ];
 var qEl = document.getElementById('eddieQuote');
 if(qEl) qEl.textContent = GHIBLI_QUOTES[Math.floor(Math.random() * GHIBLI_QUOTES.length)];
+
+// === Bottom Nav (Mobile) ===
+document.getElementById('bottomNav').addEventListener('click', function(e) {
+  var item = e.target.closest('.bnav-item');
+  if (!item || !item.dataset.tab) return;
+  // Switch tab
+  document.querySelectorAll('.menu-item').forEach(function(x) { x.classList.remove('active'); });
+  document.querySelectorAll('.tab-panel').forEach(function(x) { x.classList.remove('active'); });
+  var panel = document.getElementById('panel-' + item.dataset.tab);
+  if (panel) {
+    panel.classList.add('active');
+    panel.style.animation = 'none'; panel.offsetHeight; panel.style.animation = '';
+  }
+  // Sync menu drawer active state
+  document.querySelectorAll('.menu-item').forEach(function(x) {
+    if (x.dataset.tab === item.dataset.tab) x.classList.add('active');
+  });
+  // Update bottom nav active
+  document.querySelectorAll('.bnav-item[data-tab]').forEach(function(x) { x.classList.remove('active'); });
+  item.classList.add('active');
+  // Scroll to panel
+  if (panel) {
+    var headerH = document.querySelector('.header').offsetHeight;
+    var panelTop = panel.getBoundingClientRect().top + window.scrollY - headerH - 12;
+    window.scrollTo({ top: Math.max(0, panelTop), behavior: 'smooth' });
+  }
+});
+
+// Sync bottom nav when menu drawer is used
+var origMenuClick = document.getElementById('menuDrawer').onclick;
+document.getElementById('menuDrawer').addEventListener('click', function() {
+  setTimeout(function() {
+    var activeMenu = document.querySelector('.menu-item.active');
+    if (activeMenu) {
+      document.querySelectorAll('.bnav-item[data-tab]').forEach(function(x) {
+        x.classList.toggle('active', x.dataset.tab === activeMenu.dataset.tab);
+      });
+    }
+  }, 100);
+});
 
 // === Floating Menu Button (show when scrolled past header) ===
 var fabMenu = document.getElementById('fabMenu');
