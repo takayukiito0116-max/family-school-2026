@@ -1206,33 +1206,53 @@ button, a, .menu-item, .bnav-item, .filter-btn, .up-item, .um-card, .week-day, .
 ::-webkit-scrollbar-thumb { background:rgba(92,184,92,.15); border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(92,184,92,.3); }
 
-/* === Image Viewer Modal === */
+/* === Image Viewer Modal (pinch-zoom safe) === */
 .img-viewer-overlay {
-  position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.85);
-  display:flex; align-items:center; justify-content:center;
-  animation:modalBgIn .3s ease; cursor:zoom-out;
+  position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.92);
+  display:flex; flex-direction:column; animation:modalBgIn .3s ease;
+  touch-action:none; /* we handle all touch ourselves */
 }
-.img-viewer-overlay img {
-  max-width:95vw; max-height:90vh; object-fit:contain; border-radius:8px;
-  box-shadow:0 8px 40px rgba(0,0,0,.6); animation:modalIn .3s var(--spring);
+.img-viewer-content {
+  flex:1; display:flex; align-items:center; justify-content:center;
+  overflow:hidden; position:relative;
+  touch-action:pan-x pan-y pinch-zoom;
 }
+.img-viewer-content img {
+  max-width:100%; max-height:100%; object-fit:contain;
+  transform-origin:center center; transition:transform .1s ease-out;
+  -webkit-user-select:none; user-select:none; pointer-events:auto;
+  will-change:transform;
+}
+.img-viewer-toolbar {
+  position:absolute; top:0; left:0; right:0; z-index:2;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; padding-top:max(12px, calc(env(safe-area-inset-top) + 8px));
+  background:linear-gradient(180deg, rgba(0,0,0,.6) 0%, transparent 100%);
+  pointer-events:none;
+}
+.img-viewer-toolbar > * { pointer-events:auto; }
 .img-viewer-close {
-  position:absolute; top:16px; right:16px; width:44px; height:44px;
+  width:44px; height:44px;
   border:none; border-radius:50%; background:rgba(255,255,255,.15);
   color:#fff; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  transition:background .2s;
+  transition:background .2s; -webkit-tap-highlight-color:transparent;
 }
 .img-viewer-close:hover { background:rgba(255,255,255,.3); }
 .img-viewer-tabs {
-  position:absolute; top:16px; left:50%; transform:translateX(-50%);
   display:flex; gap:6px;
 }
 .img-viewer-tab {
   padding:8px 16px; border-radius:20px; font-size:12px; font-weight:600;
   border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.1);
-  color:#fff; cursor:pointer; transition:all .2s;
+  color:#fff; cursor:pointer; transition:all .2s; -webkit-tap-highlight-color:transparent;
 }
 .img-viewer-tab.active { background:rgba(92,184,92,.6); border-color:rgba(92,184,92,.8); }
+.img-viewer-zoom-hint {
+  position:absolute; bottom:20px; left:50%; transform:translateX(-50%);
+  font-size:11px; color:rgba(255,255,255,.5); pointer-events:none;
+  animation:fadeOut 3s ease forwards 2s;
+}
+@keyframes fadeOut { to { opacity:0; } }
 .view-schedule-btn {
   display:inline-flex; align-items:center; gap:4px;
   padding:6px 14px; border-radius:8px; font-size:11px; font-weight:600;
@@ -1448,6 +1468,7 @@ button, a, .menu-item, .bnav-item, .filter-btn, .up-item, .um-card, .week-day, .
     </div>
     <button class="lock-btn" onclick="tryUnlock()">はいろう</button>
     <div class="lock-error" id="lockError"></div>
+    <button id="biometricBtn" style="display:none;width:100%;margin-top:12px;padding:14px;border:1px solid rgba(92,184,92,.3);border-radius:14px;background:rgba(92,184,92,.08);color:#80d080;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;-webkit-tap-highlight-color:transparent;" onclick="biometricLogin()">Face ID / Touch ID でログイン</button>
   </div>
 </div>
 
@@ -1917,11 +1938,153 @@ function showSync(msg) {
 // === Password ===
 const PW_HASH='48e7f64ca6fb8200e5b7662d0507ff2c4fd2128a2708dcba807b52df8257ac59';
 const SESSION_KEY='ito-dash-session';
+const BIOMETRIC_KEY='ito-biometric-registered';
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-async function tryUnlock(){const h=await sha256(document.getElementById('pwInput').value);if(h===PW_HASH){sessionStorage.setItem(SESSION_KEY,'ok');unlock();}else{document.getElementById('lockWrap').classList.add('shake');document.getElementById('lockError').textContent='パスワードが違います';setTimeout(()=>document.getElementById('lockWrap').classList.remove('shake'),400);}}
+async function tryUnlock(){
+  const h=await sha256(document.getElementById('pwInput').value);
+  if(h===PW_HASH){
+    sessionStorage.setItem(SESSION_KEY,'ok');
+    unlock();
+    // Offer biometric registration after first password login
+    if(!localStorage.getItem(BIOMETRIC_KEY) && window.PublicKeyCredential){
+      setTimeout(function(){ offerBiometricSetup(); }, 1000);
+    }
+  }else{
+    document.getElementById('lockWrap').classList.add('shake');
+    document.getElementById('lockError').textContent='パスワードが違います';
+    setTimeout(()=>document.getElementById('lockWrap').classList.remove('shake'),400);
+  }
+}
 function unlock(){document.getElementById('lockScreen').classList.add('hidden');document.getElementById('appContent').classList.add('unlocked');}
 document.getElementById('pwInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock();});
 if(sessionStorage.getItem(SESSION_KEY)==='ok')unlock();
+
+// === Face ID / Touch ID (WebAuthn) ===
+// Uses platform authenticator (Face ID, Touch ID, Windows Hello)
+// Credential is stored in localStorage as proof of registration
+// The actual biometric check is done by the device OS
+
+async function isBiometricAvailable() {
+  if (!window.PublicKeyCredential) return false;
+  try {
+    return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+  } catch(e) { return false; }
+}
+
+function offerBiometricSetup() {
+  if (localStorage.getItem(BIOMETRIC_KEY)) return;
+  var banner = document.createElement('div');
+  banner.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:200;max-width:90%;width:360px;animation:msgIn .5s var(--spring) both;background:rgba(50,120,60,.95);border:1px solid rgba(128,208,128,.4);border-radius:14px;padding:14px 18px;display:flex;align-items:center;gap:10px;color:#fff;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  banner.innerHTML = '<div style="font-size:28px;">🔐</div><div style="flex:1;"><div style="font-size:13px;font-weight:600;">Face ID / Touch ID を設定</div><div style="font-size:11px;opacity:.7;">次回から生体認証でログインできます</div></div>';
+  var setupBtn = document.createElement('button');
+  setupBtn.style.cssText = 'padding:8px 16px;border-radius:10px;border:none;background:#fff;color:#2a6a2a;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;';
+  setupBtn.textContent = '設定する';
+  setupBtn.onclick = async function() { banner.remove(); await registerBiometric(); };
+  var dismissBtn = document.createElement('span');
+  dismissBtn.style.cssText = 'cursor:pointer;padding:4px;font-size:16px;opacity:.6;';
+  dismissBtn.textContent = '✕';
+  dismissBtn.onclick = function() { banner.remove(); };
+  banner.appendChild(setupBtn);
+  banner.appendChild(dismissBtn);
+  document.body.appendChild(banner);
+  setTimeout(function() { if(banner.parentElement) banner.remove(); }, 15000);
+}
+
+async function registerBiometric() {
+  try {
+    // Generate a random challenge and user ID
+    var challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+    var userId = new Uint8Array(16);
+    crypto.getRandomValues(userId);
+
+    var credential = await navigator.credentials.create({
+      publicKey: {
+        challenge: challenge,
+        rp: { name: '伊藤家ダッシュボード', id: location.hostname },
+        user: {
+          id: userId,
+          name: 'ito-family',
+          displayName: '伊藤家'
+        },
+        pubKeyCredParams: [
+          { type: 'public-key', alg: -7 },   // ES256
+          { type: 'public-key', alg: -257 }  // RS256
+        ],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',  // Face ID / Touch ID only
+          userVerification: 'required',
+          residentKey: 'preferred'
+        },
+        timeout: 60000
+      }
+    });
+
+    if (credential) {
+      // Store credential ID for future authentication
+      var credId = btoa(String.fromCharCode.apply(null, new Uint8Array(credential.rawId)));
+      localStorage.setItem(BIOMETRIC_KEY, credId);
+      // Store userId for get()
+      localStorage.setItem('ito-biometric-userId', btoa(String.fromCharCode.apply(null, userId)));
+      alert('Face ID / Touch ID の設定が完了しました！次回からロック画面で使えます。');
+    }
+  } catch(e) {
+    console.warn('Biometric registration failed:', e);
+    if (e.name !== 'NotAllowedError') {
+      alert('生体認証の設定に失敗しました: ' + e.message);
+    }
+  }
+}
+
+async function biometricLogin() {
+  var credIdB64 = localStorage.getItem(BIOMETRIC_KEY);
+  if (!credIdB64) return;
+
+  try {
+    var credIdRaw = Uint8Array.from(atob(credIdB64), function(c){ return c.charCodeAt(0); });
+    var challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+
+    var assertion = await navigator.credentials.get({
+      publicKey: {
+        challenge: challenge,
+        rpId: location.hostname,
+        allowCredentials: [{
+          type: 'public-key',
+          id: credIdRaw,
+          transports: ['internal']
+        }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    });
+
+    if (assertion) {
+      // Biometric verified by the OS — unlock
+      sessionStorage.setItem(SESSION_KEY, 'ok');
+      unlock();
+    }
+  } catch(e) {
+    console.warn('Biometric auth failed:', e);
+    if (e.name !== 'NotAllowedError') {
+      document.getElementById('lockError').textContent = '生体認証に失敗しました。パスワードでログインしてください。';
+    }
+  }
+}
+
+// Show biometric button on lock screen if registered
+(async function() {
+  if (localStorage.getItem(BIOMETRIC_KEY) && await isBiometricAvailable()) {
+    var btn = document.getElementById('biometricBtn');
+    if (btn) {
+      btn.style.display = 'block';
+      // Auto-trigger on load if session expired
+      if (sessionStorage.getItem(SESSION_KEY) !== 'ok') {
+        setTimeout(function() { biometricLogin(); }, 500);
+      }
+    }
+  }
+})();
 
 // === Menu Drawer ===
 function toggleMenu() {
@@ -3697,7 +3860,11 @@ scheduleImgRef.on('value', function(snap) {
 function viewScheduleImage(type) {
   var overlay = document.createElement('div');
   overlay.className = 'img-viewer-overlay';
-  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.id = 'scheduleViewer';
+
+  // Toolbar (tabs + close)
+  var toolbar = document.createElement('div');
+  toolbar.className = 'img-viewer-toolbar';
 
   var tabs = document.createElement('div');
   tabs.className = 'img-viewer-tabs';
@@ -3710,36 +3877,130 @@ function viewScheduleImage(type) {
   tabs.appendChild(tabJsb);
   tabs.appendChild(tabYochi);
 
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'img-viewer-close';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = function() { overlay.remove(); };
+
+  toolbar.appendChild(tabs);
+  toolbar.appendChild(closeBtn);
+
+  // Content area (scrollable + zoomable)
   var contentArea = document.createElement('div');
-  contentArea.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:12px;max-width:95vw;';
-  contentArea.onclick = function(e) { e.stopPropagation(); };
+  contentArea.className = 'img-viewer-content';
+
+  // Zoom hint
+  var hint = document.createElement('div');
+  hint.className = 'img-viewer-zoom-hint';
+  hint.textContent = '2本指でピンチズーム / ダブルタップでリセット';
+
+  // Pinch zoom state
+  var currentScale = 1, currentX = 0, currentY = 0;
+  var startDist = 0, startScale = 1, startX = 0, startY = 0;
+  var lastTap = 0;
+  var currentImg = null;
+
+  function applyTransform() {
+    if (currentImg) {
+      currentImg.style.transform = 'translate(' + currentX + 'px,' + currentY + 'px) scale(' + currentScale + ')';
+    }
+  }
+  function resetZoom() {
+    currentScale = 1; currentX = 0; currentY = 0;
+    applyTransform();
+  }
+
+  function getTouchDist(e) {
+    var t = e.touches;
+    return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  }
+  function getTouchCenter(e) {
+    var t = e.touches;
+    return { x: (t[0].clientX + t[1].clientX) / 2, y: (t[0].clientY + t[1].clientY) / 2 };
+  }
+
+  contentArea.addEventListener('touchstart', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      startDist = getTouchDist(e);
+      startScale = currentScale;
+      var c = getTouchCenter(e);
+      startX = c.x - currentX;
+      startY = c.y - currentY;
+    } else if (e.touches.length === 1) {
+      // Double tap to reset
+      var now = Date.now();
+      if (now - lastTap < 300) {
+        e.preventDefault();
+        if (currentScale > 1.05) { resetZoom(); }
+        else { currentScale = 2.5; applyTransform(); }
+      }
+      lastTap = now;
+      // Pan start
+      if (currentScale > 1.05) {
+        startX = e.touches[0].clientX - currentX;
+        startY = e.touches[0].clientY - currentY;
+      }
+    }
+  }, { passive: false });
+
+  contentArea.addEventListener('touchmove', function(e) {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      var dist = getTouchDist(e);
+      currentScale = Math.max(0.5, Math.min(8, startScale * (dist / startDist)));
+      var c = getTouchCenter(e);
+      currentX = c.x - startX;
+      currentY = c.y - startY;
+      applyTransform();
+    } else if (e.touches.length === 1 && currentScale > 1.05) {
+      e.preventDefault();
+      currentX = e.touches[0].clientX - startX;
+      currentY = e.touches[0].clientY - startY;
+      applyTransform();
+    }
+  }, { passive: false });
+
+  contentArea.addEventListener('touchend', function(e) {
+    if (currentScale < 1) { currentScale = 1; currentX = 0; currentY = 0; applyTransform(); }
+    // Snap back if panned too far
+    if (currentScale <= 1.05) { currentX = 0; currentY = 0; applyTransform(); }
+  });
 
   function showSchedule(t) {
     contentArea.innerHTML = '';
+    resetZoom();
+    currentImg = null;
     var data = scheduleImages[t];
     if (data) {
       var img = document.createElement('img');
       img.src = data;
       img.alt = t === 'jsb' ? 'JSB年間予定' : '幼稚園年間予定';
-      img.style.cssText = 'max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:modalIn .3s var(--spring);';
+      img.draggable = false;
+      currentImg = img;
       contentArea.appendChild(img);
-      // Replace button
-      var replaceRow = document.createElement('div');
-      replaceRow.style.cssText = 'display:flex;gap:8px;';
+      // Bottom action bar
+      var actions = document.createElement('div');
+      actions.style.cssText = 'position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3;';
       var replaceBtn = document.createElement('label');
-      replaceBtn.style.cssText = 'padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;';
-      replaceBtn.textContent = '📷 画像/PDFを差し替え';
+      replaceBtn.style.cssText = 'padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
+      replaceBtn.textContent = '📷 差し替え';
       var replaceInput = document.createElement('input');
       replaceInput.type = 'file'; replaceInput.accept = 'image/*,application/pdf'; replaceInput.style.display = 'none';
       replaceInput.onchange = function() { uploadScheduleImage(t, replaceInput, function() { showSchedule(t); }); };
       replaceBtn.appendChild(replaceInput);
       var delBtn = document.createElement('button');
-      delBtn.style.cssText = 'padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(224,85,85,.15);border:1px solid rgba(224,85,85,.3);color:#ff8888;cursor:pointer;';
+      delBtn.style.cssText = 'padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(224,85,85,.15);border:1px solid rgba(224,85,85,.3);color:#ff8888;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
       delBtn.textContent = '削除';
       delBtn.onclick = function() { if(confirm('この画像を削除しますか？')){ scheduleImages[t]=null; saveScheduleImages(); showSchedule(t); } };
-      replaceRow.appendChild(replaceBtn);
-      replaceRow.appendChild(delBtn);
-      contentArea.appendChild(replaceRow);
+      var resetBtn = document.createElement('button');
+      resetBtn.style.cssText = 'padding:8px 16px;border-radius:20px;font-size:12px;font-weight:600;background:rgba(92,184,92,.15);border:1px solid rgba(92,184,92,.3);color:#80d080;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);';
+      resetBtn.textContent = '↩ ズームリセット';
+      resetBtn.onclick = function() { resetZoom(); };
+      actions.appendChild(replaceBtn);
+      actions.appendChild(resetBtn);
+      actions.appendChild(delBtn);
+      contentArea.appendChild(actions);
     } else {
       var msg = document.createElement('div');
       msg.style.cssText = 'color:#fff;font-size:14px;text-align:center;padding:40px;background:rgba(255,255,255,.05);border-radius:12px;max-width:400px;animation:modalIn .3s var(--spring);';
@@ -3748,7 +4009,7 @@ function viewScheduleImage(type) {
         '<div style="font-weight:700;margin-bottom:8px;font-size:16px;">' + label + ' 年間予定表</div>' +
         '<div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:20px;">学校から配布された年間予定表の画像またはPDFをアップロードしてください。</div>' +
         '<label style="display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#5cb85c,#3a8a3a);color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(92,184,92,.3);">' +
-        '📸 画像 / PDF をアップロード<input type="file" accept="image/*,application/pdf" style="display:none;" onchange="uploadScheduleImage(\'' + t + '\',this,function(){document.querySelector(\'.img-viewer-overlay\').remove();viewScheduleImage(\'' + t + '\');})"></label>';
+        '📸 画像 / PDF をアップロード<input type="file" accept="image/*,application/pdf" style="display:none;" onchange="uploadScheduleImage(\'' + t + '\',this,function(){document.getElementById(\'scheduleViewer\').remove();viewScheduleImage(\'' + t + '\');})"></label>';
       contentArea.appendChild(msg);
     }
   }
@@ -3756,14 +4017,9 @@ function viewScheduleImage(type) {
   tabJsb.onclick = function(e) { e.stopPropagation(); tabJsb.classList.add('active'); tabYochi.classList.remove('active'); showSchedule('jsb'); };
   tabYochi.onclick = function(e) { e.stopPropagation(); tabYochi.classList.add('active'); tabJsb.classList.remove('active'); showSchedule('yochi'); };
 
-  var closeBtn = document.createElement('button');
-  closeBtn.className = 'img-viewer-close';
-  closeBtn.textContent = '✕';
-  closeBtn.onclick = function() { overlay.remove(); };
-
-  overlay.appendChild(tabs);
+  overlay.appendChild(toolbar);
   overlay.appendChild(contentArea);
-  overlay.appendChild(closeBtn);
+  overlay.appendChild(hint);
   document.body.appendChild(overlay);
   showSchedule(type);
 }
