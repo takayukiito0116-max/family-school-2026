@@ -2,12 +2,20 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="伊藤家">
 <meta name="theme-color" content="#1a2e1a">
-<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=yes">
+<meta name="msapplication-TileColor" content="#1a2e1a">
+<meta name="msapplication-tap-highlight" content="no">
+<!-- iOS splash screens (generated from icon) -->
+<link rel="apple-touch-startup-image" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
+<link rel="manifest" href="manifest.json">
 <title>ITO Family Dashboard</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Serif+JP:wght@400;700&display=swap');
@@ -37,7 +45,11 @@
 }
 
 * { margin:0; padding:0; box-sizing:border-box; }
-html { scroll-behavior:smooth; }
+html {
+  scroll-behavior:smooth;
+  /* Prevent pull-to-refresh on iOS PWA */
+  overscroll-behavior-y:contain;
+}
 
 body {
   font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -46,6 +58,49 @@ body {
   line-height:1.6;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
+  /* Prevent text selection on UI elements (allow on inputs/textareas) */
+  -webkit-user-select:none; user-select:none;
+  /* Prevent iOS callout on long press */
+  -webkit-touch-callout:none;
+  /* Prevent overscroll bounce */
+  overscroll-behavior:contain;
+  /* Smooth scrolling momentum on iOS */
+  -webkit-overflow-scrolling:touch;
+}
+/* Allow text selection on editable elements */
+input, textarea, [contenteditable], .memo-area, .chat-input, .top-ai-input, .task-note, .email-body-expand {
+  -webkit-user-select:text; user-select:text;
+  -webkit-touch-callout:default;
+}
+/* Prevent double-tap zoom on interactive elements */
+button, a, .menu-item, .bnav-item, .filter-btn, .up-item, .um-card, .week-day, .cl-item, .em-card, .ec, .bento-tab, .bento-starter-chip, .view-schedule-btn {
+  touch-action:manipulation;
+}
+/* iOS safe area padding */
+.header {
+  padding-top:max(14px, calc(env(safe-area-inset-top) + 6px));
+}
+.bottom-nav {
+  padding-bottom:max(4px, calc(env(safe-area-inset-bottom) + 2px));
+}
+/* Offline indicator */
+.offline-bar {
+  position:fixed; top:0; left:0; right:0; z-index:9998;
+  background:#e05555; color:#fff; text-align:center;
+  font-size:12px; font-weight:600; padding:4px 8px;
+  padding-top:max(4px, env(safe-area-inset-top));
+  display:none; animation:slideDown .3s ease;
+}
+.offline-bar.visible { display:block; }
+@keyframes slideDown { from{transform:translateY(-100%);} to{transform:translateY(0);} }
+/* Update available banner */
+.update-bar {
+  position:fixed; bottom:70px; left:50%; transform:translateX(-50%);
+  z-index:9998; background:rgba(50,120,60,.95); color:#fff;
+  border:1px solid rgba(128,208,128,.4); border-radius:14px;
+  padding:10px 18px; font-size:12px; font-weight:600;
+  display:none; cursor:pointer; animation:msgIn .5s var(--spring);
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
 }
 
 /* === Animated Background === */
@@ -1270,6 +1325,11 @@ body {
 </style>
 </head>
 <body>
+
+<!-- Offline indicator -->
+<div class="offline-bar" id="offlineBar">📡 オフラインです — 一部機能が制限されます</div>
+<!-- Update available -->
+<div class="update-bar" id="updateBar" onclick="location.reload()">🔄 新しいバージョンがあります — タップして更新</div>
 
 <div class="bg-mesh"></div>
 <div class="bg-grid"></div>
@@ -4233,8 +4293,139 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// === Service Worker ===
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+// === Native App Behaviors ===
+
+// 1. Zoom reset: after pinch zoom, double-tap returns to 1x
+(function() {
+  var lastTouchEnd = 0;
+  document.addEventListener('touchend', function(e) {
+    var now = Date.now();
+    // Prevent double-tap zoom on non-input areas
+    if (now - lastTouchEnd < 300) {
+      var tag = e.target.tagName;
+      if (tag !== 'INPUT' && tag !== 'TEXTAREA' && tag !== 'SELECT') {
+        e.preventDefault();
+      }
+    }
+    lastTouchEnd = now;
+  }, { passive: false });
+})();
+
+// 2. Reset zoom to 1x when user taps after zooming
+// Uses visual viewport API (iOS 13+)
+if (window.visualViewport) {
+  var zoomResetTimer = null;
+  window.visualViewport.addEventListener('resize', function() {
+    clearTimeout(zoomResetTimer);
+    var scale = window.visualViewport.scale;
+    if (scale > 1.05) {
+      // User has zoomed in — show a reset button
+      var btn = document.getElementById('zoomResetBtn');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'zoomResetBtn';
+        btn.textContent = '↩ 元に戻す';
+        btn.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;padding:10px 20px;border-radius:20px;border:none;background:rgba(92,184,92,.9);color:#fff;font-size:13px;font-weight:700;font-family:inherit;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:pointer;animation:msgIn .3s ease;';
+        btn.onclick = function() {
+          // Reset zoom via viewport meta manipulation
+          var vp = document.querySelector('meta[name=viewport]');
+          vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+          setTimeout(function() {
+            vp.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, user-scalable=yes, viewport-fit=cover';
+            btn.remove();
+          }, 100);
+        };
+        document.body.appendChild(btn);
+      }
+    } else {
+      var existing = document.getElementById('zoomResetBtn');
+      if (existing) existing.remove();
+    }
+  });
+}
+
+// 3. Prevent pull-to-refresh gesture (iOS Safari / PWA)
+document.body.addEventListener('touchmove', function(e) {
+  if (document.scrollingElement.scrollTop <= 0 && e.touches[0].clientY > 0) {
+    // Only prevent if at the very top and pulling down
+    if (e.target.closest('.chat-messages,.top-ai-thread,.menu-drawer,.upcoming-list')) return; // allow scrollable containers
+  }
+}, { passive: true });
+
+// 4. Offline / Online detection
+function updateOnlineStatus() {
+  var bar = document.getElementById('offlineBar');
+  if (bar) bar.classList.toggle('visible', !navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+// 5. Haptic feedback on button press (if supported)
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('button,.btn,.menu-item,.bnav-item,.filter-btn,.bento-tab');
+  if (btn && navigator.vibrate) {
+    navigator.vibrate(10); // subtle 10ms haptic
+  }
+});
+
+// 6. Prevent iOS rubber-band scroll on lock screen
+document.getElementById('lockScreen').addEventListener('touchmove', function(e) {
+  if (!e.target.closest('.lock-input-wrap')) e.preventDefault();
+}, { passive: false });
+
+// 7. Wake Lock: keep screen on while app is active (for checking tasks etc.)
+var wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', function() { wakeLock = null; });
+    }
+  } catch(e) { /* Permission denied or not supported */ }
+}
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible') requestWakeLock();
+});
+
+// 8. App install prompt (Android) — auto-show
+var deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+});
+
+// 9. Orientation change handler — reset scroll position
+window.addEventListener('orientationchange', function() {
+  setTimeout(function() { window.scrollTo(0, window.scrollY); }, 200);
+});
+
+// 10. Detect standalone mode (PWA)
+var isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                   window.navigator.standalone === true;
+if (isStandalone) {
+  document.documentElement.classList.add('pwa-standalone');
+}
+
+// === Service Worker (enhanced) ===
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    // Check for updates every 30 minutes
+    setInterval(function() { reg.update(); }, 30 * 60 * 1000);
+    // Notify user when new version available
+    reg.addEventListener('updatefound', function() {
+      var newWorker = reg.installing;
+      if (!newWorker) return;
+      newWorker.addEventListener('statechange', function() {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          // New version available
+          var bar = document.getElementById('updateBar');
+          if (bar) bar.style.display = 'block';
+        }
+      });
+    });
+  }).catch(function(){});
+}
 </script>
 </body>
 </html>

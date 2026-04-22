@@ -1,14 +1,37 @@
 {
   "name": "伊藤家 学校・幼稚園ダッシュボード",
-  "short_name": "伊藤家DB",
-  "description": "ブラッセル日本人学校・幼稚園の年間予定・タスク管理",
+  "short_name": "伊藤家",
+  "description": "ブラッセル日本人学校・幼稚園の年間予定・タスク管理・お弁当メモ",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#1a2e1a",
   "theme_color": "#1a2e1a",
   "orientation": "any",
+  "lang": "ja",
+  "categories": ["education", "productivity"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "タスク一覧",
+      "short_name": "タスク",
+      "url": "./index.html#tasks",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "カレンダー",
+      "short_name": "カレンダー",
+      "url": "./index.html#week",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "お弁当メモ",
+      "short_name": "お弁当",
+      "url": "./index.html#bento",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
   ]
 }
