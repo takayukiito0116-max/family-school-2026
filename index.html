@@ -937,14 +937,15 @@ body {
 }
 .um-card {
   display:flex; align-items:center; gap:12px; padding:12px 16px;
-  background:rgba(18,35,22,0.5); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  border:1px solid rgba(92,184,92,.12); border-left:3px solid;
+  background:rgba(12,28,16,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(92,184,92,.18); border-left:3px solid;
   border-radius:var(--radius-sm);
   transition:all .3s var(--ease);
   animation:msgIn .4s var(--spring) both;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);
 }
-.um-card:hover { background:rgba(92,184,92,.04); transform:translateX(4px); }
-.um-card.pri-high { border-left-color:#5cb85c; }
+.um-card:hover { background:rgba(16,36,20,.95); transform:translateX(4px); }
+.um-card.pri-high { border-left-color:#5cb85c; background:rgba(20,35,15,0.94); }
 .um-card.pri-mid { border-left-color:#d4a040; }
 .um-card.pri-low { border-left-color:#e8a040; }
 .um-card .um-pri {
@@ -3741,15 +3742,21 @@ function saveScheduleImages() {
 }
 
 // === Quick Add Event from Upcoming Section ===
+function closeQuickAdd() {
+  var el = document.getElementById('quickAddOverlay');
+  if (el) el.remove();
+}
+
 function showQuickAddEvent() {
   var overlay = document.createElement('div');
+  overlay.id = 'quickAddOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;animation:modalBgIn .2s ease;';
-  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = function(e) { if (e.target === overlay) closeQuickAdd(); };
 
   var modal = document.createElement('div');
-  modal.style.cssText = 'background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:420px;width:90%;animation:modalIn .3s var(--spring);';
+  modal.style.cssText = 'background:rgba(12,28,16,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:420px;width:90%;animation:modalIn .3s var(--spring);';
 
-  modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">予定を追加<span style="cursor:pointer;padding:8px;font-size:18px;" onclick="this.closest(\'[style*=position\\:fixed]\').remove()">✕</span></div>' +
+  modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">予定を追加<span style="cursor:pointer;padding:8px;font-size:18px;color:var(--text2);" onclick="closeQuickAdd()">✕</span></div>' +
     '<label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">予定名</label>' +
     '<input type="text" id="quickEvName" style="width:100%;padding:10px 14px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;" placeholder="例: 遠足">' +
     '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
@@ -3766,7 +3773,6 @@ function showQuickAddEvent() {
 
   overlay.appendChild(modal);
   document.body.appendChild(overlay);
-  // Set default date to tomorrow
   var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
   document.getElementById('quickEvDate').value = tomorrow.toISOString().slice(0,10);
 }
@@ -3792,8 +3798,7 @@ function submitQuickEvent(addToGcal) {
   }
 
   // Close modal
-  var overlay = document.querySelector('[style*="position:fixed"][style*="z-index:300"]');
-  if (overlay) overlay.remove();
+  closeQuickAdd();
 }
 
 function openGoogleCalendar(title, date, startTime, endTime) {
@@ -3828,30 +3833,74 @@ function openGoogleCalendar(title, date, startTime, endTime) {
 var origRenderUpcoming = renderUpcoming;
 renderUpcoming = function() {
   var now = new Date(); now.setHours(0,0,0,0);
-  var upcoming = EVENTS.map(function(e) {
+  var upcoming = EVENTS.map(function(e, idx) {
     var d = new Date(e.d + 'T00:00:00');
     var diff = Math.ceil((d - now) / (1000*60*60*24));
-    return Object.assign({}, e, {diff: diff, date: d});
+    return Object.assign({}, e, {diff: diff, date: d, _idx: idx});
   }).filter(function(e) { return e.diff >= 0; }).sort(function(a,b) { return a.diff - b.diff; }).slice(0, 6);
 
   var el = document.getElementById('upcomingList');
   if (!el) return;
-  el.innerHTML = upcoming.map(function(e) {
+  // Store upcoming data for tap handler
+  window._upcomingData = upcoming;
+  el.innerHTML = upcoming.map(function(e, i) {
     var bc = e.c === 'JSB' ? 'b-jsb' : e.c === '幼稚園' ? 'b-yochi' : 'b-common';
     var dayStr = e.diff === 0 ? '今日' : e.diff === 1 ? '明日' : '' + e.diff;
     var dayUnit = e.diff <= 1 ? '' : '<span>日後</span>';
     var mm = e.date.getMonth() + 1, dd = e.date.getDate();
-    var gcalHtml = '<a class="gcal-link" href="javascript:void(0)" onclick="event.stopPropagation();openGoogleCalendar(\'' + escHtml(e.n).replace(/'/g,"\\'") + '\',\'' + e.d + '\',\'' + (e.startTime || '') + '\',\'' + (e.endTime || '') + '\')">&#128197; Googleカレンダーに追加</a>';
-    return '<div class="up-item">' +
+    return '<div class="up-item" onclick="showUpcomingDetail(' + i + ')" style="cursor:pointer;">' +
       '<div class="up-days">' + dayStr + dayUnit + '</div>' +
       '<div class="up-name">' + escHtml(e.n) + '</div>' +
       '<div class="up-date">' + mm + '/' + dd + '</div>' +
       '<span class="badge up-badge ' + bc + '">' + escHtml(e.c) + '</span>' +
-      gcalHtml +
     '</div>';
   }).join('');
   if (upcoming.length === 0) el.innerHTML = '<div style="color:var(--text3);font-size:13px;">直近の予定はありません</div>';
 };
+
+// Upcoming event tap → detail modal
+function showUpcomingDetail(idx) {
+  var e = window._upcomingData && window._upcomingData[idx];
+  if (!e) return;
+  var overlay = document.createElement('div');
+  overlay.id = 'upcomingDetailOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;animation:modalBgIn .2s ease;';
+  overlay.onclick = function(ev) { if (ev.target === overlay) overlay.remove(); };
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:rgba(12,28,16,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:360px;width:90%;animation:modalIn .3s var(--spring);';
+
+  var catColor = e.c === 'JSB' ? '#4a9ede' : e.c === '幼稚園' ? '#e8a040' : '#5cb85c';
+  var days2 = ['日','月','火','水','木','金','土'];
+  var d = new Date(e.d + 'T00:00:00');
+  var dateLabel = (d.getMonth()+1) + '/' + d.getDate() + '（' + days2[d.getDay()] + '）';
+  var dayStr = e.diff === 0 ? '今日' : e.diff === 1 ? '明日' : e.diff + '日後';
+
+  // Build buttons with proper close
+  var closeFn = "document.getElementById('upcomingDetailOverlay').remove()";
+  modal.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+    '<div style="display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + catColor + ';"></span><span style="font-size:16px;font-weight:700;">' + escHtml(e.n) + '</span></div>' +
+    '<span style="cursor:pointer;padding:8px;font-size:18px;color:var(--text2);" onclick="' + closeFn + '">✕</span></div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-bottom:6px;">&#128197; ' + dateLabel + ' <span style="color:' + catColor + ';font-weight:600;">(' + dayStr + ')</span></div>' +
+    '<div style="font-size:12px;color:var(--text3);margin-bottom:6px;">' + escHtml(e.c) + (e.custom ? ' · カスタム予定' : ' · 学校予定') + '</div>' +
+    (e.startTime ? '<div style="font-size:12px;color:var(--text2);margin-bottom:16px;">&#128336; ' + e.startTime + (e.endTime ? ' ~ ' + e.endTime : '') + '</div>' : '<div style="margin-bottom:16px;"></div>') +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+    '<button class="btn btn-primary" style="flex:1;min-height:44px;background:linear-gradient(135deg,#4285f4,#1a6ddb);" onclick="openGoogleCalendar(\'' + escHtml(e.n).replace(/'/g,"\\'") + '\',\'' + e.d + '\',\'' + (e.startTime||'') + '\',\'' + (e.endTime||'') + '\');' + closeFn + '">&#128197; Googleカレンダーに追加</button>' +
+    (e.custom ? '<button class="btn btn-ghost" style="min-height:44px;color:#e05555;border-color:rgba(224,85,85,.3);" onclick="deleteUpcomingEvent(\'' + e.d + '\',\'' + escHtml(e.n).replace(/'/g,"\\'") + '\');' + closeFn + '">削除</button>' : '') +
+    '</div>';
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+}
+
+function deleteUpcomingEvent(date, name) {
+  var idx = customEvents.findIndex(function(ce) { return ce.d === date && ce.n === name; });
+  if (idx >= 0) {
+    customEvents.splice(idx, 1);
+    customEventsRef.set(customEvents);
+  }
+}
+
 // Re-render with new function
 renderUpcoming();
 
@@ -3968,242 +4017,211 @@ function renderBento(who) {
 }
 
 // === Bento Illustration Generator (SVG) ===
-// === Anime-Style Bento Illustration Generator ===
+// === Manga/Anime Bento Illustration (top-down oval box, packed colorful style) ===
 function drawBentoIllustration(svgId, items, who) {
   var svg = document.getElementById(svgId);
   if (!svg) return;
-  // Increase SVG size for detail
-  svg.setAttribute('width', '320');
-  svg.setAttribute('height', '220');
-  svg.setAttribute('viewBox', '0 0 320 220');
+  svg.setAttribute('width', '300');
+  svg.setAttribute('height', '240');
+  svg.setAttribute('viewBox', '0 0 300 240');
 
-  // Anime food item drawing functions
-  var FOOD_DRAW = {
-    // Tamagoyaki (卵焼き) - anime rolled egg
-    egg: function(cx, cy, s) {
-      var w = s * 1.3, h = s * 0.9;
-      return '<defs><linearGradient id="egg' + cx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe566"/><stop offset="100%" stop-color="#f0b830"/></linearGradient></defs>' +
-        '<rect x="' + (cx-w) + '" y="' + (cy-h) + '" width="' + (w*2) + '" height="' + (h*2) + '" rx="' + (h*0.3) + '" fill="url(#egg' + cx + ')" stroke="#d4a020" stroke-width="1.5"/>' +
-        '<line x1="' + (cx-w*0.6) + '" y1="' + (cy-h*0.2) + '" x2="' + (cx+w*0.6) + '" y2="' + (cy-h*0.2) + '" stroke="#e8c840" stroke-width="1" opacity=".6"/>' +
-        '<line x1="' + (cx-w*0.5) + '" y1="' + (cy+h*0.3) + '" x2="' + (cx+w*0.5) + '" y2="' + (cy+h*0.3) + '" stroke="#e8c840" stroke-width="1" opacity=".6"/>' +
-        '<ellipse cx="' + (cx+w*0.3) + '" cy="' + (cy-h*0.5) + '" rx="' + (w*0.25) + '" ry="' + (h*0.2) + '" fill="#fff" opacity=".35"/>';
-    },
-    // Karaage (からあげ) - anime fried chicken
-    fried: function(cx, cy, s) {
-      var r = s;
-      var bumps = '';
-      for (var i = 0; i < 6; i++) {
-        var a = (i / 6) * Math.PI * 2;
-        var bx = cx + Math.cos(a) * r * 0.85;
-        var by = cy + Math.sin(a) * r * 0.85;
-        bumps += '<circle cx="' + bx + '" cy="' + by + '" r="' + (r*0.55) + '" fill="#d48a20"/>';
-      }
-      return '<defs><radialGradient id="fry' + cx + '" cx="35%" cy="35%"><stop offset="0%" stop-color="#f0a840"/><stop offset="100%" stop-color="#b06a10"/></radialGradient></defs>' +
-        bumps +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r*0.7) + '" fill="url(#fry' + cx + ')"/>' +
-        '<circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.25) + '" r="' + (r*0.2) + '" fill="#fff" opacity=".25"/>';
-    },
-    // Broccoli (ブロッコリー) - anime tree-shaped
-    broccoli: function(cx, cy, s) {
-      var r = s * 0.8;
-      return '<rect x="' + (cx-2) + '" y="' + cy + '" width="4" height="' + (r*0.8) + '" rx="2" fill="#5a8a2a"/>' +
-        '<circle cx="' + (cx-r*0.4) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.5) + '" fill="#3a9a3a"/>' +
-        '<circle cx="' + (cx+r*0.4) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.5) + '" fill="#4aaa4a"/>' +
-        '<circle cx="' + cx + '" cy="' + (cy-r*0.4) + '" r="' + (r*0.55) + '" fill="#50b850"/>' +
-        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.55) + '" r="' + (r*0.15) + '" fill="#80e080" opacity=".4"/>';
-    },
-    // Mini tomato
-    tomato: function(cx, cy, s) {
-      var r = s * 0.7;
-      return '<defs><radialGradient id="tom' + cx + '" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff5050"/><stop offset="100%" stop-color="#c02020"/></radialGradient></defs>' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#tom' + cx + ')" stroke="#a01010" stroke-width="1"/>' +
-        '<path d="M' + (cx-3) + ',' + (cy-r+2) + ' Q' + cx + ',' + (cy-r-3) + ' ' + (cx+3) + ',' + (cy-r+2) + '" fill="#3a8a2a" stroke="none"/>' +
-        '<ellipse cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.3) + '" rx="' + (r*0.25) + '" ry="' + (r*0.15) + '" fill="#fff" opacity=".3"/>';
-    },
-    // Wiener/Sausage - octopus wiener style
-    wiener: function(cx, cy, s) {
-      var w = s * 0.5, h = s * 1.1;
-      return '<defs><linearGradient id="wie' + cx + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e85040"/><stop offset="100%" stop-color="#a02020"/></linearGradient></defs>' +
-        '<ellipse cx="' + cx + '" cy="' + (cy-h*0.2) + '" rx="' + w + '" ry="' + (h*0.5) + '" fill="url(#wie' + cx + ')" stroke="#801818" stroke-width="1"/>' +
-        '<path d="M' + (cx-w*0.7) + ',' + (cy+h*0.15) + ' Q' + (cx-w*1.1) + ',' + (cy+h*0.6) + ' ' + (cx-w*0.5) + ',' + (cy+h*0.5) + '" stroke="#c03030" stroke-width="2" fill="none"/>' +
-        '<path d="M' + (cx+w*0.7) + ',' + (cy+h*0.15) + ' Q' + (cx+w*1.1) + ',' + (cy+h*0.6) + ' ' + (cx+w*0.5) + ',' + (cy+h*0.5) + '" stroke="#c03030" stroke-width="2" fill="none"/>' +
-        '<circle cx="' + (cx-w*0.3) + '" cy="' + (cy-h*0.35) + '" r="1.5" fill="#1a1a1a"/>' +
-        '<circle cx="' + (cx+w*0.3) + '" cy="' + (cy-h*0.35) + '" r="1.5" fill="#1a1a1a"/>' +
-        '<ellipse cx="' + (cx-w*0.15) + '" cy="' + (cy-h*0.45) + '" rx="2" ry="1" fill="#fff" opacity=".35"/>';
-    },
-    // Hamburg steak
-    hamburg: function(cx, cy, s) {
-      var w = s * 1.2, h = s * 0.7;
-      return '<defs><radialGradient id="ham' + cx + '" cx="40%" cy="35%"><stop offset="0%" stop-color="#a06040"/><stop offset="100%" stop-color="#5a3020"/></radialGradient></defs>' +
-        '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + w + '" ry="' + h + '" fill="url(#ham' + cx + ')" stroke="#3a2010" stroke-width="1.5"/>' +
-        '<ellipse cx="' + cx + '" cy="' + (cy-h*0.1) + '" rx="' + (w*0.7) + '" ry="' + (h*0.4) + '" fill="#804830" opacity=".4"/>' +
-        '<ellipse cx="' + (cx-w*0.2) + '" cy="' + (cy-h*0.3) + '" rx="' + (w*0.2) + '" ry="' + (h*0.15) + '" fill="#fff" opacity=".2"/>';
-    },
-    // Onigiri (おにぎり)
-    onigiri: function(cx, cy, s) {
-      var r = s;
-      return '<polygon points="' + cx + ',' + (cy-r) + ' ' + (cx+r) + ',' + (cy+r*0.6) + ' ' + (cx-r) + ',' + (cy+r*0.6) + '" fill="#f8f4e8" stroke="#d8d0c0" stroke-width="1.5" stroke-linejoin="round"/>' +
-        '<rect x="' + (cx-r*0.5) + '" y="' + (cy+r*0.05) + '" width="' + r + '" height="' + (r*0.55) + '" rx="2" fill="#1a2a1a"/>' +
-        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.2) + '" r="2" fill="#e08080" opacity=".5"/>';
-    },
-    // Fish (鮭)
-    fish: function(cx, cy, s) {
-      var w = s * 1.3, h = s * 0.7;
-      return '<defs><linearGradient id="fish' + cx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9070"/><stop offset="100%" stop-color="#e06040"/></linearGradient></defs>' +
-        '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + w + '" ry="' + h + '" fill="url(#fish' + cx + ')" stroke="#b04020" stroke-width="1"/>' +
-        '<line x1="' + (cx-w*0.4) + '" y1="' + (cy-h*0.3) + '" x2="' + (cx+w*0.4) + '" y2="' + (cy-h*0.3) + '" stroke="#c05838" stroke-width=".8" opacity=".5"/>' +
-        '<line x1="' + (cx-w*0.3) + '" y1="' + (cy+h*0.1) + '" x2="' + (cx+w*0.3) + '" y2="' + (cy+h*0.1) + '" stroke="#c05838" stroke-width=".8" opacity=".5"/>' +
-        '<ellipse cx="' + (cx-w*0.2) + '" cy="' + (cy-h*0.4) + '" rx="3" ry="2" fill="#fff" opacity=".25"/>';
-    },
-    // Ham/Pink items
-    ham: function(cx, cy, s) {
-      var r = s * 0.8;
-      return '<defs><radialGradient id="hm' + cx + '" cx="40%" cy="35%"><stop offset="0%" stop-color="#ffb0c0"/><stop offset="100%" stop-color="#e07090"/></radialGradient></defs>' +
-        '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#hm' + cx + ')" stroke="#c06080" stroke-width="1"/>' +
-        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.2) + '" r="' + (r*0.2) + '" fill="#fff" opacity=".25"/>';
-    },
-    // Generic round item
-    generic: function(cx, cy, s, color) {
-      return '<defs><radialGradient id="gen' + cx + cy + '" cx="35%" cy="35%"><stop offset="0%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + darken(color, 30) + '"/></radialGradient></defs>' +
-        '<rect x="' + (cx-s*1.1) + '" y="' + (cy-s*0.7) + '" width="' + (s*2.2) + '" height="' + (s*1.4) + '" rx="' + (s*0.4) + '" fill="url(#gen' + cx + cy + ')" stroke="' + darken(color, 50) + '" stroke-width="1"/>' +
-        '<ellipse cx="' + (cx-s*0.3) + '" cy="' + (cy-s*0.3) + '" rx="' + (s*0.3) + '" ry="' + (s*0.15) + '" fill="#fff" opacity=".2"/>';
-    }
-  };
+  // Unique ID prefix to avoid gradient collision
+  var uid = svgId.replace(/[^a-zA-Z0-9]/g,'');
 
-  function darken(hex, amt) {
-    var r = Math.max(0, parseInt(hex.slice(1,3),16) - amt);
-    var g = Math.max(0, parseInt(hex.slice(3,5),16) - amt);
-    var b = Math.max(0, parseInt(hex.slice(5,7),16) - amt);
-    return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
-  }
-
-  // Keyword to draw function mapping
-  function getDrawType(name) {
-    var KW = {
-      egg: ['卵','たまご','玉子','オムレツ','卵焼き','厚焼き'],
-      fried: ['からあげ','唐揚げ','コロッケ','フライ','ナゲット','天ぷら','チキン','竜田'],
-      broccoli: ['ブロッコリー','サラダ','ほうれん草','枝豆','アスパラ','小松菜','野菜'],
-      tomato: ['トマト','ミニトマト','プチトマト'],
-      wiener: ['ウインナー','ソーセージ','ウィンナー','フランク'],
-      hamburg: ['ハンバーグ','ミートボール','肉団子','つくね','肉','焼肉'],
-      onigiri: ['おにぎり','ご飯','ライス','パン','サンドイッチ'],
-      fish: ['鮭','魚','ツナ','えび','しらす','焼き魚','シャケ','たらこ'],
-      ham: ['ハム','ベーコン','かまぼこ','ちくわ','たこ','チーズ','かに'],
+  // Keyword → food type
+  function getFoodType(n) {
+    var map = {
+      egg:['卵','たまご','玉子','オムレツ','卵焼き','厚焼き'],
+      karaage:['からあげ','唐揚げ','チキン','竜田','ナゲット'],
+      broccoli:['ブロッコリー','アスパラ','ほうれん草','小松菜','枝豆','野菜','サラダ'],
+      tomato:['トマト','ミニトマト','プチトマト'],
+      wiener:['ウインナー','ソーセージ','ウィンナー','フランク'],
+      hamburg:['ハンバーグ','ミートボール','肉団子','つくね','肉','焼肉'],
+      onigiri:['おにぎり','ご飯','ライス','パン','サンドイッチ'],
+      fish:['鮭','魚','ツナ','えび','しらす','シャケ','たらこ','焼き魚'],
+      fry:['コロッケ','フライ','天ぷら','エビフライ','メンチ'],
+      ham:['ハム','ベーコン','かまぼこ','ちくわ','たこ','チーズ','かに'],
+      lettuce:['レタス','きゅうり','キャベツ']
     };
-    for (var type in KW) {
-      for (var i = 0; i < KW[type].length; i++) {
-        if (name.indexOf(KW[type][i]) >= 0) return type;
-      }
-    }
+    for (var t in map) for (var i=0;i<map[t].length;i++) if(n.indexOf(map[t][i])>=0) return t;
     return 'generic';
   }
 
-  var GENERIC_COLORS = ['#e8a040','#90b0d0','#c0a080','#b0c090','#d0a0c0','#a0c8c0','#d0b880'];
+  var h = ''; // SVG content
 
-  var html = '';
-  // === Bento Box (anime wood grain) ===
-  // Shadow
-  html += '<ellipse cx="162" cy="210" rx="140" ry="8" fill="rgba(0,0,0,.2)"/>';
-  // Box body
-  html += '<defs><linearGradient id="boxGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6a3a1a"/><stop offset="40%" stop-color="#4a2810"/><stop offset="100%" stop-color="#3a1a08"/></linearGradient></defs>';
-  html += '<rect x="15" y="15" width="290" height="185" rx="12" ry="12" fill="url(#boxGrad)" stroke="#8a5a2a" stroke-width="2.5"/>';
+  // === Defs (gradients, filters) ===
+  h += '<defs>';
+  h += '<radialGradient id="'+uid+'rice" cx="45%" cy="40%"><stop offset="0%" stop-color="#fffdf5"/><stop offset="100%" stop-color="#f5ecd8"/></radialGradient>';
+  h += '<radialGradient id="'+uid+'ume" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff4444"/><stop offset="100%" stop-color="#bb1515"/></radialGradient>';
+  h += '<linearGradient id="'+uid+'egg" x1="0" y1="0" x2=".3" y2="1"><stop offset="0%" stop-color="#ffe86b"/><stop offset="100%" stop-color="#f0b020"/></linearGradient>';
+  h += '<radialGradient id="'+uid+'kara" cx="38%" cy="32%"><stop offset="0%" stop-color="#f0a030"/><stop offset="100%" stop-color="#a06010"/></radialGradient>';
+  h += '<radialGradient id="'+uid+'tom" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff5555"/><stop offset="100%" stop-color="#cc1818"/></radialGradient>';
+  h += '<linearGradient id="'+uid+'wie" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#ee4535"/><stop offset="100%" stop-color="#a01818"/></linearGradient>';
+  h += '<radialGradient id="'+uid+'hamb" cx="40%" cy="35%"><stop offset="0%" stop-color="#9a5a3a"/><stop offset="100%" stop-color="#4a2010"/></radialGradient>';
+  h += '<radialGradient id="'+uid+'fish" cx="40%" cy="30%"><stop offset="0%" stop-color="#ff9a70"/><stop offset="100%" stop-color="#d85030"/></radialGradient>';
+  h += '<radialGradient id="'+uid+'fry" cx="35%" cy="35%"><stop offset="0%" stop-color="#e8a030"/><stop offset="100%" stop-color="#9a6010"/></radialGradient>';
+  h += '<radialGradient id="'+uid+'hm" cx="40%" cy="35%"><stop offset="0%" stop-color="#ffb8c8"/><stop offset="100%" stop-color="#e06888"/></radialGradient>';
+  h += '<filter id="'+uid+'shadow"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity=".25"/></filter>';
+  h += '</defs>';
+
+  // === Bento box (oval, top-down view like reference image) ===
+  var cx=150, cy=120, rx=128, ry=100;
+  // Outer shadow
+  h += '<ellipse cx="' + (cx+3) + '" cy="' + (cy+5) + '" rx="' + rx + '" ry="' + ry + '" fill="rgba(0,0,0,.2)"/>';
+  // Box rim
+  h += '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="#c83" stroke="#964" stroke-width="4"/>';
   // Inner box
-  html += '<rect x="20" y="20" width="280" height="175" rx="9" ry="9" fill="#2a1808" stroke="#5a3a1a" stroke-width="1"/>';
-  // Wood grain texture
-  for (var gi = 0; gi < 4; gi++) {
-    var gy = 30 + gi * 45;
-    html += '<line x1="25" y1="' + gy + '" x2="295" y2="' + gy + '" stroke="#3a2210" stroke-width=".5" opacity=".3"/>';
-  }
-  // Shine on box edge
-  html += '<rect x="20" y="20" width="280" height="6" rx="3" fill="#8a6a3a" opacity=".15"/>';
+  h += '<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+(rx-6)+'" ry="'+(ry-5)+'" fill="#2a1a08" stroke="#5a3818" stroke-width="1.5"/>';
+  // Rim highlight
+  h += '<ellipse cx="'+cx+'" cy="'+(cy-ry+8)+'" rx="'+(rx*0.7)+'" ry="8" fill="#da6" opacity=".15"/>';
 
-  // Divider
-  var divX = 120;
-  html += '<line x1="' + divX + '" y1="25" x2="' + divX + '" y2="190" stroke="#5a3a1a" stroke-width="2.5"/>';
-  html += '<line x1="' + (divX+1) + '" y1="25" x2="' + (divX+1) + '" y2="190" stroke="#8a6a3a" stroke-width="0.5" opacity=".3"/>';
+  // Separate items into rice vs okazu
+  var riceItems = items.filter(function(it){return ['ご飯','おにぎり','ライス'].some(function(k){return it.indexOf(k)>=0;});});
+  var okazuItems = items.filter(function(it){return !['ご飯','おにぎり','ライス'].some(function(k){return it.indexOf(k)>=0;});});
+  if(okazuItems.length===0) okazuItems = items.slice();
 
-  // === Rice section (left) ===
-  // Rice mound
-  html += '<defs><radialGradient id="riceG" cx="45%" cy="40%"><stop offset="0%" stop-color="#fff8f0"/><stop offset="100%" stop-color="#f0e8d8"/></radialGradient></defs>';
-  html += '<ellipse cx="70" cy="105" rx="42" ry="60" fill="url(#riceG)" stroke="#e0d0b0" stroke-width="1"/>';
-  // Rice grain texture (anime style - small curved lines)
-  var grainSeeds = [[50,75],[65,68],[80,78],[55,95],[75,90],[60,110],[82,105],[48,120],[72,125],[62,85],[85,118],[50,105]];
-  for (var gi = 0; gi < grainSeeds.length; gi++) {
-    var gx = grainSeeds[gi][0], gy2 = grainSeeds[gi][1];
-    html += '<ellipse cx="' + gx + '" cy="' + gy2 + '" rx="3" ry="1.5" fill="#e8e0d0" transform="rotate(' + (gi*25) + ' ' + gx + ' ' + gy2 + ')"/>';
+  // === Left half: Rice ===
+  // Rice mound (big area, left of center)
+  h += '<ellipse cx="80" cy="120" rx="55" ry="72" fill="url(#'+uid+'rice)" stroke="#e8dcc0" stroke-width="1"/>';
+  // Rice grain texture
+  var seeds=[[55,80],[72,72],[90,82],[60,105],[82,98],[68,120],[90,115],[55,135],[75,140],[85,130],[65,95],[50,115]];
+  for(var si=0;si<seeds.length;si++){
+    var sx=seeds[si][0],sy=seeds[si][1];
+    h += '<ellipse cx="'+sx+'" cy="'+sy+'" rx="4" ry="1.8" fill="#ede4d0" opacity=".7" transform="rotate('+(si*27)+' '+sx+' '+sy+')"/>';
   }
-  // Umeboshi or decoration
-  if (who === 'satsuki') {
-    // Cute umeboshi with face (anime style)
-    html += '<defs><radialGradient id="umeG" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff5050"/><stop offset="100%" stop-color="#c02020"/></radialGradient></defs>';
-    html += '<circle cx="70" cy="95" r="10" fill="url(#umeG)" stroke="#a01818" stroke-width="1"/>';
-    html += '<circle cx="70" cy="95" r="8" fill="none" stroke="#e04040" stroke-width=".5" opacity=".4"/>';
-    // Cute wrinkle lines
-    html += '<path d="M65,93 Q70,96 75,93" stroke="#a02020" stroke-width=".8" fill="none" opacity=".5"/>';
-    html += '<circle cx="68" cy="95" r="1.5" fill="#fff" opacity=".35"/>';
+  // Umeboshi (satsuki) or nori (hayato)
+  if(who==='satsuki'){
+    h += '<circle cx="78" cy="110" r="14" fill="url(#'+uid+'ume)" stroke="#901010" stroke-width="1.5"/>';
+    h += '<path d="M71,107 Q78,112 85,107" stroke="#a02020" fill="none" stroke-width="1" opacity=".6"/>';
+    h += '<path d="M73,113 Q78,116 83,113" stroke="#a02020" fill="none" stroke-width=".8" opacity=".4"/>';
+    h += '<ellipse cx="74" cy="105" rx="3.5" ry="2" fill="#fff" opacity=".3"/>';
   } else {
-    // Nori strip (海苔)
-    html += '<rect x="50" y="82" width="40" height="22" rx="2" fill="#1a2a1a" stroke="#0a1a0a" stroke-width=".5"/>';
-    html += '<rect x="52" y="84" width="36" height="18" rx="1" fill="none" stroke="#2a3a2a" stroke-width=".3"/>';
-    // Sesame seeds
-    html += '<ellipse cx="62" cy="90" rx="1.5" ry="1" fill="#f0e8c0" transform="rotate(20 62 90)"/>';
-    html += '<ellipse cx="78" cy="88" rx="1.5" ry="1" fill="#f0e8c0" transform="rotate(-15 78 88)"/>';
-    html += '<ellipse cx="70" cy="96" rx="1.5" ry="1" fill="#1a1a1a" transform="rotate(30 70 96)"/>';
+    h += '<rect x="58" y="98" width="44" height="25" rx="3" fill="#1a2a18" stroke="#0a1a0a" stroke-width=".8"/>';
+    h += '<ellipse cx="70" cy="107" rx="2" ry="1.2" fill="#f0e8c0" transform="rotate(20 70 107)"/>';
+    h += '<ellipse cx="84" cy="105" rx="2" ry="1.2" fill="#f0e8c0" transform="rotate(-15 84 105)"/>';
+    h += '<ellipse cx="76" cy="115" rx="2" ry="1.2" fill="#222" transform="rotate(30 76 115)"/>';
   }
 
-  // === Okazu section (right) ===
-  var okazuItems = items.filter(function(it) { return !['ご飯','おにぎり','ライス'].some(function(r){return it.indexOf(r)>=0;}); });
-  if (okazuItems.length === 0) okazuItems = items.slice();
-  var maxItems = Math.min(okazuItems.length, 6);
-  var areaW = 280 - divX;
-  var areaH = 160;
+  // === Green baran divider ===
+  h += '<path d="M120,50 Q128,35 136,52 Q142,30 150,48 Q156,32 162,55 L162,190 Q155,200 148,188 Q140,200 133,190 Q126,198 120,188 Z" fill="#30aa30" stroke="#1a8a1a" stroke-width="1" opacity=".85"/>';
+  h += '<path d="M125,60 Q132,48 138,58 Q143,42 148,56 Q153,44 158,62" fill="none" stroke="#50cc50" stroke-width=".8" opacity=".5"/>';
 
-  // Layout positions based on item count
-  var positions;
-  if (maxItems <= 2) {
-    positions = [{x:divX+areaW*0.5, y:60, s:22}, {x:divX+areaW*0.5, y:140, s:22}];
-  } else if (maxItems <= 3) {
-    positions = [{x:divX+areaW*0.35, y:55, s:19}, {x:divX+areaW*0.7, y:55, s:19}, {x:divX+areaW*0.5, y:135, s:19}];
-  } else if (maxItems <= 4) {
-    positions = [{x:divX+areaW*0.3, y:55, s:17}, {x:divX+areaW*0.7, y:55, s:17}, {x:divX+areaW*0.3, y:140, s:17}, {x:divX+areaW*0.7, y:140, s:17}];
-  } else {
-    positions = [{x:divX+areaW*0.25, y:50, s:15}, {x:divX+areaW*0.6, y:45, s:15}, {x:divX+areaW*0.85, y:55, s:14}, {x:divX+areaW*0.2, y:120, s:15}, {x:divX+areaW*0.55, y:125, s:15}, {x:divX+areaW*0.85, y:130, s:14}];
-  }
+  // === Right half: Okazu (packed tight) ===
+  var maxO = Math.min(okazuItems.length, 7);
+  // Pre-defined positions in right half (packed, overlapping slightly)
+  var SLOTS = [
+    {x:185,y:62,s:24},{x:230,y:70,s:22},{x:210,y:108,s:26},{x:250,y:110,s:20},
+    {x:178,y:145,s:22},{x:220,y:152,s:24},{x:255,y:148,s:18}
+  ];
 
-  // Green divider cup (baran) - anime style
-  if (maxItems > 2) {
-    var baranX = divX + areaW * 0.5;
-    html += '<path d="M' + (baranX-20) + ',95 Q' + (baranX-10) + ',75 ' + baranX + ',90 Q' + (baranX+10) + ',70 ' + (baranX+20) + ',88 L' + (baranX+20) + ',100 L' + (baranX-20) + ',100 Z" fill="#40a840" stroke="#2a8a2a" stroke-width=".8" opacity=".7"/>';
-  }
+  // Draw food items
+  for(var oi=0;oi<maxO;oi++){
+    var p = SLOTS[oi];
+    var fname = okazuItems[oi];
+    var ft = getFoodType(fname);
+    var u = uid + oi;
 
-  for (var oi = 0; oi < maxItems; oi++) {
-    var pos = positions[oi];
-    var name = okazuItems[oi];
-    var dtype = getDrawType(name);
-    var drawFn = FOOD_DRAW[dtype];
-
-    if (dtype === 'generic') {
-      html += drawFn(pos.x, pos.y, pos.s, GENERIC_COLORS[oi % GENERIC_COLORS.length]);
+    if(ft==='egg'){
+      // Tamagoyaki - thick rolled slices
+      h += '<rect x="'+(p.x-p.s*1.2)+'" y="'+(p.y-p.s*0.8)+'" width="'+(p.s*2.4)+'" height="'+(p.s*1.6)+'" rx="'+(p.s*0.3)+'" fill="url(#'+uid+'egg)" stroke="#c89a10" stroke-width="2"/>';
+      h += '<line x1="'+(p.x-p.s*0.8)+'" y1="'+(p.y-p.s*0.15)+'" x2="'+(p.x+p.s*0.8)+'" y2="'+(p.y-p.s*0.15)+'" stroke="#ddb830" stroke-width="1.5" opacity=".7"/>';
+      h += '<line x1="'+(p.x-p.s*0.7)+'" y1="'+(p.y+p.s*0.35)+'" x2="'+(p.x+p.s*0.7)+'" y2="'+(p.y+p.s*0.35)+'" stroke="#ddb830" stroke-width="1" opacity=".5"/>';
+      h += '<ellipse cx="'+(p.x+p.s*0.5)+'" cy="'+(p.y-p.s*0.4)+'" rx="'+(p.s*0.3)+'" ry="'+(p.s*0.15)+'" fill="#fff" opacity=".35"/>';
+    } else if(ft==='karaage'){
+      // Cluster of fried chunks
+      var offsets=[[-0.4,-0.3],[0.3,-0.2],[0,0.3],[-0.2,0.1],[0.2,-0.4]];
+      for(var ki=0;ki<4;ki++){
+        var kx=p.x+offsets[ki][0]*p.s, ky=p.y+offsets[ki][1]*p.s, kr=p.s*0.48;
+        h += '<circle cx="'+kx+'" cy="'+ky+'" r="'+kr+'" fill="url(#'+uid+'kara)" stroke="#8a5a10" stroke-width="1.5"/>';
+        h += '<ellipse cx="'+(kx-kr*0.2)+'" cy="'+(ky-kr*0.3)+'" rx="'+(kr*0.3)+'" ry="'+(kr*0.15)+'" fill="#fff" opacity=".25"/>';
+      }
+    } else if(ft==='broccoli'){
+      // Tree cluster
+      h += '<rect x="'+(p.x-2)+'" y="'+(p.y+2)+'" width="4" height="'+(p.s*0.5)+'" rx="2" fill="#4a7a2a"/>';
+      var bpos=[[-0.35,-0.15],[0.35,-0.15],[0,-0.45],[-0.2,0.1],[0.2,0.1]];
+      for(var bi=0;bi<5;bi++){
+        var bx=p.x+bpos[bi][0]*p.s, by=p.y+bpos[bi][1]*p.s, br=p.s*0.32;
+        h += '<circle cx="'+bx+'" cy="'+by+'" r="'+br+'" fill="'+(bi<3?'#40aa40':'#35903a')+'"/>';
+      }
+      h += '<circle cx="'+(p.x-p.s*0.1)+'" cy="'+(p.y-p.s*0.5)+'" r="'+(p.s*0.12)+'" fill="#80ee80" opacity=".4"/>';
+    } else if(ft==='tomato'){
+      var tr=p.s*0.55;
+      h += '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+tr+'" fill="url(#'+uid+'tom)" stroke="#a01010" stroke-width="1.5"/>';
+      h += '<path d="M'+(p.x-4)+','+(p.y-tr+3)+' Q'+p.x+','+(p.y-tr-4)+' '+(p.x+4)+','+(p.y-tr+3)+'" fill="#2a8a1a" stroke="none"/>';
+      h += '<line x1="'+p.x+'" y1="'+(p.y-tr+1)+'" x2="'+p.x+'" y2="'+(p.y-tr-2)+'" stroke="#3a6a2a" stroke-width="1.5"/>';
+      h += '<ellipse cx="'+(p.x-tr*0.3)+'" cy="'+(p.y-tr*0.35)+'" rx="'+(tr*0.3)+'" ry="'+(tr*0.2)+'" fill="#fff" opacity=".35"/>';
+    } else if(ft==='wiener'){
+      // Octopus wiener
+      var wr=p.s*0.4, wh=p.s*0.8;
+      h += '<ellipse cx="'+p.x+'" cy="'+(p.y-wh*0.15)+'" rx="'+wr+'" ry="'+(wh*0.45)+'" fill="url(#'+uid+'wie)" stroke="#801010" stroke-width="1.5"/>';
+      // Legs
+      h += '<path d="M'+(p.x-wr*0.7)+','+(p.y+wh*0.15)+' Q'+(p.x-wr*1.3)+','+(p.y+wh*0.5)+' '+(p.x-wr*0.5)+','+(p.y+wh*0.55)+'" stroke="#c02020" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+      h += '<path d="M'+(p.x+wr*0.7)+','+(p.y+wh*0.15)+' Q'+(p.x+wr*1.3)+','+(p.y+wh*0.5)+' '+(p.x+wr*0.5)+','+(p.y+wh*0.55)+'" stroke="#c02020" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+      h += '<path d="M'+p.x+','+(p.y+wh*0.2)+' Q'+p.x+','+(p.y+wh*0.6)+' '+(p.x+2)+','+(p.y+wh*0.55)+'" stroke="#c02020" stroke-width="2" fill="none" stroke-linecap="round"/>';
+      // Face
+      h += '<circle cx="'+(p.x-wr*0.3)+'" cy="'+(p.y-wh*0.25)+'" r="2" fill="#111"/>';
+      h += '<circle cx="'+(p.x+wr*0.3)+'" cy="'+(p.y-wh*0.25)+'" r="2" fill="#111"/>';
+      h += '<ellipse cx="'+(p.x-wr*0.2)+'" cy="'+(p.y-wh*0.35)+'" rx="1.5" ry="1" fill="#fff" opacity=".4"/>';
+      h += '<path d="M'+(p.x-3)+','+(p.y-wh*0.05)+' Q'+p.x+','+(p.y+wh*0.05)+' '+(p.x+3)+','+(p.y-wh*0.05)+'" stroke="#111" stroke-width="1" fill="none"/>';
+    } else if(ft==='hamburg'){
+      var hw=p.s*1.1, hh=p.s*0.65;
+      h += '<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+hw+'" ry="'+hh+'" fill="url(#'+uid+'hamb)" stroke="#2a1008" stroke-width="2"/>';
+      // Grill lines
+      h += '<line x1="'+(p.x-hw*0.6)+'" y1="'+(p.y-hh*0.2)+'" x2="'+(p.x+hw*0.6)+'" y2="'+(p.y-hh*0.2)+'" stroke="#3a1a08" stroke-width="1.5" opacity=".3"/>';
+      h += '<line x1="'+(p.x-hw*0.5)+'" y1="'+(p.y+hh*0.3)+'" x2="'+(p.x+hw*0.5)+'" y2="'+(p.y+hh*0.3)+'" stroke="#3a1a08" stroke-width="1" opacity=".25"/>';
+      h += '<ellipse cx="'+(p.x-hw*0.25)+'" cy="'+(p.y-hh*0.35)+'" rx="'+(hw*0.2)+'" ry="'+(hh*0.15)+'" fill="#fff" opacity=".15"/>';
+      // Sauce drizzle
+      h += '<path d="M'+(p.x-hw*0.3)+','+(p.y-hh*0.5)+' Q'+p.x+','+(p.y-hh*0.7)+' '+(p.x+hw*0.4)+','+(p.y-hh*0.4)+'" stroke="#cc3300" stroke-width="2" fill="none" opacity=".6"/>';
+    } else if(ft==='fish'){
+      var fw=p.s*1.2, fh=p.s*0.7;
+      h += '<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+fw+'" ry="'+fh+'" fill="url(#'+uid+'fish)" stroke="#a03018" stroke-width="1.5"/>';
+      h += '<line x1="'+(p.x-fw*0.5)+'" y1="'+(p.y-fh*0.2)+'" x2="'+(p.x+fw*0.5)+'" y2="'+(p.y-fh*0.2)+'" stroke="#c05030" stroke-width="1" opacity=".4"/>';
+      h += '<line x1="'+(p.x-fw*0.4)+'" y1="'+(p.y+fh*0.2)+'" x2="'+(p.x+fw*0.4)+'" y2="'+(p.y+fh*0.2)+'" stroke="#c05030" stroke-width="1" opacity=".3"/>';
+      h += '<ellipse cx="'+(p.x-fw*0.3)+'" cy="'+(p.y-fh*0.4)+'" rx="4" ry="2.5" fill="#fff" opacity=".25"/>';
+    } else if(ft==='fry'){
+      // Croquette / fry
+      h += '<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+(p.s*1)+'" ry="'+(p.s*0.6)+'" fill="url(#'+uid+'fry)" stroke="#805010" stroke-width="2"/>';
+      for(var fi=0;fi<5;fi++){
+        var fx=p.x-p.s*0.5+Math.random()*p.s, fy=p.y-p.s*0.3+Math.random()*p.s*0.6;
+        h += '<circle cx="'+fx+'" cy="'+fy+'" r="1.5" fill="#b07818" opacity=".5"/>';
+      }
+      h += '<ellipse cx="'+(p.x-p.s*0.2)+'" cy="'+(p.y-p.s*0.3)+'" rx="'+(p.s*0.25)+'" ry="'+(p.s*0.1)+'" fill="#fff" opacity=".2"/>';
+    } else if(ft==='ham'){
+      var hr2=p.s*0.6;
+      h += '<circle cx="'+p.x+'" cy="'+p.y+'" r="'+hr2+'" fill="url(#'+uid+'hm)" stroke="#b05070" stroke-width="1.5"/>';
+      h += '<ellipse cx="'+(p.x-hr2*0.2)+'" cy="'+(p.y-hr2*0.25)+'" rx="'+(hr2*0.25)+'" ry="'+(hr2*0.15)+'" fill="#fff" opacity=".3"/>';
+    } else if(ft==='lettuce'){
+      // Leafy lettuce
+      h += '<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+(p.s*0.9)+'" ry="'+(p.s*0.6)+'" fill="#60c040" stroke="#40a030" stroke-width="1"/>';
+      h += '<path d="M'+(p.x-p.s*0.5)+','+p.y+' Q'+p.x+','+(p.y-p.s*0.4)+' '+(p.x+p.s*0.5)+','+p.y+'" fill="none" stroke="#80e060" stroke-width="1" opacity=".5"/>';
+      h += '<ellipse cx="'+p.x+'" cy="'+(p.y-p.s*0.2)+'" rx="'+(p.s*0.15)+'" ry="'+(p.s*0.08)+'" fill="#a0ff80" opacity=".3"/>';
     } else {
-      html += drawFn(pos.x, pos.y, pos.s);
+      // Generic colorful item
+      var gColors=['#e8a040','#90b8e0','#c0a880','#b8c898','#d8a0c8','#a8d0c0'];
+      var gc = gColors[oi%gColors.length];
+      h += '<ellipse cx="'+p.x+'" cy="'+p.y+'" rx="'+(p.s*0.9)+'" ry="'+(p.s*0.6)+'" fill="'+gc+'" stroke="'+ gc.replace(/[89abcdef]/g,function(c){return String.fromCharCode(c.charCodeAt(0)-3);}) +'" stroke-width="1.5"/>';
+      h += '<ellipse cx="'+(p.x-p.s*0.2)+'" cy="'+(p.y-p.s*0.2)+'" rx="'+(p.s*0.2)+'" ry="'+(p.s*0.1)+'" fill="#fff" opacity=".2"/>';
     }
-    // Label (anime-style with bg)
-    var lbl = name.length > 5 ? name.substring(0,4) + '..' : name;
-    html += '<rect x="' + (pos.x - lbl.length * 3.5 - 4) + '" y="' + (pos.y + pos.s + 3) + '" width="' + (lbl.length * 7 + 8) + '" height="12" rx="6" fill="rgba(0,0,0,.45)"/>';
-    html += '<text x="' + pos.x + '" y="' + (pos.y + pos.s + 12) + '" text-anchor="middle" font-size="7.5" fill="#f0e8d0" font-weight="600" font-family="\'Noto Serif JP\',serif">' + escHtml(lbl) + '</text>';
+
+    // Label
+    var lbl = fname.length > 5 ? fname.substring(0,4)+'..' : fname;
+    var lw = lbl.length * 7.5 + 10;
+    h += '<rect x="'+(p.x-lw/2)+'" y="'+(p.y+p.s*0.7+1)+'" width="'+lw+'" height="14" rx="7" fill="rgba(0,0,0,.55)"/>';
+    h += '<text x="'+p.x+'" y="'+(p.y+p.s*0.7+11.5)+'" text-anchor="middle" font-size="8" fill="#fff" font-weight="600">'+escHtml(lbl)+'</text>';
   }
 
-  // Person name badge (anime nameplate)
-  var personLabel = who === 'satsuki' ? 'さつき' : 'はやと';
-  var badgeColor = who === 'satsuki' ? '#e8a040' : '#4a9ede';
-  html += '<rect x="240" y="3" width="70" height="16" rx="8" fill="' + badgeColor + '" opacity=".9"/>';
-  html += '<text x="275" y="14" text-anchor="middle" font-size="8" fill="#fff" font-weight="700" font-family="\'Noto Serif JP\',serif">' + personLabel + '</text>';
+  // Name badge
+  var pLabel = who==='satsuki' ? 'さつき' : 'はやと';
+  var bCol = who==='satsuki' ? '#e8a040' : '#4a9ede';
+  h += '<rect x="215" y="8" width="75" height="20" rx="10" fill="'+bCol+'" filter="url(#'+uid+'shadow)"/>';
+  h += '<text x="252" y="22" text-anchor="middle" font-size="10" fill="#fff" font-weight="700" font-family="\'Noto Serif JP\',serif">'+pLabel+'</text>';
 
-  // Sparkle decorations (anime kawaii)
-  html += '<text x="25" y="14" font-size="10" opacity=".6">✨</text>';
-  html += '<text x="300" y="200" font-size="8" opacity=".4">🌸</text>';
+  // Sparkles
+  h += '<text x="18" y="22" font-size="14" opacity=".5">✨</text>';
+  h += '<text x="268" y="228" font-size="10" opacity=".4">🌸</text>';
+  if(who==='satsuki') h += '<text x="38" y="228" font-size="10" opacity=".3">🎀</text>';
 
-  svg.innerHTML = html;
+  svg.innerHTML = h;
 }
 
 // Bento input enter key
