@@ -3728,9 +3728,9 @@ function viewScheduleImage(type) {
       replaceRow.style.cssText = 'display:flex;gap:8px;';
       var replaceBtn = document.createElement('label');
       replaceBtn.style.cssText = 'padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;';
-      replaceBtn.textContent = '📷 画像を差し替え';
+      replaceBtn.textContent = '📷 画像/PDFを差し替え';
       var replaceInput = document.createElement('input');
-      replaceInput.type = 'file'; replaceInput.accept = 'image/*'; replaceInput.style.display = 'none';
+      replaceInput.type = 'file'; replaceInput.accept = 'image/*,application/pdf'; replaceInput.style.display = 'none';
       replaceInput.onchange = function() { uploadScheduleImage(t, replaceInput, function() { showSchedule(t); }); };
       replaceBtn.appendChild(replaceInput);
       var delBtn = document.createElement('button');
@@ -3746,9 +3746,9 @@ function viewScheduleImage(type) {
       var label = t === 'jsb' ? 'JSB（中学部）' : '幼稚園';
       msg.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📷</div>' +
         '<div style="font-weight:700;margin-bottom:8px;font-size:16px;">' + label + ' 年間予定表</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:20px;">学校から配布された年間予定表のスキャン画像や写真をアップロードしてください。</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:20px;">学校から配布された年間予定表の画像またはPDFをアップロードしてください。</div>' +
         '<label style="display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#5cb85c,#3a8a3a);color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(92,184,92,.3);">' +
-        '📸 画像をアップロード<input type="file" accept="image/*" style="display:none;" onchange="uploadScheduleImage(\'' + t + '\',this,function(){document.querySelector(\'.img-viewer-overlay\').remove();viewScheduleImage(\'' + t + '\');})"></label>';
+        '📸 画像 / PDF をアップロード<input type="file" accept="image/*,application/pdf" style="display:none;" onchange="uploadScheduleImage(\'' + t + '\',this,function(){document.querySelector(\'.img-viewer-overlay\').remove();viewScheduleImage(\'' + t + '\');})"></label>';
       contentArea.appendChild(msg);
     }
   }
@@ -3771,28 +3771,120 @@ function viewScheduleImage(type) {
 function uploadScheduleImage(type, input, callback) {
   var file = input.files[0];
   if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function() {
-    // Resize if too large (max 1600px)
-    var img = new Image();
-    img.onload = function() {
-      var maxDim = 1600;
-      var w = img.width, h = img.height;
-      if (w > maxDim || h > maxDim) {
-        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
-        else { w = Math.round(w * maxDim / h); h = maxDim; }
-      }
-      var canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      scheduleImages[type] = dataUrl;
-      saveScheduleImages();
-      if (callback) callback();
+
+  if (file.type === 'application/pdf') {
+    // PDF: render all pages to a single tall image using pdf.js
+    uploadSchedulePdf(type, file, callback);
+  } else {
+    // Image: resize and save
+    var reader = new FileReader();
+    reader.onload = function() {
+      var img = new Image();
+      img.onload = function() {
+        var maxDim = 1600;
+        var w = img.width, h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        var canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        scheduleImages[type] = dataUrl;
+        saveScheduleImages();
+        if (callback) callback();
+      };
+      img.src = reader.result;
     };
-    img.src = reader.result;
+    reader.readAsDataURL(file);
+  }
+}
+
+// PDF → image conversion using pdf.js (CDN)
+var pdfJsLoaded = false;
+function loadPdfJs(cb) {
+  if (pdfJsLoaded) { cb(); return; }
+  var script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  script.onload = function() {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfJsLoaded = true;
+    cb();
   };
-  reader.readAsDataURL(file);
+  script.onerror = function() { alert('PDF.jsの読み込みに失敗しました。インターネット接続を確認してください。'); };
+  document.head.appendChild(script);
+}
+
+function uploadSchedulePdf(type, file, callback) {
+  // Show loading indicator
+  var loadingEl = document.createElement('div');
+  loadingEl.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;';
+  loadingEl.innerHTML = '<div style="text-align:center;"><div style="font-size:32px;margin-bottom:12px;animation:pulse 1.5s infinite;">📄</div>PDFを処理中...</div>';
+  document.body.appendChild(loadingEl);
+
+  loadPdfJs(function() {
+    var reader = new FileReader();
+    reader.onload = function() {
+      var typedarray = new Uint8Array(reader.result);
+      pdfjsLib.getDocument(typedarray).promise.then(function(pdf) {
+        var numPages = pdf.numPages;
+        var scale = 2; // High resolution
+        var canvases = [];
+        var totalHeight = 0;
+        var maxWidth = 0;
+
+        // Render each page
+        var renderPage = function(pageNum) {
+          pdf.getPage(pageNum).then(function(page) {
+            var viewport = page.getViewport({ scale: scale });
+            var canvas = document.createElement('canvas');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            var ctx = canvas.getContext('2d');
+
+            page.render({ canvasContext: ctx, viewport: viewport }).promise.then(function() {
+              canvases.push(canvas);
+              totalHeight += canvas.height;
+              if (canvas.width > maxWidth) maxWidth = canvas.width;
+
+              if (pageNum < numPages) {
+                renderPage(pageNum + 1);
+              } else {
+                // Combine all pages into one tall canvas
+                var combined = document.createElement('canvas');
+                // Limit max dimensions for storage
+                var scaleFactor = 1;
+                if (maxWidth > 1400) scaleFactor = 1400 / maxWidth;
+                combined.width = Math.round(maxWidth * scaleFactor);
+                combined.height = Math.round(totalHeight * scaleFactor);
+                var cctx = combined.getContext('2d');
+                var yOffset = 0;
+                for (var i = 0; i < canvases.length; i++) {
+                  var cw = Math.round(canvases[i].width * scaleFactor);
+                  var ch = Math.round(canvases[i].height * scaleFactor);
+                  cctx.drawImage(canvases[i], 0, yOffset, cw, ch);
+                  yOffset += ch;
+                }
+
+                var dataUrl = combined.toDataURL('image/jpeg', 0.88);
+                scheduleImages[type] = dataUrl;
+                saveScheduleImages();
+                loadingEl.remove();
+                if (callback) callback();
+              }
+            });
+          });
+        };
+
+        renderPage(1);
+      }).catch(function(err) {
+        loadingEl.remove();
+        alert('PDFの読み込みに失敗しました: ' + err.message);
+      });
+    };
+    reader.readAsArrayBuffer(file);
+  });
 }
 
 function saveScheduleImages() {
