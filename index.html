@@ -1149,6 +1149,123 @@ body {
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(92,184,92,.15); border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(92,184,92,.3); }
+
+/* === Image Viewer Modal === */
+.img-viewer-overlay {
+  position:fixed; inset:0; z-index:500; background:rgba(0,0,0,.85);
+  display:flex; align-items:center; justify-content:center;
+  animation:modalBgIn .3s ease; cursor:zoom-out;
+}
+.img-viewer-overlay img {
+  max-width:95vw; max-height:90vh; object-fit:contain; border-radius:8px;
+  box-shadow:0 8px 40px rgba(0,0,0,.6); animation:modalIn .3s var(--spring);
+}
+.img-viewer-close {
+  position:absolute; top:16px; right:16px; width:44px; height:44px;
+  border:none; border-radius:50%; background:rgba(255,255,255,.15);
+  color:#fff; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:background .2s;
+}
+.img-viewer-close:hover { background:rgba(255,255,255,.3); }
+.img-viewer-tabs {
+  position:absolute; top:16px; left:50%; transform:translateX(-50%);
+  display:flex; gap:6px;
+}
+.img-viewer-tab {
+  padding:8px 16px; border-radius:20px; font-size:12px; font-weight:600;
+  border:1px solid rgba(255,255,255,.3); background:rgba(255,255,255,.1);
+  color:#fff; cursor:pointer; transition:all .2s;
+}
+.img-viewer-tab.active { background:rgba(92,184,92,.6); border-color:rgba(92,184,92,.8); }
+.view-schedule-btn {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:6px 14px; border-radius:8px; font-size:11px; font-weight:600;
+  border:1px solid rgba(92,184,92,.25); background:rgba(92,184,92,.08);
+  color:#80d080; cursor:pointer; transition:all .2s var(--ease);
+  font-family:inherit;
+}
+.view-schedule-btn:hover { background:rgba(92,184,92,.15); border-color:rgba(92,184,92,.4); }
+
+/* === Bento Memo === */
+.bento-tabs { display:flex; gap:6px; margin-bottom:16px; }
+.bento-tab {
+  padding:10px 18px; border-radius:20px; font-size:13px; font-weight:600;
+  border:1px solid var(--glass-border); background:var(--glass); color:var(--text2);
+  cursor:pointer; transition:all .2s var(--ease); font-family:inherit;
+  min-height:44px;
+}
+.bento-tab.active { background:rgba(92,184,92,.12); color:var(--accent3); border-color:rgba(92,184,92,.25); }
+
+.bento-section { display:none; }
+.bento-section.active { display:block; }
+
+.bento-starters {
+  display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px;
+}
+.bento-starter-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:6px 12px; border-radius:20px; font-size:12px; font-weight:500;
+  background:rgba(92,184,92,.08); border:1px solid rgba(92,184,92,.15);
+  color:var(--text); cursor:default; transition:all .2s;
+}
+.bento-starter-chip .chip-del {
+  width:18px; height:18px; border-radius:50%; border:none;
+  background:rgba(255,255,255,.08); color:var(--text3); font-size:12px;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  transition:all .2s;
+}
+.bento-starter-chip .chip-del:hover { background:rgba(224,85,85,.2); color:#e05555; }
+
+.bento-pattern {
+  background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm);
+  padding:14px; margin-bottom:10px; transition:all .2s var(--ease);
+}
+.bento-pattern:hover { border-color:rgba(92,184,92,.2); }
+.bento-pattern-header {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+}
+.bento-pattern-name { font-size:14px; font-weight:700; }
+.bento-pattern-actions { display:flex; gap:4px; }
+.bento-pattern-actions button {
+  border:none; background:rgba(255,255,255,.05); cursor:pointer; font-size:12px;
+  padding:6px 8px; border-radius:6px; color:var(--text2); transition:all .2s;
+}
+.bento-pattern-actions button:hover { background:rgba(255,255,255,.1); color:var(--text); }
+.bento-items-list { font-size:12px; color:var(--text2); margin-bottom:8px; }
+.bento-illustration {
+  background:rgba(18,35,22,.4); border-radius:12px; padding:8px;
+  display:flex; justify-content:center;
+}
+
+.bento-add-form {
+  display:flex; gap:6px; flex-wrap:wrap; padding-top:12px;
+  border-top:1px solid var(--glass-border); margin-top:12px;
+}
+.bento-add-form input {
+  flex:1; min-width:150px; padding:10px 14px; border:1px solid var(--glass-border);
+  border-radius:8px; background:var(--glass); color:var(--text);
+  font-size:13px; font-family:inherit; outline:none;
+}
+
+/* === Upcoming Add Button === */
+.upcoming-add-btn {
+  flex-shrink:0; width:44px; height:44px; border-radius:50%;
+  border:2px dashed rgba(92,184,92,.3); background:rgba(92,184,92,.05);
+  color:var(--accent3); font-size:22px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .2s var(--spring); align-self:center;
+}
+.upcoming-add-btn:hover { border-color:rgba(92,184,92,.5); background:rgba(92,184,92,.1); transform:scale(1.1); }
+
+/* Google Calendar link */
+.gcal-link {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:4px 10px; border-radius:6px; font-size:10px; font-weight:600;
+  background:rgba(66,133,244,.1); border:1px solid rgba(66,133,244,.2);
+  color:#7aadff; cursor:pointer; transition:all .2s; text-decoration:none;
+  margin-top:4px;
+}
+.gcal-link:hover { background:rgba(66,133,244,.2); }
 </style>
 </head>
 <body>
@@ -1354,7 +1471,7 @@ body {
 
   <!-- Upcoming Events -->
   <div class="upcoming">
-    <div class="upcoming-title">&#128308; 直近の予定</div>
+    <div class="upcoming-title" style="display:flex;align-items:center;justify-content:space-between;">&#128308; 直近の予定<button class="upcoming-add-btn" onclick="showQuickAddEvent()" title="予定を追加">+</button></div>
     <div class="upcoming-list" id="upcomingList"></div>
   </div>
 
@@ -1480,6 +1597,60 @@ body {
     </div>
   </div>
 
+  <!-- TAB: Bento Memo -->
+  <div class="tab-panel" id="panel-bento">
+    <div class="sec">
+      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#e8a040,#d48020);">&#127857;</div>お弁当メモ</div>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:12px;">よく作るおかずを登録して、お弁当パターンを管理できます。</p>
+      <div class="bento-tabs">
+        <button class="bento-tab active" onclick="switchBentoTab('satsuki')">&#127800; さつき</button>
+        <button class="bento-tab" onclick="switchBentoTab('hayato')">&#127979; はやと</button>
+      </div>
+
+      <!-- さつき -->
+      <div class="bento-section active" id="bentoSec-satsuki">
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">&#11088; スタメンおかず</div>
+          <div class="bento-starters" id="bentoStarters-satsuki"></div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <input type="text" id="bentoStarterInput-satsuki" placeholder="おかず名を入力..." style="flex:1;padding:8px 12px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:12px;font-family:inherit;outline:none;">
+            <button class="btn btn-primary" onclick="addBentoStarter('satsuki')" style="padding:8px 14px;font-size:12px;">+ 登録</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">&#127857; お弁当パターン</div>
+          <div id="bentoPatterns-satsuki"></div>
+          <div class="bento-add-form">
+            <input type="text" id="bentoPatternName-satsuki" placeholder="パターン名（例: 月曜定番）">
+            <input type="text" id="bentoPatternItems-satsuki" placeholder="おかず（カンマ区切り: 卵焼き,ウインナー,...）" style="min-width:200px;">
+            <button class="btn btn-primary" onclick="addBentoPattern('satsuki')">+ パターン追加</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- はやと -->
+      <div class="bento-section" id="bentoSec-hayato">
+        <div style="margin-bottom:16px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">&#11088; スタメンおかず</div>
+          <div class="bento-starters" id="bentoStarters-hayato"></div>
+          <div style="display:flex;gap:6px;margin-top:6px;">
+            <input type="text" id="bentoStarterInput-hayato" placeholder="おかず名を入力..." style="flex:1;padding:8px 12px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:12px;font-family:inherit;outline:none;">
+            <button class="btn btn-primary" onclick="addBentoStarter('hayato')" style="padding:8px 14px;font-size:12px;">+ 登録</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;">&#127857; お弁当パターン</div>
+          <div id="bentoPatterns-hayato"></div>
+          <div class="bento-add-form">
+            <input type="text" id="bentoPatternName-hayato" placeholder="パターン名（例: 運動会弁当）">
+            <input type="text" id="bentoPatternItems-hayato" placeholder="おかず（カンマ区切り: おにぎり,からあげ,...）" style="min-width:200px;">
+            <button class="btn btn-primary" onclick="addBentoPattern('hayato')">+ パターン追加</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TAB: Timeline -->
   <div class="tab-panel" id="panel-timeline">
     <div class="sec">
@@ -1494,10 +1665,16 @@ body {
     </div>
     <div class="sec"><div class="ow"><span style="font-size:18px;">&#9888;</span><div><strong>10/17(土)</strong> — JSB合唱祭（保護者鑑賞）と幼稚園合唱が同日。時間帯の確認が必要。</div></div></div>
     <div class="sec">
-      <div class="st"><div class="st-icon" style="background:linear-gradient(135deg,#5cb85c,#3a8a3a);">&#128467;</div>年間行事予定</div>
+      <div class="st" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;"><div class="st-icon" style="background:linear-gradient(135deg,#5cb85c,#3a8a3a);">&#128467;</div>年間行事予定</div>
+        <div style="display:flex;gap:6px;">
+          <button class="view-schedule-btn" onclick="viewScheduleImage('jsb')">&#128444; JSB元画像</button>
+          <button class="view-schedule-btn" onclick="viewScheduleImage('yochi')">&#128444; 幼稚園元画像</button>
+        </div>
+      </div>
       <div class="tg">
         <div class="tc jsb">
-          <h3><span class="tc-dot"></span>JSB（颯士・中1）</h3>
+          <h3><span class="tc-dot"></span>JSB（颯士・中1）<button class="view-schedule-btn" onclick="viewScheduleImage('jsb')" style="margin-left:auto;font-size:10px;padding:4px 10px;">&#128444; 元画像</button></h3>
           <div class="mg"><div class="ml">4月</div><div class="er"><span class="ed">4/9</span><span class="en">着任式・始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/10</span><span class="en">入学式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/17</span><span class="en">中1学力テスト / 修学旅行説明会</span><span class="et t-exam">テスト</span></div><div class="er"><span class="ed">4/22</span><span class="en">中学部参観・懇談会</span><span class="et t-par">参観</span></div><div class="er"><span class="ed">4/29</span><span class="en">避難訓練（引取：テロ）</span></div></div>
           <div class="mg"><div class="ml">5月</div><div class="er"><span class="ed">5/20-22</span><span class="en">中学部修学旅行</span><span class="et t-evt">行事</span></div><div class="er"><span class="ed">5/28-29</span><span class="en">個人懇談（午前日課）</span><span class="et t-par">懇談</span></div><div class="er"><span class="ed">5/31</span><span class="en">英検第1回 1次</span><span class="et t-eik">英検</span></div></div>
           <div class="mg"><div class="ml">6月</div><div class="er"><span class="ed">6/1-2</span><span class="en">個人懇談（午前日課）</span><span class="et t-par">懇談</span></div><div class="er"><span class="ed">6/17-18</span><span class="en">第1回定期考査</span><span class="et t-exam">テスト</span></div></div>
@@ -1512,7 +1689,7 @@ body {
           <div class="mg"><div class="ml">3月</div><div class="er"><span class="ed">3/1</span><span class="en">中学部卒業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">3/5</span><span class="en">修了式・離任式</span><span class="et t-cer">式典</span></div></div>
         </div>
         <div class="tc yochi">
-          <h3><span class="tc-dot"></span>幼稚園（さつき・年少）</h3>
+          <h3><span class="tc-dot"></span>幼稚園（さつき・年少）<button class="view-schedule-btn" onclick="viewScheduleImage('yochi')" style="margin-left:auto;font-size:10px;padding:4px 10px;">&#128444; 元画像</button></h3>
           <div class="mg"><div class="ml">4月</div><div class="er"><span class="ed">4/8</span><span class="en">始業式</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/9</span><span class="en">入園式 10:00〜</span><span class="et t-cer">式典</span></div><div class="er"><span class="ed">4/13</span><span class="en">預かり・お弁当開始</span></div><div class="er"><span class="ed">4/15</span><span class="en">保護者会</span><span class="et t-par">保護者</span></div></div>
           <div class="mg"><div class="ml">5月</div><div class="er"><span class="ed">5/4</span><span class="en">年少お弁当開始</span></div><div class="er"><span class="ed">5/6</span><span class="en">子どもの日・ポップコーン</span><span class="et t-evt">行事</span></div></div>
           <div class="mg"><div class="ml">6月</div><div class="er"><span class="ed">6/10</span><span class="en">茶・保護者会</span><span class="et t-par">保護者</span></div><div class="er"><span class="ed">6/13</span><span class="en">父の日参観</span><span class="et t-par">参観</span></div></div>
@@ -1645,6 +1822,7 @@ body {
   <button class="menu-item" data-tab="week"><span class="mi-icon">🌸</span><span class="mi-label">カレンダー</span></button>
   <button class="menu-item" data-tab="checklist"><span class="mi-icon">🎒</span><span class="mi-label">持ち物 & 連絡先</span></button>
   <button class="menu-item" data-tab="memo"><span class="mi-icon">🍃</span><span class="mi-label">メモ</span></button>
+  <button class="menu-item" data-tab="bento"><span class="mi-icon">🍱</span><span class="mi-label">お弁当メモ</span></button>
   <button class="menu-item" data-tab="timeline"><span class="mi-icon">🌳</span><span class="mi-label">年間予定</span></button>
   <button class="menu-item" data-tab="info"><span class="mi-icon">🏡</span><span class="mi-label">学校情報</span></button>
   <button class="menu-item" data-tab="emails"><span class="mi-icon">✉️</span><span class="mi-label">手紙</span></button>
@@ -1848,45 +2026,76 @@ document.getElementById('editModal').addEventListener('click',e=>{if(e.target===
 
 // === Upcoming Events ===
 const EVENTS = [
+  // === 4月 ===
+  {d:'2026-04-08',n:'始業式',c:'幼稚園'},
+  {d:'2026-04-09',n:'着任式・始業式',c:'JSB'},
+  {d:'2026-04-09',n:'入園式 10:00〜',c:'幼稚園'},
+  {d:'2026-04-10',n:'入学式',c:'JSB'},
+  {d:'2026-04-13',n:'預かり・お弁当開始',c:'幼稚園'},
   {d:'2026-04-15',n:'保護者会',c:'幼稚園'},
-  {d:'2026-04-17',n:'中1学力テスト',c:'JSB'},
+  {d:'2026-04-17',n:'中1学力テスト / 修学旅行説明会',c:'JSB'},
   {d:'2026-04-22',n:'中学部参観・懇談会',c:'JSB'},
-  {d:'2026-04-29',n:'避難訓練（引取）',c:'JSB'},
+  {d:'2026-04-29',n:'避難訓練（引取：テロ）',c:'JSB'},
+  // === 5月 ===
   {d:'2026-05-04',n:'年少お弁当開始',c:'幼稚園'},
-  {d:'2026-05-20',n:'中学部修学旅行',c:'JSB'},
-  {d:'2026-05-28',n:'個人懇談',c:'JSB'},
+  {d:'2026-05-06',n:'子どもの日・ポップコーン',c:'幼稚園'},
+  {d:'2026-05-20',n:'中学部修学旅行（〜22日）',c:'JSB'},
+  {d:'2026-05-28',n:'個人懇談（午前日課〜29日）',c:'JSB'},
   {d:'2026-05-31',n:'英検第1回 1次',c:'JSB'},
+  // === 6月 ===
+  {d:'2026-06-01',n:'個人懇談（午前日課〜2日）',c:'JSB'},
   {d:'2026-06-10',n:'茶・保護者会',c:'幼稚園'},
   {d:'2026-06-13',n:'父の日参観',c:'幼稚園'},
-  {d:'2026-06-17',n:'第1回定期考査',c:'JSB'},
+  {d:'2026-06-17',n:'第1回定期考査（〜18日）',c:'JSB'},
+  // === 7月 ===
   {d:'2026-07-05',n:'英検第1回 2次',c:'JSB'},
   {d:'2026-07-11',n:'土曜授業参観',c:'JSB'},
   {d:'2026-07-17',n:'1学期終業式',c:'共通'},
+  // === 8月 ===
   {d:'2026-08-19',n:'2学期始業式 (JSB)',c:'JSB'},
   {d:'2026-08-24',n:'2学期始業式 (幼)',c:'幼稚園'},
   {d:'2026-08-28',n:'夏祭り',c:'幼稚園'},
-  {d:'2026-09-04',n:'運動会',c:'JSB'},
+  // === 9月 ===
+  {d:'2026-09-04',n:'運動会（予備日9/9）',c:'JSB'},
   {d:'2026-09-15',n:'遠足',c:'幼稚園'},
   {d:'2026-09-21',n:'中学部学力テスト',c:'JSB'},
+  {d:'2026-09-21',n:'個人面談（〜10/2）',c:'幼稚園'},
   {d:'2026-09-30',n:'学校公開',c:'JSB'},
+  // === 10月 ===
   {d:'2026-10-04',n:'英検第2回 1次',c:'JSB'},
   {d:'2026-10-07',n:'音楽会',c:'幼稚園'},
-  {d:'2026-10-15',n:'合唱祭',c:'JSB'},
+  {d:'2026-10-14',n:'茶・保護者会',c:'幼稚園'},
+  {d:'2026-10-15',n:'合唱祭（〜17日）',c:'JSB'},
+  {d:'2026-10-17',n:'合唱祭 保護者鑑賞',c:'JSB'},
+  {d:'2026-10-17',n:'合唱（JSBと同日）',c:'幼稚園'},
   {d:'2026-10-28',n:'ハロウィン仮装',c:'幼稚園'},
+  // === 11月 ===
   {d:'2026-11-08',n:'英検第2回 2次',c:'JSB'},
-  {d:'2026-11-18',n:'第2回定期考査',c:'JSB'},
+  {d:'2026-11-18',n:'第2回定期考査（〜19日）',c:'JSB'},
+  {d:'2026-11-21',n:'スポーツデー（未確定）',c:'幼稚園'},
+  // === 12月 ===
+  {d:'2026-12-01',n:'個人懇談（午前日課 1,3,4日）',c:'JSB'},
   {d:'2026-12-04',n:'サン・ニコラ',c:'幼稚園'},
   {d:'2026-12-16',n:'クリスマス会',c:'幼稚園'},
   {d:'2026-12-18',n:'2学期終業式',c:'共通'},
+  // === 1月 ===
   {d:'2027-01-05',n:'3学期始業式 (幼)',c:'幼稚園'},
   {d:'2027-01-06',n:'3学期始業式 (JSB)',c:'JSB'},
+  {d:'2027-01-13',n:'餅丸め',c:'幼稚園'},
+  // === 2月 ===
   {d:'2027-02-03',n:'豆まき',c:'幼稚園'},
   {d:'2027-02-04',n:'外国語参観・懇談会(中)',c:'JSB'},
-  {d:'2027-02-17',n:'第3回定期考査',c:'JSB'},
+  {d:'2027-02-10',n:'茶・保護者会',c:'幼稚園'},
+  {d:'2027-02-15',n:'中1・2学力テスト',c:'JSB'},
+  {d:'2027-02-17',n:'第3回定期考査（〜18日）',c:'JSB'},
   {d:'2027-02-24',n:'カーニバル仮装',c:'幼稚園'},
+  {d:'2027-02-25',n:'感謝の会',c:'JSB'},
+  {d:'2027-02-26',n:'お別れランチ',c:'幼稚園'},
+  // === 3月 ===
   {d:'2027-03-01',n:'中学部卒業式',c:'JSB'},
   {d:'2027-03-03',n:'卒園式',c:'幼稚園'},
-  {d:'2027-03-05',n:'修了式',c:'共通'},
+  {d:'2027-03-04',n:'修了式（幼稚園）',c:'幼稚園'},
+  {d:'2027-03-05',n:'修了式・離任式（JSB）',c:'JSB'},
 ];
 
 function renderUpcoming(){
@@ -2064,6 +2273,15 @@ function applyAllActions(actionSource) {
   src.length = 0;
 }
 
+// Fetch with timeout helper
+function fetchWithTimeout(url, options, timeoutMs) {
+  timeoutMs = timeoutMs || 20000;
+  var controller = new AbortController();
+  var timer = setTimeout(function() { controller.abort(); }, timeoutMs);
+  options.signal = controller.signal;
+  return fetch(url, options).finally(function() { clearTimeout(timer); });
+}
+
 async function sendChat() {
   const input = document.getElementById('chatInput');
   const msg = input.value.trim();
@@ -2071,7 +2289,6 @@ async function sendChat() {
 
   addChatMsg(msg, 'user');
   chatHistory.push({role:'user', content:msg});
-  // Keep last 20 messages to avoid token overflow
   if(chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
   input.value = '';
   input.style.height = 'auto';
@@ -2080,11 +2297,12 @@ async function sendChat() {
   showTyping();
 
   try {
-    const res = await fetch(API_URL + '/chat', {
+    const res = await fetchWithTimeout(API_URL + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: msg, currentTasks: tasks, history: chatHistory.slice(0,-1) }),
-    });
+    }, 20000);
+    if (!res.ok) throw new Error('サーバーエラー (' + res.status + ')');
     const data = await res.json();
     hideTyping();
 
@@ -2097,11 +2315,12 @@ async function sendChat() {
     }
   } catch (err) {
     hideTyping();
-    addChatMsg('接続エラー: ' + err.message, 'system');
+    var errMsg = err.name === 'AbortError' ? 'タイムアウト: サーバーが応答しません。しばらくしてから再度お試しください。' : '接続エラー: ' + err.message;
+    addChatMsg(errMsg, 'system');
+  } finally {
+    aiProcessing = false;
+    document.getElementById('sendBtn').disabled = false;
   }
-
-  aiProcessing = false;
-  document.getElementById('sendBtn').disabled = false;
 }
 
 // === Top AI Box ===
@@ -2141,7 +2360,6 @@ async function sendTopAi() {
   const msg = input.value.trim();
   if (!msg || aiProcessing) return;
 
-  // Show user message
   addTopMsg(msg, 'user');
   chatHistory.push({role:'user', content:msg});
   if(chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
@@ -2153,19 +2371,19 @@ async function sendTopAi() {
   showTopTyping();
 
   try {
-    const res = await fetch(API_URL + '/chat', {
+    const res = await fetchWithTimeout(API_URL + '/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: msg, currentTasks: tasks, history: chatHistory.slice(0,-1) }),
-    });
+    }, 20000);
+    if (!res.ok) throw new Error('サーバーエラー (' + res.status + ')');
     const data = await res.json();
     hideTopTyping();
 
     if (data.error) {
-      addTopMsg('Error: ' + data.error, 'ai');
+      addTopMsg('エラー: ' + data.error, 'ai');
     } else {
       chatHistory.push({role:'assistant', content:data.reply});
-      // Build AI response with action buttons
       const thread = document.getElementById('topAiThread');
       const aiDiv = document.createElement('div');
       aiDiv.className = 'top-ai-msg ai';
@@ -2195,12 +2413,13 @@ async function sendTopAi() {
     }
   } catch (err) {
     hideTopTyping();
-    addTopMsg('接続エラー: ' + err.message, 'ai');
+    var errMsg = err.name === 'AbortError' ? 'タイムアウト: しばらくしてから再度お試しください。' : '接続エラー: ' + err.message;
+    addTopMsg(errMsg, 'ai');
+  } finally {
+    aiProcessing = false;
+    document.getElementById('topAiSend').disabled = false;
+    document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
   }
-
-  aiProcessing = false;
-  document.getElementById('topAiSend').disabled = false;
-  document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
 }
 
 // === Top AI File Handler ===
@@ -2307,13 +2526,14 @@ async function handleTopFile(input) {
     }
   } catch (err) {
     hideTopTyping();
-    addTopMsg('エラー: ' + err.message, 'ai');
+    var errMsg = err.name === 'AbortError' ? 'タイムアウト: しばらくしてから再度お試しください。' : 'エラー: ' + err.message;
+    addTopMsg(errMsg, 'ai');
+  } finally {
+    aiProcessing = false;
+    document.getElementById('topAiSend').disabled = false;
+    document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
+    input.value = '';
   }
-
-  aiProcessing = false;
-  document.getElementById('topAiSend').disabled = false;
-  document.getElementById('topAiStatus').innerHTML = '<span class="ai-dot"></span> Ready';
-  input.value = '';
 }
 
 // Chat input: NO Enter send (mobile IME問題回避) — 送信ボタンのみ
@@ -2434,12 +2654,13 @@ async function handleFile(input) {
     }
   } catch (err) {
     hideTyping();
-    addChatMsg('ファイル分析エラー: ' + err.message, 'system');
+    var errMsg = err.name === 'AbortError' ? 'タイムアウト: しばらくしてから再度お試しください。' : 'ファイル分析エラー: ' + err.message;
+    addChatMsg(errMsg, 'system');
+  } finally {
+    aiProcessing = false;
+    document.getElementById('sendBtn').disabled = false;
+    input.value = '';
   }
-
-  aiProcessing = false;
-  document.getElementById('sendBtn').disabled = false;
-  input.value = '';
 }
 
 // === Weather (Open-Meteo API — free, no key needed) ===
@@ -3392,6 +3613,607 @@ window.addEventListener('scroll', function() {
   }
   lastScrollY = scrollY;
 }, { passive: true });
+
+// === Schedule Image Viewer ===
+// Schedule images stored in localStorage (base64) or Firebase
+var scheduleImgRef = db.ref('dashboard/schedule-images');
+var scheduleImages = { jsb: null, yochi: null };
+
+// Load from localStorage first, then sync from Firebase
+try {
+  var saved = localStorage.getItem('ito-schedule-images');
+  if (saved) scheduleImages = JSON.parse(saved);
+} catch(e) {}
+
+scheduleImgRef.on('value', function(snap) {
+  var data = snap.val();
+  if (data) {
+    scheduleImages = { jsb: data.jsb || null, yochi: data.yochi || null };
+    localStorage.setItem('ito-schedule-images', JSON.stringify(scheduleImages));
+  }
+});
+
+function viewScheduleImage(type) {
+  var overlay = document.createElement('div');
+  overlay.className = 'img-viewer-overlay';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  var tabs = document.createElement('div');
+  tabs.className = 'img-viewer-tabs';
+  var tabJsb = document.createElement('button');
+  tabJsb.className = 'img-viewer-tab' + (type === 'jsb' ? ' active' : '');
+  tabJsb.textContent = 'JSB 中学部';
+  var tabYochi = document.createElement('button');
+  tabYochi.className = 'img-viewer-tab' + (type === 'yochi' ? ' active' : '');
+  tabYochi.textContent = '幼稚園';
+  tabs.appendChild(tabJsb);
+  tabs.appendChild(tabYochi);
+
+  var contentArea = document.createElement('div');
+  contentArea.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:12px;max-width:95vw;';
+  contentArea.onclick = function(e) { e.stopPropagation(); };
+
+  function showSchedule(t) {
+    contentArea.innerHTML = '';
+    var data = scheduleImages[t];
+    if (data) {
+      var img = document.createElement('img');
+      img.src = data;
+      img.alt = t === 'jsb' ? 'JSB年間予定' : '幼稚園年間予定';
+      img.style.cssText = 'max-width:95vw;max-height:80vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6);animation:modalIn .3s var(--spring);';
+      contentArea.appendChild(img);
+      // Replace button
+      var replaceRow = document.createElement('div');
+      replaceRow.style.cssText = 'display:flex;gap:8px;';
+      var replaceBtn = document.createElement('label');
+      replaceBtn.style.cssText = 'padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;';
+      replaceBtn.textContent = '📷 画像を差し替え';
+      var replaceInput = document.createElement('input');
+      replaceInput.type = 'file'; replaceInput.accept = 'image/*'; replaceInput.style.display = 'none';
+      replaceInput.onchange = function() { uploadScheduleImage(t, replaceInput, function() { showSchedule(t); }); };
+      replaceBtn.appendChild(replaceInput);
+      var delBtn = document.createElement('button');
+      delBtn.style.cssText = 'padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(224,85,85,.15);border:1px solid rgba(224,85,85,.3);color:#ff8888;cursor:pointer;';
+      delBtn.textContent = '削除';
+      delBtn.onclick = function() { if(confirm('この画像を削除しますか？')){ scheduleImages[t]=null; saveScheduleImages(); showSchedule(t); } };
+      replaceRow.appendChild(replaceBtn);
+      replaceRow.appendChild(delBtn);
+      contentArea.appendChild(replaceRow);
+    } else {
+      var msg = document.createElement('div');
+      msg.style.cssText = 'color:#fff;font-size:14px;text-align:center;padding:40px;background:rgba(255,255,255,.05);border-radius:12px;max-width:400px;animation:modalIn .3s var(--spring);';
+      var label = t === 'jsb' ? 'JSB（中学部）' : '幼稚園';
+      msg.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📷</div>' +
+        '<div style="font-weight:700;margin-bottom:8px;font-size:16px;">' + label + ' 年間予定表</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,.6);margin-bottom:20px;">学校から配布された年間予定表のスキャン画像や写真をアップロードしてください。</div>' +
+        '<label style="display:inline-flex;align-items:center;gap:6px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;background:linear-gradient(135deg,#5cb85c,#3a8a3a);color:#fff;cursor:pointer;box-shadow:0 4px 16px rgba(92,184,92,.3);">' +
+        '📸 画像をアップロード<input type="file" accept="image/*" style="display:none;" onchange="uploadScheduleImage(\'' + t + '\',this,function(){document.querySelector(\'.img-viewer-overlay\').remove();viewScheduleImage(\'' + t + '\');})"></label>';
+      contentArea.appendChild(msg);
+    }
+  }
+
+  tabJsb.onclick = function(e) { e.stopPropagation(); tabJsb.classList.add('active'); tabYochi.classList.remove('active'); showSchedule('jsb'); };
+  tabYochi.onclick = function(e) { e.stopPropagation(); tabYochi.classList.add('active'); tabJsb.classList.remove('active'); showSchedule('yochi'); };
+
+  var closeBtn = document.createElement('button');
+  closeBtn.className = 'img-viewer-close';
+  closeBtn.textContent = '✕';
+  closeBtn.onclick = function() { overlay.remove(); };
+
+  overlay.appendChild(tabs);
+  overlay.appendChild(contentArea);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+  showSchedule(type);
+}
+
+function uploadScheduleImage(type, input, callback) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function() {
+    // Resize if too large (max 1600px)
+    var img = new Image();
+    img.onload = function() {
+      var maxDim = 1600;
+      var w = img.width, h = img.height;
+      if (w > maxDim || h > maxDim) {
+        if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      var dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+      scheduleImages[type] = dataUrl;
+      saveScheduleImages();
+      if (callback) callback();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function saveScheduleImages() {
+  localStorage.setItem('ito-schedule-images', JSON.stringify(scheduleImages));
+  // Also save to Firebase for cross-device sync
+  scheduleImgRef.set(scheduleImages).catch(function() { /* localStorage is backup */ });
+}
+
+// === Quick Add Event from Upcoming Section ===
+function showQuickAddEvent() {
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;animation:modalBgIn .2s ease;';
+  overlay.onclick = function(e) { if (e.target === overlay) overlay.remove(); };
+
+  var modal = document.createElement('div');
+  modal.style.cssText = 'background:var(--surface);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:16px;padding:24px;max-width:420px;width:90%;animation:modalIn .3s var(--spring);';
+
+  modal.innerHTML = '<div style="font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">予定を追加<span style="cursor:pointer;padding:8px;font-size:18px;" onclick="this.closest(\'[style*=position\\:fixed]\').remove()">✕</span></div>' +
+    '<label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">予定名</label>' +
+    '<input type="text" id="quickEvName" style="width:100%;padding:10px 14px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;" placeholder="例: 遠足">' +
+    '<div style="display:flex;gap:8px;margin-bottom:12px;">' +
+    '<div style="flex:1;"><label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">日付</label><input type="date" id="quickEvDate" style="width:100%;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;"></div>' +
+    '<div style="flex:1;"><label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">開始時間</label><input type="time" id="quickEvStart" style="width:100%;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;"></div>' +
+    '<div style="flex:1;"><label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">終了時間</label><input type="time" id="quickEvEnd" style="width:100%;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;"></div>' +
+    '</div>' +
+    '<label style="display:block;font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:600;">カテゴリ</label>' +
+    '<select id="quickEvCat" style="width:100%;padding:10px;border:1px solid var(--glass-border);border-radius:8px;background:var(--glass);color:var(--text);font-size:13px;font-family:inherit;margin-bottom:16px;"><option value="JSB">JSB</option><option value="幼稚園">幼稚園</option><option value="共通">共通</option></select>' +
+    '<div style="display:flex;gap:8px;">' +
+    '<button class="btn btn-primary" style="flex:1;min-height:44px;" onclick="submitQuickEvent(false)">追加</button>' +
+    '<button class="btn btn-primary" style="flex:1;min-height:44px;background:linear-gradient(135deg,#4285f4,#1a6ddb);" onclick="submitQuickEvent(true)">追加 + Googleカレンダー</button>' +
+    '</div>';
+
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  // Set default date to tomorrow
+  var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('quickEvDate').value = tomorrow.toISOString().slice(0,10);
+}
+
+function submitQuickEvent(addToGcal) {
+  var name = document.getElementById('quickEvName').value.trim();
+  var date = document.getElementById('quickEvDate').value;
+  var startTime = document.getElementById('quickEvStart').value;
+  var endTime = document.getElementById('quickEvEnd').value;
+  var cat = document.getElementById('quickEvCat').value;
+  if (!name || !date) { alert('予定名と日付を入力してください'); return; }
+
+  // Add to custom events (Firebase synced)
+  var newEvent = { d: date, n: name, c: cat, custom: true };
+  if (startTime) newEvent.startTime = startTime;
+  if (endTime) newEvent.endTime = endTime;
+  customEvents.push(newEvent);
+  customEventsRef.set(customEvents);
+
+  // Open Google Calendar if requested
+  if (addToGcal) {
+    openGoogleCalendar(name, date, startTime, endTime);
+  }
+
+  // Close modal
+  var overlay = document.querySelector('[style*="position:fixed"][style*="z-index:300"]');
+  if (overlay) overlay.remove();
+}
+
+function openGoogleCalendar(title, date, startTime, endTime) {
+  // Format dates for Google Calendar URL
+  var dateClean = date.replace(/-/g, '');
+  var start, end;
+  if (startTime) {
+    start = dateClean + 'T' + startTime.replace(':', '') + '00';
+    if (endTime) {
+      end = dateClean + 'T' + endTime.replace(':', '') + '00';
+    } else {
+      // Default 1 hour
+      var sh = parseInt(startTime.split(':')[0]);
+      var sm = startTime.split(':')[1];
+      end = dateClean + 'T' + String(sh + 1).padStart(2,'0') + sm + '00';
+    }
+  } else {
+    // All day event
+    start = dateClean;
+    var nextDay = new Date(date + 'T00:00:00');
+    nextDay.setDate(nextDay.getDate() + 1);
+    end = nextDay.toISOString().slice(0,10).replace(/-/g, '');
+  }
+  var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+    '&text=' + encodeURIComponent(title) +
+    '&dates=' + start + '/' + end +
+    '&ctz=Europe/Brussels';
+  window.open(url, '_blank');
+}
+
+// === Enhanced Upcoming Events with Google Calendar link ===
+var origRenderUpcoming = renderUpcoming;
+renderUpcoming = function() {
+  var now = new Date(); now.setHours(0,0,0,0);
+  var upcoming = EVENTS.map(function(e) {
+    var d = new Date(e.d + 'T00:00:00');
+    var diff = Math.ceil((d - now) / (1000*60*60*24));
+    return Object.assign({}, e, {diff: diff, date: d});
+  }).filter(function(e) { return e.diff >= 0; }).sort(function(a,b) { return a.diff - b.diff; }).slice(0, 6);
+
+  var el = document.getElementById('upcomingList');
+  if (!el) return;
+  el.innerHTML = upcoming.map(function(e) {
+    var bc = e.c === 'JSB' ? 'b-jsb' : e.c === '幼稚園' ? 'b-yochi' : 'b-common';
+    var dayStr = e.diff === 0 ? '今日' : e.diff === 1 ? '明日' : '' + e.diff;
+    var dayUnit = e.diff <= 1 ? '' : '<span>日後</span>';
+    var mm = e.date.getMonth() + 1, dd = e.date.getDate();
+    var gcalHtml = '<a class="gcal-link" href="javascript:void(0)" onclick="event.stopPropagation();openGoogleCalendar(\'' + escHtml(e.n).replace(/'/g,"\\'") + '\',\'' + e.d + '\',\'' + (e.startTime || '') + '\',\'' + (e.endTime || '') + '\')">&#128197; Googleカレンダーに追加</a>';
+    return '<div class="up-item">' +
+      '<div class="up-days">' + dayStr + dayUnit + '</div>' +
+      '<div class="up-name">' + escHtml(e.n) + '</div>' +
+      '<div class="up-date">' + mm + '/' + dd + '</div>' +
+      '<span class="badge up-badge ' + bc + '">' + escHtml(e.c) + '</span>' +
+      gcalHtml +
+    '</div>';
+  }).join('');
+  if (upcoming.length === 0) el.innerHTML = '<div style="color:var(--text3);font-size:13px;">直近の予定はありません</div>';
+};
+// Re-render with new function
+renderUpcoming();
+
+// === Bento Memo ===
+var bentoRef = db.ref('dashboard/bento');
+var bentoData = { satsuki: { starters: [], patterns: [] }, hayato: { starters: [], patterns: [] } };
+var currentBentoTab = 'satsuki';
+
+bentoRef.on('value', function(snap) {
+  var data = snap.val();
+  if (data) {
+    bentoData = {
+      satsuki: { starters: data.satsuki && data.satsuki.starters ? data.satsuki.starters : [], patterns: data.satsuki && data.satsuki.patterns ? data.satsuki.patterns : [] },
+      hayato: { starters: data.hayato && data.hayato.starters ? data.hayato.starters : [], patterns: data.hayato && data.hayato.patterns ? data.hayato.patterns : [] }
+    };
+  }
+  renderBento('satsuki');
+  renderBento('hayato');
+});
+
+function switchBentoTab(tab) {
+  currentBentoTab = tab;
+  document.querySelectorAll('.bento-tab').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.bento-section').forEach(function(s) { s.classList.remove('active'); });
+  document.querySelector('.bento-tab:nth-child(' + (tab === 'satsuki' ? '1' : '2') + ')').classList.add('active');
+  document.getElementById('bentoSec-' + tab).classList.add('active');
+}
+
+function saveBento() {
+  bentoRef.set(bentoData);
+}
+
+function addBentoStarter(who) {
+  var input = document.getElementById('bentoStarterInput-' + who);
+  var text = input.value.trim();
+  if (!text) return;
+  bentoData[who].starters.push(text);
+  saveBento();
+  input.value = '';
+}
+
+function removeBentoStarter(who, idx) {
+  bentoData[who].starters.splice(idx, 1);
+  saveBento();
+}
+
+function addBentoPattern(who) {
+  var nameInput = document.getElementById('bentoPatternName-' + who);
+  var itemsInput = document.getElementById('bentoPatternItems-' + who);
+  var name = nameInput.value.trim();
+  var items = itemsInput.value.split(/[,、，]/).map(function(s) { return s.trim(); }).filter(Boolean);
+  if (!name || items.length === 0) { alert('パターン名とおかず（カンマ区切り）を入力してください'); return; }
+  bentoData[who].patterns.push({ name: name, items: items, created: new Date().toISOString() });
+  saveBento();
+  nameInput.value = '';
+  itemsInput.value = '';
+}
+
+function editBentoPattern(who, idx) {
+  var p = bentoData[who].patterns[idx];
+  if (!p) return;
+  var newName = prompt('パターン名:', p.name);
+  if (newName === null) return;
+  var newItems = prompt('おかず（カンマ区切り）:', p.items.join(', '));
+  if (newItems === null) return;
+  p.name = newName.trim() || p.name;
+  p.items = newItems.split(/[,、，]/).map(function(s) { return s.trim(); }).filter(Boolean);
+  saveBento();
+}
+
+function deleteBentoPattern(who, idx) {
+  if (!confirm('このパターンを削除しますか？')) return;
+  bentoData[who].patterns.splice(idx, 1);
+  saveBento();
+}
+
+function renderBento(who) {
+  // Starters
+  var startersEl = document.getElementById('bentoStarters-' + who);
+  if (!startersEl) return;
+  var starters = bentoData[who].starters || [];
+  startersEl.innerHTML = starters.length === 0 ?
+    '<div style="font-size:12px;color:var(--text3);padding:8px;">まだ登録されていません</div>' :
+    starters.map(function(s, i) {
+      return '<div class="bento-starter-chip">' + escHtml(s) +
+        '<button class="chip-del" onclick="removeBentoStarter(\'' + who + '\',' + i + ')">✕</button></div>';
+    }).join('');
+
+  // Patterns
+  var patternsEl = document.getElementById('bentoPatterns-' + who);
+  var patterns = bentoData[who].patterns || [];
+  if (patterns.length === 0) {
+    patternsEl.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:16px;text-align:center;background:var(--glass);border-radius:8px;border:1px dashed var(--glass-border);">パターンを追加してお弁当メニューを管理しましょう</div>';
+    return;
+  }
+  patternsEl.innerHTML = patterns.map(function(p, i) {
+    var svgId = 'bentoSvg-' + who + '-' + i;
+    return '<div class="bento-pattern">' +
+      '<div class="bento-pattern-header">' +
+      '<div class="bento-pattern-name">' + escHtml(p.name) + '</div>' +
+      '<div class="bento-pattern-actions">' +
+      '<button onclick="editBentoPattern(\'' + who + '\',' + i + ')" title="編集">&#9998;</button>' +
+      '<button onclick="deleteBentoPattern(\'' + who + '\',' + i + ')" title="削除">&#128465;</button>' +
+      '</div></div>' +
+      '<div class="bento-items-list">' + p.items.map(function(it) { return escHtml(it); }).join(' · ') + '</div>' +
+      '<div class="bento-illustration"><svg id="' + svgId + '" width="280" height="180" viewBox="0 0 280 180"></svg></div>' +
+      '</div>';
+  }).join('');
+
+  // Draw illustrations
+  patterns.forEach(function(p, i) {
+    drawBentoIllustration('bentoSvg-' + who + '-' + i, p.items, who);
+  });
+}
+
+// === Bento Illustration Generator (SVG) ===
+// === Anime-Style Bento Illustration Generator ===
+function drawBentoIllustration(svgId, items, who) {
+  var svg = document.getElementById(svgId);
+  if (!svg) return;
+  // Increase SVG size for detail
+  svg.setAttribute('width', '320');
+  svg.setAttribute('height', '220');
+  svg.setAttribute('viewBox', '0 0 320 220');
+
+  // Anime food item drawing functions
+  var FOOD_DRAW = {
+    // Tamagoyaki (卵焼き) - anime rolled egg
+    egg: function(cx, cy, s) {
+      var w = s * 1.3, h = s * 0.9;
+      return '<defs><linearGradient id="egg' + cx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffe566"/><stop offset="100%" stop-color="#f0b830"/></linearGradient></defs>' +
+        '<rect x="' + (cx-w) + '" y="' + (cy-h) + '" width="' + (w*2) + '" height="' + (h*2) + '" rx="' + (h*0.3) + '" fill="url(#egg' + cx + ')" stroke="#d4a020" stroke-width="1.5"/>' +
+        '<line x1="' + (cx-w*0.6) + '" y1="' + (cy-h*0.2) + '" x2="' + (cx+w*0.6) + '" y2="' + (cy-h*0.2) + '" stroke="#e8c840" stroke-width="1" opacity=".6"/>' +
+        '<line x1="' + (cx-w*0.5) + '" y1="' + (cy+h*0.3) + '" x2="' + (cx+w*0.5) + '" y2="' + (cy+h*0.3) + '" stroke="#e8c840" stroke-width="1" opacity=".6"/>' +
+        '<ellipse cx="' + (cx+w*0.3) + '" cy="' + (cy-h*0.5) + '" rx="' + (w*0.25) + '" ry="' + (h*0.2) + '" fill="#fff" opacity=".35"/>';
+    },
+    // Karaage (からあげ) - anime fried chicken
+    fried: function(cx, cy, s) {
+      var r = s;
+      var bumps = '';
+      for (var i = 0; i < 6; i++) {
+        var a = (i / 6) * Math.PI * 2;
+        var bx = cx + Math.cos(a) * r * 0.85;
+        var by = cy + Math.sin(a) * r * 0.85;
+        bumps += '<circle cx="' + bx + '" cy="' + by + '" r="' + (r*0.55) + '" fill="#d48a20"/>';
+      }
+      return '<defs><radialGradient id="fry' + cx + '" cx="35%" cy="35%"><stop offset="0%" stop-color="#f0a840"/><stop offset="100%" stop-color="#b06a10"/></radialGradient></defs>' +
+        bumps +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r*0.7) + '" fill="url(#fry' + cx + ')"/>' +
+        '<circle cx="' + (cx-r*0.2) + '" cy="' + (cy-r*0.25) + '" r="' + (r*0.2) + '" fill="#fff" opacity=".25"/>';
+    },
+    // Broccoli (ブロッコリー) - anime tree-shaped
+    broccoli: function(cx, cy, s) {
+      var r = s * 0.8;
+      return '<rect x="' + (cx-2) + '" y="' + cy + '" width="4" height="' + (r*0.8) + '" rx="2" fill="#5a8a2a"/>' +
+        '<circle cx="' + (cx-r*0.4) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.5) + '" fill="#3a9a3a"/>' +
+        '<circle cx="' + (cx+r*0.4) + '" cy="' + (cy-r*0.1) + '" r="' + (r*0.5) + '" fill="#4aaa4a"/>' +
+        '<circle cx="' + cx + '" cy="' + (cy-r*0.4) + '" r="' + (r*0.55) + '" fill="#50b850"/>' +
+        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.55) + '" r="' + (r*0.15) + '" fill="#80e080" opacity=".4"/>';
+    },
+    // Mini tomato
+    tomato: function(cx, cy, s) {
+      var r = s * 0.7;
+      return '<defs><radialGradient id="tom' + cx + '" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff5050"/><stop offset="100%" stop-color="#c02020"/></radialGradient></defs>' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#tom' + cx + ')" stroke="#a01010" stroke-width="1"/>' +
+        '<path d="M' + (cx-3) + ',' + (cy-r+2) + ' Q' + cx + ',' + (cy-r-3) + ' ' + (cx+3) + ',' + (cy-r+2) + '" fill="#3a8a2a" stroke="none"/>' +
+        '<ellipse cx="' + (cx-r*0.25) + '" cy="' + (cy-r*0.3) + '" rx="' + (r*0.25) + '" ry="' + (r*0.15) + '" fill="#fff" opacity=".3"/>';
+    },
+    // Wiener/Sausage - octopus wiener style
+    wiener: function(cx, cy, s) {
+      var w = s * 0.5, h = s * 1.1;
+      return '<defs><linearGradient id="wie' + cx + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#e85040"/><stop offset="100%" stop-color="#a02020"/></linearGradient></defs>' +
+        '<ellipse cx="' + cx + '" cy="' + (cy-h*0.2) + '" rx="' + w + '" ry="' + (h*0.5) + '" fill="url(#wie' + cx + ')" stroke="#801818" stroke-width="1"/>' +
+        '<path d="M' + (cx-w*0.7) + ',' + (cy+h*0.15) + ' Q' + (cx-w*1.1) + ',' + (cy+h*0.6) + ' ' + (cx-w*0.5) + ',' + (cy+h*0.5) + '" stroke="#c03030" stroke-width="2" fill="none"/>' +
+        '<path d="M' + (cx+w*0.7) + ',' + (cy+h*0.15) + ' Q' + (cx+w*1.1) + ',' + (cy+h*0.6) + ' ' + (cx+w*0.5) + ',' + (cy+h*0.5) + '" stroke="#c03030" stroke-width="2" fill="none"/>' +
+        '<circle cx="' + (cx-w*0.3) + '" cy="' + (cy-h*0.35) + '" r="1.5" fill="#1a1a1a"/>' +
+        '<circle cx="' + (cx+w*0.3) + '" cy="' + (cy-h*0.35) + '" r="1.5" fill="#1a1a1a"/>' +
+        '<ellipse cx="' + (cx-w*0.15) + '" cy="' + (cy-h*0.45) + '" rx="2" ry="1" fill="#fff" opacity=".35"/>';
+    },
+    // Hamburg steak
+    hamburg: function(cx, cy, s) {
+      var w = s * 1.2, h = s * 0.7;
+      return '<defs><radialGradient id="ham' + cx + '" cx="40%" cy="35%"><stop offset="0%" stop-color="#a06040"/><stop offset="100%" stop-color="#5a3020"/></radialGradient></defs>' +
+        '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + w + '" ry="' + h + '" fill="url(#ham' + cx + ')" stroke="#3a2010" stroke-width="1.5"/>' +
+        '<ellipse cx="' + cx + '" cy="' + (cy-h*0.1) + '" rx="' + (w*0.7) + '" ry="' + (h*0.4) + '" fill="#804830" opacity=".4"/>' +
+        '<ellipse cx="' + (cx-w*0.2) + '" cy="' + (cy-h*0.3) + '" rx="' + (w*0.2) + '" ry="' + (h*0.15) + '" fill="#fff" opacity=".2"/>';
+    },
+    // Onigiri (おにぎり)
+    onigiri: function(cx, cy, s) {
+      var r = s;
+      return '<polygon points="' + cx + ',' + (cy-r) + ' ' + (cx+r) + ',' + (cy+r*0.6) + ' ' + (cx-r) + ',' + (cy+r*0.6) + '" fill="#f8f4e8" stroke="#d8d0c0" stroke-width="1.5" stroke-linejoin="round"/>' +
+        '<rect x="' + (cx-r*0.5) + '" y="' + (cy+r*0.05) + '" width="' + r + '" height="' + (r*0.55) + '" rx="2" fill="#1a2a1a"/>' +
+        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.2) + '" r="2" fill="#e08080" opacity=".5"/>';
+    },
+    // Fish (鮭)
+    fish: function(cx, cy, s) {
+      var w = s * 1.3, h = s * 0.7;
+      return '<defs><linearGradient id="fish' + cx + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff9070"/><stop offset="100%" stop-color="#e06040"/></linearGradient></defs>' +
+        '<ellipse cx="' + cx + '" cy="' + cy + '" rx="' + w + '" ry="' + h + '" fill="url(#fish' + cx + ')" stroke="#b04020" stroke-width="1"/>' +
+        '<line x1="' + (cx-w*0.4) + '" y1="' + (cy-h*0.3) + '" x2="' + (cx+w*0.4) + '" y2="' + (cy-h*0.3) + '" stroke="#c05838" stroke-width=".8" opacity=".5"/>' +
+        '<line x1="' + (cx-w*0.3) + '" y1="' + (cy+h*0.1) + '" x2="' + (cx+w*0.3) + '" y2="' + (cy+h*0.1) + '" stroke="#c05838" stroke-width=".8" opacity=".5"/>' +
+        '<ellipse cx="' + (cx-w*0.2) + '" cy="' + (cy-h*0.4) + '" rx="3" ry="2" fill="#fff" opacity=".25"/>';
+    },
+    // Ham/Pink items
+    ham: function(cx, cy, s) {
+      var r = s * 0.8;
+      return '<defs><radialGradient id="hm' + cx + '" cx="40%" cy="35%"><stop offset="0%" stop-color="#ffb0c0"/><stop offset="100%" stop-color="#e07090"/></radialGradient></defs>' +
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#hm' + cx + ')" stroke="#c06080" stroke-width="1"/>' +
+        '<circle cx="' + (cx-r*0.15) + '" cy="' + (cy-r*0.2) + '" r="' + (r*0.2) + '" fill="#fff" opacity=".25"/>';
+    },
+    // Generic round item
+    generic: function(cx, cy, s, color) {
+      return '<defs><radialGradient id="gen' + cx + cy + '" cx="35%" cy="35%"><stop offset="0%" stop-color="' + color + '"/><stop offset="100%" stop-color="' + darken(color, 30) + '"/></radialGradient></defs>' +
+        '<rect x="' + (cx-s*1.1) + '" y="' + (cy-s*0.7) + '" width="' + (s*2.2) + '" height="' + (s*1.4) + '" rx="' + (s*0.4) + '" fill="url(#gen' + cx + cy + ')" stroke="' + darken(color, 50) + '" stroke-width="1"/>' +
+        '<ellipse cx="' + (cx-s*0.3) + '" cy="' + (cy-s*0.3) + '" rx="' + (s*0.3) + '" ry="' + (s*0.15) + '" fill="#fff" opacity=".2"/>';
+    }
+  };
+
+  function darken(hex, amt) {
+    var r = Math.max(0, parseInt(hex.slice(1,3),16) - amt);
+    var g = Math.max(0, parseInt(hex.slice(3,5),16) - amt);
+    var b = Math.max(0, parseInt(hex.slice(5,7),16) - amt);
+    return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+  }
+
+  // Keyword to draw function mapping
+  function getDrawType(name) {
+    var KW = {
+      egg: ['卵','たまご','玉子','オムレツ','卵焼き','厚焼き'],
+      fried: ['からあげ','唐揚げ','コロッケ','フライ','ナゲット','天ぷら','チキン','竜田'],
+      broccoli: ['ブロッコリー','サラダ','ほうれん草','枝豆','アスパラ','小松菜','野菜'],
+      tomato: ['トマト','ミニトマト','プチトマト'],
+      wiener: ['ウインナー','ソーセージ','ウィンナー','フランク'],
+      hamburg: ['ハンバーグ','ミートボール','肉団子','つくね','肉','焼肉'],
+      onigiri: ['おにぎり','ご飯','ライス','パン','サンドイッチ'],
+      fish: ['鮭','魚','ツナ','えび','しらす','焼き魚','シャケ','たらこ'],
+      ham: ['ハム','ベーコン','かまぼこ','ちくわ','たこ','チーズ','かに'],
+    };
+    for (var type in KW) {
+      for (var i = 0; i < KW[type].length; i++) {
+        if (name.indexOf(KW[type][i]) >= 0) return type;
+      }
+    }
+    return 'generic';
+  }
+
+  var GENERIC_COLORS = ['#e8a040','#90b0d0','#c0a080','#b0c090','#d0a0c0','#a0c8c0','#d0b880'];
+
+  var html = '';
+  // === Bento Box (anime wood grain) ===
+  // Shadow
+  html += '<ellipse cx="162" cy="210" rx="140" ry="8" fill="rgba(0,0,0,.2)"/>';
+  // Box body
+  html += '<defs><linearGradient id="boxGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6a3a1a"/><stop offset="40%" stop-color="#4a2810"/><stop offset="100%" stop-color="#3a1a08"/></linearGradient></defs>';
+  html += '<rect x="15" y="15" width="290" height="185" rx="12" ry="12" fill="url(#boxGrad)" stroke="#8a5a2a" stroke-width="2.5"/>';
+  // Inner box
+  html += '<rect x="20" y="20" width="280" height="175" rx="9" ry="9" fill="#2a1808" stroke="#5a3a1a" stroke-width="1"/>';
+  // Wood grain texture
+  for (var gi = 0; gi < 4; gi++) {
+    var gy = 30 + gi * 45;
+    html += '<line x1="25" y1="' + gy + '" x2="295" y2="' + gy + '" stroke="#3a2210" stroke-width=".5" opacity=".3"/>';
+  }
+  // Shine on box edge
+  html += '<rect x="20" y="20" width="280" height="6" rx="3" fill="#8a6a3a" opacity=".15"/>';
+
+  // Divider
+  var divX = 120;
+  html += '<line x1="' + divX + '" y1="25" x2="' + divX + '" y2="190" stroke="#5a3a1a" stroke-width="2.5"/>';
+  html += '<line x1="' + (divX+1) + '" y1="25" x2="' + (divX+1) + '" y2="190" stroke="#8a6a3a" stroke-width="0.5" opacity=".3"/>';
+
+  // === Rice section (left) ===
+  // Rice mound
+  html += '<defs><radialGradient id="riceG" cx="45%" cy="40%"><stop offset="0%" stop-color="#fff8f0"/><stop offset="100%" stop-color="#f0e8d8"/></radialGradient></defs>';
+  html += '<ellipse cx="70" cy="105" rx="42" ry="60" fill="url(#riceG)" stroke="#e0d0b0" stroke-width="1"/>';
+  // Rice grain texture (anime style - small curved lines)
+  var grainSeeds = [[50,75],[65,68],[80,78],[55,95],[75,90],[60,110],[82,105],[48,120],[72,125],[62,85],[85,118],[50,105]];
+  for (var gi = 0; gi < grainSeeds.length; gi++) {
+    var gx = grainSeeds[gi][0], gy2 = grainSeeds[gi][1];
+    html += '<ellipse cx="' + gx + '" cy="' + gy2 + '" rx="3" ry="1.5" fill="#e8e0d0" transform="rotate(' + (gi*25) + ' ' + gx + ' ' + gy2 + ')"/>';
+  }
+  // Umeboshi or decoration
+  if (who === 'satsuki') {
+    // Cute umeboshi with face (anime style)
+    html += '<defs><radialGradient id="umeG" cx="35%" cy="30%"><stop offset="0%" stop-color="#ff5050"/><stop offset="100%" stop-color="#c02020"/></radialGradient></defs>';
+    html += '<circle cx="70" cy="95" r="10" fill="url(#umeG)" stroke="#a01818" stroke-width="1"/>';
+    html += '<circle cx="70" cy="95" r="8" fill="none" stroke="#e04040" stroke-width=".5" opacity=".4"/>';
+    // Cute wrinkle lines
+    html += '<path d="M65,93 Q70,96 75,93" stroke="#a02020" stroke-width=".8" fill="none" opacity=".5"/>';
+    html += '<circle cx="68" cy="95" r="1.5" fill="#fff" opacity=".35"/>';
+  } else {
+    // Nori strip (海苔)
+    html += '<rect x="50" y="82" width="40" height="22" rx="2" fill="#1a2a1a" stroke="#0a1a0a" stroke-width=".5"/>';
+    html += '<rect x="52" y="84" width="36" height="18" rx="1" fill="none" stroke="#2a3a2a" stroke-width=".3"/>';
+    // Sesame seeds
+    html += '<ellipse cx="62" cy="90" rx="1.5" ry="1" fill="#f0e8c0" transform="rotate(20 62 90)"/>';
+    html += '<ellipse cx="78" cy="88" rx="1.5" ry="1" fill="#f0e8c0" transform="rotate(-15 78 88)"/>';
+    html += '<ellipse cx="70" cy="96" rx="1.5" ry="1" fill="#1a1a1a" transform="rotate(30 70 96)"/>';
+  }
+
+  // === Okazu section (right) ===
+  var okazuItems = items.filter(function(it) { return !['ご飯','おにぎり','ライス'].some(function(r){return it.indexOf(r)>=0;}); });
+  if (okazuItems.length === 0) okazuItems = items.slice();
+  var maxItems = Math.min(okazuItems.length, 6);
+  var areaW = 280 - divX;
+  var areaH = 160;
+
+  // Layout positions based on item count
+  var positions;
+  if (maxItems <= 2) {
+    positions = [{x:divX+areaW*0.5, y:60, s:22}, {x:divX+areaW*0.5, y:140, s:22}];
+  } else if (maxItems <= 3) {
+    positions = [{x:divX+areaW*0.35, y:55, s:19}, {x:divX+areaW*0.7, y:55, s:19}, {x:divX+areaW*0.5, y:135, s:19}];
+  } else if (maxItems <= 4) {
+    positions = [{x:divX+areaW*0.3, y:55, s:17}, {x:divX+areaW*0.7, y:55, s:17}, {x:divX+areaW*0.3, y:140, s:17}, {x:divX+areaW*0.7, y:140, s:17}];
+  } else {
+    positions = [{x:divX+areaW*0.25, y:50, s:15}, {x:divX+areaW*0.6, y:45, s:15}, {x:divX+areaW*0.85, y:55, s:14}, {x:divX+areaW*0.2, y:120, s:15}, {x:divX+areaW*0.55, y:125, s:15}, {x:divX+areaW*0.85, y:130, s:14}];
+  }
+
+  // Green divider cup (baran) - anime style
+  if (maxItems > 2) {
+    var baranX = divX + areaW * 0.5;
+    html += '<path d="M' + (baranX-20) + ',95 Q' + (baranX-10) + ',75 ' + baranX + ',90 Q' + (baranX+10) + ',70 ' + (baranX+20) + ',88 L' + (baranX+20) + ',100 L' + (baranX-20) + ',100 Z" fill="#40a840" stroke="#2a8a2a" stroke-width=".8" opacity=".7"/>';
+  }
+
+  for (var oi = 0; oi < maxItems; oi++) {
+    var pos = positions[oi];
+    var name = okazuItems[oi];
+    var dtype = getDrawType(name);
+    var drawFn = FOOD_DRAW[dtype];
+
+    if (dtype === 'generic') {
+      html += drawFn(pos.x, pos.y, pos.s, GENERIC_COLORS[oi % GENERIC_COLORS.length]);
+    } else {
+      html += drawFn(pos.x, pos.y, pos.s);
+    }
+    // Label (anime-style with bg)
+    var lbl = name.length > 5 ? name.substring(0,4) + '..' : name;
+    html += '<rect x="' + (pos.x - lbl.length * 3.5 - 4) + '" y="' + (pos.y + pos.s + 3) + '" width="' + (lbl.length * 7 + 8) + '" height="12" rx="6" fill="rgba(0,0,0,.45)"/>';
+    html += '<text x="' + pos.x + '" y="' + (pos.y + pos.s + 12) + '" text-anchor="middle" font-size="7.5" fill="#f0e8d0" font-weight="600" font-family="\'Noto Serif JP\',serif">' + escHtml(lbl) + '</text>';
+  }
+
+  // Person name badge (anime nameplate)
+  var personLabel = who === 'satsuki' ? 'さつき' : 'はやと';
+  var badgeColor = who === 'satsuki' ? '#e8a040' : '#4a9ede';
+  html += '<rect x="240" y="3" width="70" height="16" rx="8" fill="' + badgeColor + '" opacity=".9"/>';
+  html += '<text x="275" y="14" text-anchor="middle" font-size="8" fill="#fff" font-weight="700" font-family="\'Noto Serif JP\',serif">' + personLabel + '</text>';
+
+  // Sparkle decorations (anime kawaii)
+  html += '<text x="25" y="14" font-size="10" opacity=".6">✨</text>';
+  html += '<text x="300" y="200" font-size="8" opacity=".4">🌸</text>';
+
+  svg.innerHTML = html;
+}
+
+// Bento input enter key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (e.target.id && e.target.id.startsWith('bentoStarterInput-')) {
+      addBentoStarter(e.target.id.replace('bentoStarterInput-', ''));
+    }
+  }
+});
 
 // === Service Worker ===
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
