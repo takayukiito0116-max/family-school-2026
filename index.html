@@ -1913,6 +1913,7 @@ button, a, .menu-item, .bnav-item, .filter-btn, .up-item, .um-card, .week-day, .
 <!-- Firebase SDK (compat for simple usage) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 
 <script>
 // === Firebase ===
@@ -1926,6 +1927,46 @@ firebase.initializeApp({
   appId: "1:891477511033:web:b8898445bfceaad6c43da8"
 });
 const db = firebase.database();
+
+// === Firebase Auth Gate (家族メールallowlist方式) ===
+const AUTH_ALLOWLIST = [
+  'takayuki.ito0116@gmail.com',
+  'nr.02hyt08@gmail.com'
+];
+const auth = firebase.auth();
+let _authedUser = null;
+let _authResolve;
+const authReady = new Promise(resolve => { _authResolve = resolve; });
+
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e => console.warn('Auth persistence:', e));
+
+auth.onAuthStateChanged(async user => {
+  if (user && user.email && AUTH_ALLOWLIST.includes(user.email) && user.emailVerified) {
+    _authedUser = user;
+    const name = user.displayName || user.email.split('@')[0];
+    showSync('🔐 ' + name);
+    _authResolve(user);
+  } else if (user) {
+    alert('伊藤家専用アプリです。\n登録済みのGoogleアカウントでログインしてください。');
+    await auth.signOut();
+    triggerGoogleSignIn();
+  } else {
+    triggerGoogleSignIn();
+  }
+});
+
+// redirect戻り時のエラーハンドリング
+auth.getRedirectResult().catch(err => {
+  console.error('Auth redirect error:', err);
+  if (typeof showSync === 'function') showSync('⚠ 認証エラー');
+});
+
+function triggerGoogleSignIn() {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+  auth.signInWithRedirect(provider);
+}
+
 const tasksRef = db.ref('dashboard/tasks');
 let firebaseReady = false;
 let skipNextFirebaseUpdate = false;
@@ -2364,7 +2405,7 @@ memoArea.addEventListener('input', () => {
   }, 800); // debounce 800ms
 });
 
-memoRef.on('value', snap => {
+authReady.then(() => memoRef.on('value', snap => {
   if(skipMemoUpdate){ skipMemoUpdate=false; return; }
   const val = snap.val();
   if(val !== null && val !== memoArea.value){
@@ -2372,10 +2413,10 @@ memoRef.on('value', snap => {
     document.getElementById('memoStatus').textContent = '他の端末から更新を受信';
     setTimeout(() => document.getElementById('memoStatus').textContent = '', 2000);
   }
-});
+}));
 
 // === Firebase Realtime Sync (Tasks) ===
-tasksRef.on('value', snap => {
+authReady.then(() => tasksRef.on('value', snap => {
   if(skipNextFirebaseUpdate){ skipNextFirebaseUpdate=false; return; }
   const data = snap.val();
   if(data && Array.isArray(data)){
@@ -2385,7 +2426,7 @@ tasksRef.on('value', snap => {
     showSync('&#x2601; 同期受信');
   }
   firebaseReady = true;
-});
+}));
 
 // Initial load
 loadTasks();
@@ -2393,13 +2434,13 @@ renderTasks();
 renderUpcoming();
 
 // Push local to Firebase if empty (first time)
-tasksRef.once('value', snap => {
+authReady.then(() => tasksRef.once('value', snap => {
   if(!snap.val()){
     tasksRef.set(tasks);
     showSync('&#x2601; 初回同期完了');
   }
   firebaseReady = true;
-});
+}));
 
 // === AI Chat ===
 const API_URL = 'https://ito-family-api.jsb-yochien.workers.dev';
@@ -3065,7 +3106,7 @@ function checkTransitStatus() {
 
       // Check known disruptions from Firebase
       var transitRef = db.ref('dashboard/transit-alerts');
-      transitRef.once('value').then(function(snap) {
+      authReady.then(() => transitRef.once('value')).then(function(snap) {
         var alerts = snap.val() || {};
         var metroAlert = alerts.metro5 || null;
         var busAlert = alerts.bus43 || null;
@@ -3241,7 +3282,7 @@ var customEventsRef = db.ref('dashboard/custom-events');
 var customEvents = [];
 var BUILTIN_EVENTS = EVENTS.slice(); // Keep original copy
 
-customEventsRef.on('value', function(snap) {
+authReady.then(() => customEventsRef.on('value', function(snap) {
   var data = snap.val();
   customEvents = data ? (Array.isArray(data) ? data : Object.values(data)) : [];
   // Reset EVENTS to builtin + custom (avoid duplicates)
@@ -3253,7 +3294,7 @@ customEventsRef.on('value', function(snap) {
   }
   renderCal();
   renderUpcoming();
-});
+}));
 
 function addEvent() {
   var date = document.getElementById('addEventDate').value;
@@ -3585,7 +3626,7 @@ async function sendNotification(title, body) {
 const morningAlertRef = db.ref('dashboard/morning-alert');
 let lastAlertDate = localStorage.getItem('ito-last-alert-date') || '';
 
-morningAlertRef.on('value', snap => {
+authReady.then(() => morningAlertRef.on('value', snap => {
   const data = snap.val();
   if (!data || data.date === lastAlertDate) return;
 
@@ -3608,7 +3649,7 @@ morningAlertRef.on('value', snap => {
 
   lastAlertDate = data.date;
   localStorage.setItem('ito-last-alert-date', data.date);
-});
+}));
 
 // === Urgent Task Map ===
 function renderUrgentMap() {
@@ -3675,7 +3716,7 @@ renderTasks = function() {
 const schoolEmailsRef = db.ref('dashboard/school-emails');
 const emailNotifRef = db.ref('dashboard/email-notification');
 
-schoolEmailsRef.on('value', snap => {
+authReady.then(() => schoolEmailsRef.on('value', snap => {
   const emails = snap.val();
   if (!emails || !Array.isArray(emails)) return;
 
@@ -3751,11 +3792,11 @@ schoolEmailsRef.on('value', snap => {
   });
 
   autoSec.appendChild(grid);
-});
+}));
 
 // Email notification banner
 let lastEmailNotif = localStorage.getItem('ito-last-email-notif') || '';
-emailNotifRef.on('value', snap => {
+authReady.then(() => emailNotifRef.on('value', snap => {
   const data = snap.val();
   if (!data || data.timestamp === lastEmailNotif) return;
 
@@ -3765,7 +3806,7 @@ emailNotifRef.on('value', snap => {
 
   lastEmailNotif = data.timestamp;
   localStorage.setItem('ito-last-email-notif', data.timestamp);
-});
+}));
 
 // === Eddie Munson Quotes ===
 var GHIBLI_QUOTES = [
@@ -3849,13 +3890,13 @@ try {
   if (saved) scheduleImages = JSON.parse(saved);
 } catch(e) {}
 
-scheduleImgRef.on('value', function(snap) {
+authReady.then(() => scheduleImgRef.on('value', function(snap) {
   var data = snap.val();
   if (data) {
     scheduleImages = { jsb: data.jsb || null, yochi: data.yochi || null };
     localStorage.setItem('ito-schedule-images', JSON.stringify(scheduleImages));
   }
-});
+}));
 
 function viewScheduleImage(type) {
   var overlay = document.createElement('div');
@@ -4317,7 +4358,7 @@ var bentoRef = db.ref('dashboard/bento');
 var bentoData = { satsuki: { starters: [], patterns: [] }, hayato: { starters: [], patterns: [] } };
 var currentBentoTab = 'satsuki';
 
-bentoRef.on('value', function(snap) {
+authReady.then(() => bentoRef.on('value', function(snap) {
   var data = snap.val();
   if (data) {
     bentoData = {
@@ -4327,7 +4368,7 @@ bentoRef.on('value', function(snap) {
   }
   renderBento('satsuki');
   renderBento('hayato');
-});
+}));
 
 function switchBentoTab(tab) {
   currentBentoTab = tab;
